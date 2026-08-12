@@ -2,7 +2,7 @@ import { Controller, useFormContext } from 'react-hook-form'
 
 import { PRIORITY_META } from '@/features/issues/constants/metadata'
 import type { RequestFormValues } from '@/features/issues/utils/request-form-schema'
-import { Field, FieldDescription, FieldError, FieldLabel } from '@/shared/components/ui/field'
+import { Field, FieldError, FieldLabel } from '@/shared/components/ui/field'
 import { Input } from '@/shared/components/ui/input'
 import {
   Select,
@@ -38,9 +38,6 @@ export function RequestMetaAside() {
           {...register('dueDate')}
           aria-invalid={Boolean(errors.dueDate)}
         />
-        <FieldDescription className="text-[11px]">
-          오늘 이전 날짜는 선택할 수 없어요
-        </FieldDescription>
         <FieldError errors={[errors.dueDate]} />
       </Field>
 
@@ -75,7 +72,6 @@ export function RequestMetaAside() {
             </Select>
           )}
         />
-        <FieldDescription className="text-[11px]">표시·정렬용</FieldDescription>
       </Field>
 
       <Field>

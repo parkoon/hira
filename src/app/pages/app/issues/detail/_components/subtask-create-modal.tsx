@@ -137,7 +137,6 @@ export function SubtaskCreateModal({
           <Field>
             <FieldLabel>상위이슈</FieldLabel>
             <span className="text-[13px] font-medium">{parentIssueNo}</span>
-            <FieldDescription className="text-[11px]">이 이슈의 실행 단위</FieldDescription>
           </Field>
         </div>
       }
@@ -189,9 +188,7 @@ export function SubtaskCreateModal({
               </RadioGroup>
             )}
           />
-          <FieldDescription className="text-[11px]">
-            유형이 워크플로를 결정하며 생성 후에는 변경할 수 없어요
-          </FieldDescription>
+          <FieldDescription className="text-[11px]">생성 후에는 변경할 수 없어요</FieldDescription>
           <FieldError errors={[form.formState.errors.type]} />
         </Field>
 
