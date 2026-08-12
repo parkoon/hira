@@ -116,7 +116,7 @@ export function RequestCreateModal() {
             ? {
                 label: (
                   <>
-                    다음: 컴플라이언스 확인
+                    다음
                     <ArrowRightIcon />
                   </>
                 ),
