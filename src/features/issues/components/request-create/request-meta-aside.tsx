@@ -2,10 +2,8 @@ import { Controller, useFormContext } from 'react-hook-form'
 
 import { PRIORITY_META } from '@/features/issues/constants/metadata'
 import type { RequestFormValues } from '@/features/issues/utils/request-form-schema'
-import { useCurrentUser } from '@/features/users/hooks/use-current-user'
 import { Field, FieldDescription, FieldError, FieldLabel } from '@/shared/components/ui/field'
 import { Input } from '@/shared/components/ui/input'
-import { NameAvatar } from '@/shared/components/ui/name-avatar'
 import {
   Select,
   SelectContent,
@@ -22,7 +20,6 @@ const priorityOptions = toEnumOptions(PRIORITY_META)
 
 /** 이슈 등록 모달의 보조 패널 — 스텝이 바뀌어도 계속 보이는 메타 필드 */
 export function RequestMetaAside() {
-  const { user } = useCurrentUser()
   const {
     control,
     register,
@@ -84,19 +81,6 @@ export function RequestMetaAside() {
       <Field>
         <FieldLabel>참고 링크</FieldLabel>
         <ReferenceLinkField />
-      </Field>
-
-      <Field>
-        <FieldLabel>요청자</FieldLabel>
-        <div className="flex items-center gap-2 text-[13px]">
-          <NameAvatar name={user.name} />
-          <span className="truncate">
-            {user.name} · {user.dept}
-          </span>
-        </div>
-        <FieldDescription className="text-[11px]">
-          {user.contact} · 로그인 계정으로 고정
-        </FieldDescription>
       </Field>
     </div>
   )
