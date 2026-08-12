@@ -1,0 +1,42 @@
+import { useQueryStates } from 'nuqs'
+
+import { AUDIT_EVENT_META, AUDIT_PERIOD_META } from '@/features/audit-logs/constants/metadata'
+import { FilterBar, type FilterBarField, toChipValue } from '@/shared/components/ui/filter-bar'
+import { toEnumOptions } from '@/shared/utils/enum'
+
+import { AUDIT_LOG_DEFAULT_PERIOD, auditLogFilterParsers } from '../_utils/audit-log-filters'
+
+export function AuditLogFilters({ actors }: { actors: string[] }) {
+  const [filters, setFilters] = useQueryStates(auditLogFilterParsers)
+
+  const filterFields: FilterBarField[] = [
+    { key: 'period', label: '기간', multiple: false, options: toEnumOptions(AUDIT_PERIOD_META) },
+    {
+      key: 'actor',
+      label: '사용자',
+      options: actors.map((name) => ({ value: name, label: name })),
+    },
+    { key: 'event', label: '이벤트', options: toEnumOptions(AUDIT_EVENT_META) },
+  ]
+
+  return (
+    <FilterBar
+      fields={filterFields}
+      value={{
+        period: toChipValue(filters.period, AUDIT_LOG_DEFAULT_PERIOD),
+        actor: filters.actor,
+        event: filters.event,
+      }}
+      onChange={(value) =>
+        void setFilters({
+          period: value.period?.[0] ?? AUDIT_LOG_DEFAULT_PERIOD,
+          actor: value.actor ?? [],
+          event: value.event ?? [],
+        })
+      }
+      search={filters.issueNo}
+      onSearchChange={(issueNo) => void setFilters({ issueNo })}
+      searchPlaceholder="이슈번호 검색"
+    />
+  )
+}

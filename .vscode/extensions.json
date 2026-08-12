@@ -1,0 +1,17 @@
+{
+  "recommendations": [
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "bradlc.vscode-tailwindcss",
+    "dsznajder.es7-react-js-snippets",
+    "christian-kohler.path-intellisense",
+    "wix.vscode-import-cost",
+    "streetsidesoftware.code-spell-checker",
+    "pkief.material-icon-theme",
+    "pflannery.vscode-versionlens",
+    "naumovs.color-highlight",
+    "formulahendry.auto-close-tag",
+    "formulahendry.auto-rename-tag",
+    "akamud.vscode-theme-onedark"
+  ]
+}

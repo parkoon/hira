@@ -1,0 +1,54 @@
+import type { StatusHistoryEntry, Subtask } from '@/features/issues/api/types'
+import { SUBTASK_STATUS_META } from '@/features/issues/constants/metadata'
+import { Lozenge } from '@/shared/components/ui/lozenge'
+import { NameAvatar } from '@/shared/components/ui/name-avatar'
+import { getEnumLabel } from '@/shared/utils/enum'
+import { getSubjectParticle } from '@/shared/utils/korean'
+
+function describeEntry(entry: StatusHistoryEntry) {
+  if (entry.fromStatus === null) return '하위작업을 생성함'
+
+  const from = getEnumLabel(SUBTASK_STATUS_META, entry.fromStatus)
+  const to = getEnumLabel(SUBTASK_STATUS_META, entry.toStatus)
+  return `상태를 변경함 · ${from} → ${to}`
+}
+
+export function SubtaskActivity({ subtask }: { subtask: Subtask }) {
+  return (
+    <section className="space-y-2">
+      <h2 className="text-sm font-semibold">활동</h2>
+
+      <div className="space-y-3">
+        {/* 생성 직후에는 이력이 없다. 섹션을 감추면 페이지 구조가 흔들리므로 안내만 둔다 */}
+        {subtask.history.length === 0 && (
+          <p className="text-muted-foreground text-[13px]">
+            아직 활동이 없습니다. 단계를 전이하면 여기에 기록됩니다.
+          </p>
+        )}
+
+        {subtask.history.map((entry) => (
+          <div
+            key={entry.id}
+            className="flex gap-2.5"
+          >
+            <NameAvatar name={entry.actorName} />
+            <div className="min-w-0 flex-1">
+              <p className="flex flex-wrap items-center gap-1.5 text-[13px]">
+                <span>
+                  <span className="font-semibold">{entry.actorName}</span>
+                  {`${getSubjectParticle(entry.actorName)} ${describeEntry(entry)}`}
+                </span>
+                {/* 수동이 기본이므로 API 전이일 때만 배지를 붙인다 (스펙 §5.3) */}
+                {entry.via === 'API' && <Lozenge tone="info">자동</Lozenge>}
+              </p>
+              <p className="text-muted-foreground text-[11px]">{entry.occurredAt}</p>
+              {entry.reason && (
+                <p className="text-muted-foreground text-xs break-all">사유: {entry.reason}</p>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}

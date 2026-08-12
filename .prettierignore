@@ -1,0 +1,2 @@
+# pnpm이 직접 쓰는 형식이라 prettier가 건드리면 install할 때마다 diff가 뒤집힌다
+pnpm-lock.yaml
