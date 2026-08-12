@@ -208,27 +208,24 @@ export type Database = {
       }
       reference_links: {
         Row: {
-          evidence_id: number | null
+          evidence_id: number
           id: number
           label: string
           position: number
-          request_issue_no: string | null
           url: string
         }
         Insert: {
-          evidence_id?: number | null
+          evidence_id: number
           id?: never
           label?: string
           position?: number
-          request_issue_no?: string | null
           url: string
         }
         Update: {
-          evidence_id?: number | null
+          evidence_id?: number
           id?: never
           label?: string
           position?: number
-          request_issue_no?: string | null
           url?: string
         }
         Relationships: [
@@ -238,13 +235,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: 'evidences'
             referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'reference_links_request_issue_no_fkey'
-            columns: ['request_issue_no']
-            isOneToOne: false
-            referencedRelation: 'requests'
-            referencedColumns: ['issue_no']
           },
         ]
       }
