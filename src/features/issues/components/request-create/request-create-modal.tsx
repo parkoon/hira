@@ -36,7 +36,6 @@ export function RequestCreateModal() {
       dueDate: '',
       priority: 'NORMAL',
       description: '',
-      referenceLinks: [{ url: '' }],
       attachments: [],
       darkPatternChecked: false,
     },
@@ -67,9 +66,6 @@ export function RequestCreateModal() {
           description: values.description,
           priority: values.priority,
           dueDate: values.dueDate,
-          referenceLinks: values.referenceLinks
-            .filter((link) => link.url.trim().length > 0)
-            .map((link) => ({ url: link.url, label: link.url })),
           handlesPersonalData: values.handlesPersonalData === 'YES',
           consumerProtectionTarget: values.consumerProtectionTarget === 'YES',
           darkPatternChecked: values.darkPatternChecked,

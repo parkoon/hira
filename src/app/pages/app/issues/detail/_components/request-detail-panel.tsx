@@ -1,4 +1,3 @@
-import { ExternalLinkIcon } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { useApproveRequestMutation } from '@/features/issues/api/approve-request'
@@ -83,29 +82,6 @@ export function RequestDetailPanel({ request }: { request: Request }) {
             <span className="text-muted-foreground">해당 없음</span>
           )}
         </PanelCardField>
-
-        {request.referenceLinks.length > 0 && (
-          <PanelCardField
-            label="참고 링크"
-            className="items-start"
-          >
-            <ul className="space-y-1">
-              {request.referenceLinks.map((link) => (
-                <li key={link.url}>
-                  <a
-                    href={link.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex min-w-0 items-center gap-1 text-blue-700 hover:underline dark:text-blue-400"
-                  >
-                    <span className="truncate">{link.label}</span>
-                    <ExternalLinkIcon className="size-3 shrink-0" />
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </PanelCardField>
-        )}
       </PanelCard>
 
       {/* Jira의 Created/Updated 자리 — 카드 아래 작은 회색 텍스트 */}

@@ -57,18 +57,6 @@ export const createRequestService = async ({
   })
   if (error) throw error
 
-  if (draft.referenceLinks.length > 0) {
-    const { error: linkError } = await supabase.from('reference_links').insert(
-      draft.referenceLinks.map((link, position) => ({
-        request_issue_no: issueNo,
-        url: link.url,
-        label: link.label,
-        position,
-      }))
-    )
-    if (linkError) throw linkError
-  }
-
   if (files.length > 0) {
     const { error: attachmentError } = await supabase.from('attachments').insert(
       files.map((file) => ({

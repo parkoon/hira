@@ -24,7 +24,6 @@ type Tables = Database['public']['Tables']
 const REQUEST_TREE_SELECT = `
   *,
   requester:profiles!requests_requester_id_fkey(name, dept, contact),
-  reference_links(*),
   attachments(*),
   approvals(*),
   evidences(*, reference_links(*), attachments(*)),
@@ -64,7 +63,6 @@ type SubtaskRow = Tables['subtasks']['Row'] & {
 
 type RequestRow = Tables['requests']['Row'] & {
   requester: Pick<Tables['profiles']['Row'], 'name' | 'dept' | 'contact'> | null
-  reference_links: Tables['reference_links']['Row'][]
   attachments: Tables['attachments']['Row'][]
   approvals: Tables['approvals']['Row'][]
   evidences: EvidenceRow[]
@@ -165,7 +163,6 @@ function toRequest(row: RequestRow): Request {
     consumerProtectionTarget: row.consumer_protection_target,
     darkPatternChecked: row.dark_pattern_checked,
     attachments: toAttachments(row.attachments),
-    referenceLinks: toLinks(row.reference_links),
     // 채번이 곧 생성 순서라 번호순이 등록 순서다
     subtasks: [...row.subtasks].sort((a, b) => a.issue_no.localeCompare(b.issue_no)).map(toSubtask),
     approvals: toApprovals(row.approvals),

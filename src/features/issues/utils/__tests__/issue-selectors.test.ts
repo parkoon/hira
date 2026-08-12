@@ -61,7 +61,6 @@ const makeRequest = (overrides: Partial<Request> = {}): Request => ({
   consumerProtectionTarget: false,
   darkPatternChecked: true,
   attachments: [],
-  referenceLinks: [],
   subtasks: [],
   approvals: [],
   evidences: [],

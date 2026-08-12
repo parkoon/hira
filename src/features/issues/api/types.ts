@@ -141,7 +141,6 @@ export type RequestDraft = {
   description: string
   priority: Priority
   dueDate: string
-  referenceLinks: ReferenceLink[]
   handlesPersonalData: boolean
   consumerProtectionTarget: boolean
   darkPatternChecked: boolean
@@ -171,7 +170,6 @@ export type Request = {
   consumerProtectionTarget: boolean
   darkPatternChecked: boolean
   attachments: Attachment[]
-  referenceLinks: ReferenceLink[]
   subtasks: Subtask[]
   /** 요청 승인 전 받아야 하는 결재 (시나리오 3). 결재선 연동 전까지는 임시 버튼으로 채운다 */
   approvals: Approval[]
