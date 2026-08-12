@@ -7,6 +7,7 @@ import type { SubtaskType } from '@/features/issues/api/types'
 import { RichTextEditor } from '@/features/issues/components/rich-text-editor'
 import { getUsersQueryOptions } from '@/features/users/api/get-users'
 import { selectAssignableUsers } from '@/features/users/utils/user-selectors'
+import { DatePicker } from '@/shared/components/ui/date-picker'
 import { Field, FieldDescription, FieldError, FieldLabel } from '@/shared/components/ui/field'
 import { Input } from '@/shared/components/ui/input'
 import { Modal } from '@/shared/components/ui/modal'
@@ -127,10 +128,16 @@ export function SubtaskCreateModal({
 
           <Field>
             <FieldLabel htmlFor="subtask-due-date">목표일</FieldLabel>
-            <Input
-              id="subtask-due-date"
-              type="date"
-              {...form.register('dueDate')}
+            <Controller
+              control={form.control}
+              name="dueDate"
+              render={({ field }) => (
+                <DatePicker
+                  id="subtask-due-date"
+                  value={field.value}
+                  onChange={field.onChange}
+                />
+              )}
             />
           </Field>
 

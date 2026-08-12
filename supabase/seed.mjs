@@ -6,7 +6,7 @@
  *
  * 그래서 이 스크립트는 업무 데이터를 지우지 않는다 — 여러 번 돌려도 안전하다.
  *
- *   SUPABASE_ACCESS_TOKEN=... node supabase/seed.mjs
+ *   pnpm supabase:seed   # .env의 SUPABASE_PROJECT_REF / SUPABASE_ACCESS_TOKEN을 읽는다
  *
  * 프로젝트 secret 키는 Management API로 그때그때 받아온다 — 저장소에 두지 않는다.
  */

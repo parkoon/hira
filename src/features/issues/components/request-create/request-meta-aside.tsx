@@ -2,8 +2,8 @@ import { Controller, useFormContext } from 'react-hook-form'
 
 import { PRIORITY_META } from '@/features/issues/constants/metadata'
 import type { RequestFormValues } from '@/features/issues/utils/request-form-schema'
+import { DatePicker } from '@/shared/components/ui/date-picker'
 import { Field, FieldError, FieldLabel } from '@/shared/components/ui/field'
-import { Input } from '@/shared/components/ui/input'
 import {
   Select,
   SelectContent,
@@ -13,7 +13,6 @@ import {
 } from '@/shared/components/ui/select'
 import { toEnumOptions } from '@/shared/utils/enum'
 
-import { ReferenceLinkField } from './reference-link-field'
 import { RequiredMark } from './required-mark'
 
 const priorityOptions = toEnumOptions(PRIORITY_META)
@@ -22,7 +21,6 @@ const priorityOptions = toEnumOptions(PRIORITY_META)
 export function RequestMetaAside() {
   const {
     control,
-    register,
     formState: { errors },
   } = useFormContext<RequestFormValues>()
 
@@ -32,11 +30,18 @@ export function RequestMetaAside() {
         <FieldLabel htmlFor="request-due-date">
           완료요청일 <RequiredMark />
         </FieldLabel>
-        <Input
-          id="request-due-date"
-          type="date"
-          {...register('dueDate')}
-          aria-invalid={Boolean(errors.dueDate)}
+        <Controller
+          control={control}
+          name="dueDate"
+          render={({ field }) => (
+            <DatePicker
+              id="request-due-date"
+              value={field.value}
+              onChange={field.onChange}
+              minDate={new Date()}
+              aria-invalid={Boolean(errors.dueDate)}
+            />
+          )}
         />
         <FieldError errors={[errors.dueDate]} />
       </Field>
@@ -72,11 +77,6 @@ export function RequestMetaAside() {
             </Select>
           )}
         />
-      </Field>
-
-      <Field>
-        <FieldLabel>참고 링크</FieldLabel>
-        <ReferenceLinkField />
       </Field>
     </div>
   )

@@ -13,7 +13,6 @@ export const requestFormSchema = z.object({
     ),
   priority: z.enum(['URGENT', 'HIGH', 'NORMAL', 'LOW']),
   description: z.string().trim().min(1, '상세내용을 입력해 주세요'),
-  referenceLinks: z.array(z.object({ url: z.string().trim() })),
   // 개수·용량 제한은 고를 때 `validateAttachment`가 막으므로 여기선 담아만 둔다 (스펙 §4.2)
   attachments: z.array(z.instanceof(File)),
   // Step 2 — 컴플라이언스 확인. 미응답 시 제출 불가 (스펙 §4.1)
