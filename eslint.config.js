@@ -7,7 +7,7 @@ import globals from 'globals'
 import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
-  // src/shared/types는 OpenAPI·Supabase에서 자동 생성한다 (수기 편집 금지)
+  // src/shared/types는 Supabase에서 자동 생성한다 (수기 편집 금지)
   { ignores: ['dist', 'src/shared/types'] },
   {
     files: ['**/*.{ts,tsx}'],

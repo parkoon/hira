@@ -4,12 +4,24 @@ import { isRouteErrorResponse, Link, useRouteError } from 'react-router'
 import { Button } from '@/shared/components/ui/button'
 import { Empty } from '@/shared/components/ui/empty'
 import { paths } from '@/shared/config/paths'
-import { ApiError, HTTP_ERROR_MESSAGES } from '@/shared/lib/api/error'
 import { getSupabaseErrorMessage, isSupabaseError } from '@/shared/lib/supabase-error'
 
 type RouteErrorInfo = {
   title: string
   message: string
+}
+
+// HTTP 상태 코드별 기본 메시지 — 라우터가 던지는 Response 에러에만 쓴다
+const HTTP_ERROR_MESSAGES: Record<number, string> = {
+  400: '잘못된 요청입니다.',
+  401: '로그인이 필요합니다.',
+  403: '접근 권한이 없습니다.',
+  404: '요청한 리소스를 찾을 수 없습니다.',
+  422: '입력값을 확인해 주세요.',
+  429: '요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.',
+  500: '서버 오류가 발생했습니다.',
+  502: '서버에 연결할 수 없습니다.',
+  503: '서비스를 일시적으로 사용할 수 없습니다.',
 }
 
 const DEFAULT_ERROR_TITLE = '일시적인 오류가 발생했습니다'
@@ -31,13 +43,6 @@ function getRouteErrorInfo(error: unknown): RouteErrorInfo {
     return {
       title: getErrorTitle(error.status),
       message,
-    }
-  }
-
-  if (error instanceof ApiError) {
-    return {
-      title: getErrorTitle(error.statusCode),
-      message: error.message || HTTP_ERROR_MESSAGES[error.statusCode] || DEFAULT_ERROR_MESSAGE,
     }
   }
 

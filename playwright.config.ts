@@ -1,6 +1,7 @@
 import { defineConfig, devices } from '@playwright/test'
 
-const BASE_URL = process.env.E2E_BASE_URL ?? 'http://127.0.0.1:3000'
+// vite.config.ts의 server.port와 같아야 한다
+const BASE_URL = process.env.E2E_BASE_URL ?? 'http://127.0.0.1:5000'
 
 export default defineConfig({
   // e2e/ 폴더 안의 테스트만 실행 (vitest와 분리)
@@ -21,23 +22,10 @@ export default defineConfig({
   // 리포터: CI는 GitHub Actions 어노테이션, 로컬은 HTML 리포트
   reporter: process.env.CI ? 'github' : [['html', { open: 'never' }]],
 
-  // 로그인 후 세션을 저장하는 setup 프로젝트 정의
-  // globalSetup 대신 'setup' 프로젝트를 사용하는 것이 최신 권장 방식
-  // → 테스트처럼 디버깅 가능하고, 실패 시 에러 위치가 명확함
   projects: [
     {
-      name: 'setup',
-      testMatch: /.*\.setup\.ts/,
-    },
-    {
       name: 'chromium',
-      use: {
-        ...devices['Desktop Chrome'],
-        // setup 프로젝트가 저장한 쿠키·세션을 모든 테스트에서 재사용
-        storageState: 'e2e/.auth/session.json',
-      },
-      // 반드시 setup이 먼저 실행되어야 함
-      dependencies: ['setup'],
+      use: { ...devices['Desktop Chrome'] },
     },
   ],
 
@@ -55,7 +43,7 @@ export default defineConfig({
     video: 'retain-on-failure',
   },
 
-  // 테스트 실행 전 vite dev 서버를 자동으로 기동/종료
+  // 테스트 실행 시 vite dev 서버를 자동으로 기동/종료
   webServer: {
     command: 'pnpm dev',
     url: BASE_URL,

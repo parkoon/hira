@@ -12,7 +12,6 @@
     "format:check": "prettier --check .",
     "preview": "vite preview",
     "prepare": "husky",
-    "openapi": "node scripts/openapi.js",
     "supabase:seed": "node --env-file=.env supabase/seed.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -30,7 +29,6 @@
     "@tiptap/starter-kit": "^3.29.2",
     "ag-grid-community": "^35.3.1",
     "ag-grid-react": "^35.3.1",
-    "axios": "^1.17.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
@@ -72,8 +70,6 @@
     "husky": "^9.1.7",
     "jsdom": "^29.0.1",
     "lint-staged": "^16.2.7",
-    "msw": "^2.12.14",
-    "openapi-typescript": "^7.10.1",
     "prettier": "^3.8.1",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "rollup-plugin-visualizer": "^7.0.1",
@@ -92,11 +88,6 @@
     ],
     "*.{json,md,css}": [
       "prettier --write"
-    ]
-  },
-  "msw": {
-    "workerDirectory": [
-      "public"
     ]
   }
 }

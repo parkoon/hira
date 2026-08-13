@@ -2,22 +2,10 @@ import type * as React from 'react'
 
 import { cn } from '@/shared/utils/cn'
 
-const MAX_WIDTH_MAP = {
-  sm: 'max-w-sm',
-  md: 'max-w-md',
-  lg: 'max-w-lg',
-  xl: 'max-w-xl',
-  '2xl': 'max-w-2xl',
-  '3xl': 'max-w-3xl',
-  '4xl': 'max-w-4xl',
-  '5xl': 'max-w-5xl',
-} as const
-
 type PageProps = {
   children: React.ReactNode
   /** 우측 상단 액션 영역 (예: 이슈 등록 버튼) */
   action?: React.ReactNode
-  maxWidth?: keyof typeof MAX_WIDTH_MAP
   /**
    * 콘텐츠가 화면 끝까지 닿아야 할 때 children 여백을 끈다.
    * action 영역의 여백은 그대로 유지된다.
@@ -33,15 +21,9 @@ type PageProps = {
  * 기본은 페이지 자체가 세로 스크롤한다. 표가 남은 높이를 채워야 하는 화면은
  * `className="overflow-y-hidden"`으로 페이지 스크롤을 끄고 표에 `flex-1`을 준다.
  */
-export function Page({ children, action, maxWidth, noContentPadding, className }: PageProps) {
+export function Page({ children, action, noContentPadding, className }: PageProps) {
   return (
-    <main
-      className={cn(
-        'flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto',
-        maxWidth && `mx-auto w-full ${MAX_WIDTH_MAP[maxWidth]}`,
-        className
-      )}
-    >
+    <main className={cn('flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto', className)}>
       {action && <div className="flex shrink-0 justify-end p-2 pb-3">{action}</div>}
       <div
         className={cn(

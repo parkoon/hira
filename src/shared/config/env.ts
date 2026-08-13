@@ -2,12 +2,6 @@ import * as z from 'zod'
 
 const createEnv = () => {
   const EnvSchema = z.object({
-    API_URL: z.string().optional(),
-    ENABLE_API_MOCKING: z
-      .string()
-      .refine((s) => s === 'true' || s === 'false')
-      .transform((s) => s === 'true')
-      .optional(),
     SUPABASE_URL: z.url(),
     SUPABASE_ANON_KEY: z.string().min(1),
   })

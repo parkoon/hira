@@ -1,12 +1,5 @@
 import type { EnumMetadata } from '@/shared/utils/enum'
 
-export const REQUEST_LIST_SEARCH_PARAMS = {
-  status: 'status',
-  priority: 'priority',
-  period: 'period',
-  sort: 'sort',
-} as const
-
 /** URL 파서 기본값이자 필터 칩의 "미적용" 기준. 파서와 칩 매핑이 함께 참조한다. */
 export const REQUEST_LIST_DEFAULT_PERIOD = 'ALL'
 export const REQUEST_LIST_DEFAULT_SORT = 'CREATED_DESC'

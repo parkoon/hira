@@ -6,9 +6,6 @@ import { defineConfig } from 'vite'
 
 // https://vite.dev/config/
 export default defineConfig({
-  define: {
-    __APP_VERSION__: JSON.stringify(process.env.npm_package_version ?? '0.0.0'),
-  },
   server: {
     host: '127.0.0.1',
     port: 5000,
