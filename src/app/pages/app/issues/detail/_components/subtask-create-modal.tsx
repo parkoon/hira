@@ -41,7 +41,6 @@ export type SubtaskCreateResult = {
 }
 
 type SubtaskCreateModalProps = {
-  parentIssueNo: string
   open: boolean
   onOpenChange: (open: boolean) => void
   onSubmit: (values: SubtaskCreateResult) => void
@@ -49,12 +48,7 @@ type SubtaskCreateModalProps = {
 
 const FORM_ID = 'subtask-create-form'
 
-export function SubtaskCreateModal({
-  parentIssueNo,
-  open,
-  onOpenChange,
-  onSubmit,
-}: SubtaskCreateModalProps) {
+export function SubtaskCreateModal({ open, onOpenChange, onSubmit }: SubtaskCreateModalProps) {
   const usersQuery = useSuspenseQuery(getUsersQueryOptions())
   const assignableUsers = selectAssignableUsers(usersQuery.data)
 
@@ -187,11 +181,6 @@ export function SubtaskCreateModal({
                 />
               )}
             />
-          </Field>
-
-          <Field>
-            <FieldLabel>상위이슈</FieldLabel>
-            <span className="text-[13px] font-medium">{parentIssueNo}</span>
           </Field>
         </div>
       }

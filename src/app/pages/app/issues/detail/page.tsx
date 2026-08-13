@@ -145,7 +145,6 @@ function RequestDetailPage() {
       </div>
 
       <SubtaskCreateModal
-        parentIssueNo={request.issueNo}
         open={subtaskCreateOpen}
         onOpenChange={setSubtaskCreateOpen}
         onSubmit={(values) => {
