@@ -8,7 +8,7 @@ import { RichTextEditor } from '@/features/issues/components/rich-text-editor'
 import { getUsersQueryOptions } from '@/features/users/api/get-users'
 import { selectAssignableUsers } from '@/features/users/utils/user-selectors'
 import { DatePicker } from '@/shared/components/ui/date-picker'
-import { Field, FieldDescription, FieldError, FieldLabel } from '@/shared/components/ui/field'
+import { Field, FieldError, FieldLabel } from '@/shared/components/ui/field'
 import { Input } from '@/shared/components/ui/input'
 import { Modal } from '@/shared/components/ui/modal'
 import { NameAvatar } from '@/shared/components/ui/name-avatar'
@@ -85,12 +85,60 @@ export function SubtaskCreateModal({
       open={open}
       onOpenChange={handleOpenChange}
       title="하위작업 생성"
-      description="생성 시 상태는 작업대기중입니다."
       // 필드가 적어 기본 고정 높이(640px)를 쓰면 아래가 비므로 내용 높이를 따르게 한다.
       // max-h는 확장 시 높이(100dvh-2rem)와 맞춰야 확장이 화면을 다 채운다
       className="h-auto max-h-[calc(100dvh-2rem)]"
       aside={
         <div className="space-y-4">
+          <Field>
+            <FieldLabel>이슈유형</FieldLabel>
+            <Controller
+              control={form.control}
+              name="type"
+              render={({ field }) => (
+                <RadioGroup
+                  value={field.value ?? ''}
+                  onValueChange={field.onChange}
+                  className="mt-1 gap-2"
+                >
+                  <FieldLabel
+                    htmlFor="subtask-type-deploy"
+                    className="items-start font-normal"
+                  >
+                    <RadioGroupItem
+                      id="subtask-type-deploy"
+                      value="DEPLOY"
+                      className="mt-0.5"
+                    />
+                    <span className="flex flex-col gap-0.5">
+                      배포형
+                      <span className="text-muted-foreground text-[11px]">
+                        운영 배포가 필요한 작업 · 8단계 워크플로
+                      </span>
+                    </span>
+                  </FieldLabel>
+                  <FieldLabel
+                    htmlFor="subtask-type-non-deploy"
+                    className="items-start font-normal"
+                  >
+                    <RadioGroupItem
+                      id="subtask-type-non-deploy"
+                      value="NON_DEPLOY"
+                      className="mt-0.5"
+                    />
+                    <span className="flex flex-col gap-0.5">
+                      비배포형
+                      <span className="text-muted-foreground text-[11px]">
+                        문서 작업 등 배포 무관 · 4단계 워크플로
+                      </span>
+                    </span>
+                  </FieldLabel>
+                </RadioGroup>
+              )}
+            />
+            <FieldError errors={[form.formState.errors.type]} />
+          </Field>
+
           <Field>
             <FieldLabel htmlFor="subtask-assignee">담당자</FieldLabel>
             <Controller
@@ -155,50 +203,6 @@ export function SubtaskCreateModal({
         onSubmit={handleSubmit}
         className="space-y-4"
       >
-        <Field>
-          <FieldLabel>이슈유형</FieldLabel>
-          <Controller
-            control={form.control}
-            name="type"
-            render={({ field }) => (
-              <RadioGroup
-                value={field.value ?? ''}
-                onValueChange={field.onChange}
-                className="mt-1 gap-2"
-              >
-                <FieldLabel
-                  htmlFor="subtask-type-deploy"
-                  className="items-center font-normal"
-                >
-                  <RadioGroupItem
-                    id="subtask-type-deploy"
-                    value="DEPLOY"
-                  />
-                  배포형
-                  <span className="text-muted-foreground text-[11px]">
-                    운영 배포가 필요한 작업 · 8단계 워크플로
-                  </span>
-                </FieldLabel>
-                <FieldLabel
-                  htmlFor="subtask-type-non-deploy"
-                  className="items-center font-normal"
-                >
-                  <RadioGroupItem
-                    id="subtask-type-non-deploy"
-                    value="NON_DEPLOY"
-                  />
-                  비배포형
-                  <span className="text-muted-foreground text-[11px]">
-                    문서 작업 등 배포 무관 · 4단계 워크플로
-                  </span>
-                </FieldLabel>
-              </RadioGroup>
-            )}
-          />
-          <FieldDescription className="text-[11px]">생성 후에는 변경할 수 없어요</FieldDescription>
-          <FieldError errors={[form.formState.errors.type]} />
-        </Field>
-
         <Field>
           <FieldLabel htmlFor="subtask-title">제목</FieldLabel>
           <Input
