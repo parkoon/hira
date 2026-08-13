@@ -9,7 +9,7 @@ import { AttachmentField } from './attachment-field'
 import { RequiredMark } from './required-mark'
 
 /** 화면 3 — 이슈 등록 Step 1 (이슈 내용). 완료요청일·우선순위 등 메타 필드는 모달 aside에 있다 */
-export function RequestContentStep() {
+export function RequestContentStep({ withAttachments }: { withAttachments: boolean }) {
   const {
     control,
     register,
@@ -47,10 +47,12 @@ export function RequestContentStep() {
         <FieldError errors={[errors.description]} />
       </Field>
 
-      <Field>
-        <FieldLabel>파일첨부</FieldLabel>
-        <AttachmentField />
-      </Field>
+      {withAttachments && (
+        <Field>
+          <FieldLabel>파일첨부</FieldLabel>
+          <AttachmentField />
+        </Field>
+      )}
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
-import { SquarePlusIcon } from 'lucide-react'
+import { PencilIcon, SquarePlusIcon } from 'lucide-react'
 import { useState } from 'react'
 import { useParams } from 'react-router'
 import { toast } from 'sonner'
@@ -7,10 +7,14 @@ import { toast } from 'sonner'
 import { useAttachFilesMutation } from '@/features/issues/api/attach-files'
 import { useCreateSubtaskMutation } from '@/features/issues/api/create-subtask'
 import { getRequestsQueryOptions } from '@/features/issues/api/get-requests'
+import { useUpdateRequestMutation } from '@/features/issues/api/update-request'
 import { IssueDescription } from '@/features/issues/components/issue-description'
 import { IssueDetailHeader } from '@/features/issues/components/issue-detail-header'
+import { RequestFormModal } from '@/features/issues/components/request-form/request-form-modal'
+import { SubtaskFormModal } from '@/features/issues/components/subtask-form-modal'
 import {
   canConfirmAcceptance,
+  canEditRequest,
   canViewRequest,
   selectRequestByIssueNo,
 } from '@/features/issues/utils/issue-selectors'
@@ -29,7 +33,6 @@ import { RequestActivity } from './_components/request-activity'
 import { RequestAttachments } from './_components/request-attachments'
 import { RequestDetailPanel } from './_components/request-detail-panel'
 import { RequestStatusActions } from './_components/request-status-actions'
-import { SubtaskCreateModal } from './_components/subtask-create-modal'
 import { SubtaskList } from './_components/subtask-list'
 
 /** 화면 6 — 이슈 상세 (Jira 신규 이슈 뷰 배치) */
@@ -37,10 +40,12 @@ function RequestDetailPage() {
   const { issueNo = '' } = useParams()
   const { user, hasRole } = useCurrentUser()
   const [subtaskCreateOpen, setSubtaskCreateOpen] = useState(false)
+  const [editOpen, setEditOpen] = useState(false)
 
   const requestsQuery = useSuspenseQuery(getRequestsQueryOptions())
   const usersQuery = useSuspenseQuery(getUsersQueryOptions())
   const createSubtask = useCreateSubtaskMutation()
+  const updateRequest = useUpdateRequestMutation()
   const attachFiles = useAttachFilesMutation()
 
   const request = selectRequestByIssueNo(requestsQuery.data, issueNo)
@@ -76,6 +81,23 @@ function RequestDetailPage() {
               <>
                 {/* 상태 전이가 이 화면의 주 액션이라 맨 앞에 둔다 */}
                 <RequestStatusActions request={request} />
+
+                {/* 제출 전 등록자만 — 검토 중에는 회수해야 고칠 수 있다 (스펙 §3.4) */}
+                {canEditRequest(request, user) && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        aria-label="이슈 수정"
+                        onClick={() => setEditOpen(true)}
+                      >
+                        <PencilIcon />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>이슈 수정</TooltipContent>
+                  </Tooltip>
+                )}
 
                 <AttachFileButton
                   request={request}
@@ -144,34 +166,62 @@ function RequestDetailPage() {
         </div>
       </div>
 
-      <SubtaskCreateModal
+      {/* 열 때마다 마운트해 현재 값으로 폼을 채운다 */}
+      {editOpen && (
+        <RequestFormModal
+          open
+          onOpenChange={setEditOpen}
+          title={`${request.issueNo} 수정`}
+          submitLabel="저장"
+          defaultValues={{
+            title: request.title,
+            description: request.description,
+            priority: request.priority,
+            dueDate: request.dueDate,
+            handlesPersonalData: request.handlesPersonalData ? 'YES' : 'NO',
+            consumerProtectionTarget: request.consumerProtectionTarget ? 'YES' : 'NO',
+            darkPatternChecked: request.darkPatternChecked,
+          }}
+          pending={updateRequest.isPending}
+          onSubmit={(values) =>
+            updateRequest.mutate(
+              {
+                issueNo: request.issueNo,
+                draft: {
+                  title: values.title,
+                  description: values.description,
+                  priority: values.priority,
+                  dueDate: values.dueDate,
+                  handlesPersonalData: values.handlesPersonalData === 'YES',
+                  consumerProtectionTarget: values.consumerProtectionTarget === 'YES',
+                  darkPatternChecked: values.darkPatternChecked,
+                },
+                actorName: user.name,
+              },
+              {
+                onSuccess: (changed) => {
+                  setEditOpen(false)
+                  // 값이 그대로면 아무것도 기록되지 않으므로 수정했다고 알리지 않는다
+                  if (changed) toast.success(`${request.issueNo} 이슈를 수정했습니다.`)
+                },
+              }
+            )
+          }
+        />
+      )}
+
+      <SubtaskFormModal
         open={subtaskCreateOpen}
         onOpenChange={setSubtaskCreateOpen}
-        onSubmit={(values) => {
-          const assignee = selectAssignableUsers(usersQuery.data).find(
-            (candidate) => candidate.loginId === values.assigneeLoginId
-          )
-          // 모달이 이미 닫힌 뒤라 조용히 끝내면 생성된 줄 안다 — 드물지만(목록 갱신 경합) 알려준다
-          if (!assignee) {
-            toast.error('담당자를 찾을 수 없습니다. 하위작업을 다시 생성해 주세요.')
-            return
-          }
-
+        title="하위작업 생성"
+        submitLabel="생성"
+        assignableUsers={selectAssignableUsers(usersQuery.data)}
+        onSubmit={(draft) =>
           createSubtask.mutate(
-            {
-              parentIssueNo: request.issueNo,
-              draft: {
-                type: values.type,
-                title: values.title,
-                description: values.description,
-                assignee: { id: assignee.id, name: assignee.name, dept: assignee.dept },
-                dueDate: values.dueDate,
-              },
-              actorName: user.name,
-            },
-            { onSuccess: () => toast.success(`하위작업 "${values.title}"을(를) 생성했습니다.`) }
+            { parentIssueNo: request.issueNo, draft, actorName: user.name },
+            { onSuccess: () => toast.success(`하위작업 "${draft.title}"을(를) 생성했습니다.`) }
           )
-        }}
+        }
       />
     </Page>
   )

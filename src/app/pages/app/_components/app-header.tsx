@@ -1,4 +1,4 @@
-import { RequestCreateModal } from '@/features/issues/components/request-create/request-create-modal'
+import { RequestCreateModal } from '@/features/issues/components/request-form/request-create-modal'
 import { NavUserButton } from '@/features/users/components/nav-user-button'
 import { EnvBadge } from '@/shared/components/env-badge'
 import { ThemeButton } from '@/shared/components/theme-button'

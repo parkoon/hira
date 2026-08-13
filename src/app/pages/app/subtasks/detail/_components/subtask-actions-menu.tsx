@@ -1,10 +1,13 @@
-import { MoreHorizontalIcon, Trash2Icon } from 'lucide-react'
+import { MoreHorizontalIcon, PencilIcon, Trash2Icon } from 'lucide-react'
 import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 
 import { useDeleteSubtaskMutation } from '@/features/issues/api/delete-subtask'
 import type { Subtask } from '@/features/issues/api/types'
-import { getSubtaskDeletionState } from '@/features/issues/utils/issue-selectors'
+import {
+  getSubtaskDeletionState,
+  getSubtaskEditState,
+} from '@/features/issues/utils/issue-selectors'
 import { Button } from '@/shared/components/ui/button'
 import {
   DropdownMenu,
@@ -17,15 +20,24 @@ import { useConfirm } from '@/shared/hooks/use-confirm'
 
 type SubtaskActionsMenuProps = {
   subtask: Subtask
+  /** 수정 권한 보유 여부. 상태 조건은 별도로 검사한다 */
+  canEdit: boolean
+  onEdit: () => void
   /** 삭제 권한 보유 여부. 상태 조건은 별도로 검사한다 (스펙 §11.3) */
   canDelete: boolean
 }
 
-export function SubtaskActionsMenu({ subtask, canDelete }: SubtaskActionsMenuProps) {
+export function SubtaskActionsMenu({
+  subtask,
+  canEdit,
+  onEdit,
+  canDelete,
+}: SubtaskActionsMenuProps) {
   const navigate = useNavigate()
   const confirm = useConfirm()
   const deleteSubtask = useDeleteSubtaskMutation()
 
+  const edit = getSubtaskEditState(subtask)
   const deletion = getSubtaskDeletionState(subtask)
 
   const handleDelete = async () => {
@@ -63,6 +75,19 @@ export function SubtaskActionsMenu({ subtask, canDelete }: SubtaskActionsMenuPro
         align="end"
         className="w-64"
       >
+        <DropdownMenuItem
+          disabled={!canEdit || !edit.enabled}
+          onSelect={onEdit}
+        >
+          <PencilIcon />
+          수정
+        </DropdownMenuItem>
+        {canEdit && edit.reason && (
+          <p className="text-muted-foreground px-1.5 pt-0.5 pb-1 text-[11px] leading-snug">
+            {edit.reason}
+          </p>
+        )}
+
         <DropdownMenuItem
           variant="destructive"
           disabled={!canDelete || !deletion.enabled}

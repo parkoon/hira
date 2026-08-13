@@ -453,6 +453,8 @@ export type Database = {
         | 'ROLE_CHANGE'
         | 'ATTACHMENT_UPLOAD'
         | 'ATTACHMENT_DOWNLOAD'
+        | 'SUBTASK_UPDATE'
+        | 'ISSUE_UPDATE'
       history_via: 'MANUAL' | 'API'
       priority: 'URGENT' | 'HIGH' | 'NORMAL' | 'LOW'
       request_status:
@@ -612,6 +614,8 @@ export const Constants = {
         'ROLE_CHANGE',
         'ATTACHMENT_UPLOAD',
         'ATTACHMENT_DOWNLOAD',
+        'SUBTASK_UPDATE',
+        'ISSUE_UPDATE',
       ],
       history_via: ['MANUAL', 'API'],
       priority: ['URGENT', 'HIGH', 'NORMAL', 'LOW'],

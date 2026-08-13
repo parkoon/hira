@@ -1,17 +1,21 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
+import { useState } from 'react'
 import { useParams } from 'react-router'
 import { toast } from 'sonner'
 
 import { getRequestsQueryOptions } from '@/features/issues/api/get-requests'
-import { useReassignSubtaskMutation } from '@/features/issues/api/reassign-subtask'
+import { useUpdateSubtaskMutation } from '@/features/issues/api/update-subtask'
 import { IssueDescription } from '@/features/issues/components/issue-description'
 import { IssueDetailHeader } from '@/features/issues/components/issue-detail-header'
+import { SubtaskFormModal } from '@/features/issues/components/subtask-form-modal'
 import {
   canViewRequest,
   selectRequestByIssueNo,
   selectSubtaskByIssueNo,
 } from '@/features/issues/utils/issue-selectors'
+import { getUsersQueryOptions } from '@/features/users/api/get-users'
 import { useCurrentUser } from '@/features/users/hooks/use-current-user'
+import { selectAssignableUsers } from '@/features/users/utils/user-selectors'
 import { Empty } from '@/shared/components/ui/empty'
 import { Page } from '@/shared/components/ui/layout/page'
 import { paths } from '@/shared/config/paths'
@@ -26,9 +30,12 @@ import { TransitionEvidenceCard } from './_components/transition-evidence-card'
 function SubtaskDetailPage() {
   const { subtaskNo = '' } = useParams()
   const { user, hasRole } = useCurrentUser()
+  const [editOpen, setEditOpen] = useState(false)
 
   const requestsQuery = useSuspenseQuery(getRequestsQueryOptions())
-  const reassignSubtask = useReassignSubtaskMutation()
+  // 수정 모달이 열릴 때 화면이 서스펜드되지 않도록 담당자 후보를 미리 받아 둔다
+  const usersQuery = useSuspenseQuery(getUsersQueryOptions())
+  const updateSubtask = useUpdateSubtaskMutation()
 
   const subtask = selectSubtaskByIssueNo(requestsQuery.data, subtaskNo)
   const request = subtask
@@ -50,7 +57,7 @@ function SubtaskDetailPage() {
 
   // 담당자 본인 또는 리드 이상만 전이할 수 있다 (스펙 §5.2)
   const canTransition = hasRole('LEAD') || subtask.assignee.id === user.id
-  // 하위작업 배정·삭제는 작업자 이상이 수행한다 (스펙 §5.1)
+  // 하위작업 수정·배정·삭제는 작업자 이상이 수행한다 (스펙 §5.1)
   const canManageSubtask = hasRole('WORKER')
 
   return (
@@ -70,6 +77,8 @@ function SubtaskDetailPage() {
             actions={
               <SubtaskActionsMenu
                 subtask={subtask}
+                canEdit={canManageSubtask}
+                onEdit={() => setEditOpen(true)}
                 canDelete={canManageSubtask}
               />
             }
@@ -102,20 +111,42 @@ function SubtaskDetailPage() {
           스크롤 경계에 잘리지 않게 좌우 여유를 두고 그만큼 자리를 되돌리는 것이다.
         */}
         <div className="w-full shrink-0 lg:sticky lg:top-3 lg:-m-1 lg:max-h-[calc(100dvh-4.5rem)] lg:w-102 lg:self-start lg:overflow-y-auto lg:p-1">
-          <SubtaskDetailPanel
-            subtask={subtask}
-            canReassign={canManageSubtask}
-            onReassign={(assignee) =>
-              reassignSubtask.mutate(
-                { subtaskNo: subtask.issueNo, assignee },
-                {
-                  onSuccess: () => toast.success(`담당자를 ${assignee.name}(으)로 변경했습니다.`),
-                }
-              )
-            }
-          />
+          <SubtaskDetailPanel subtask={subtask} />
         </div>
       </div>
+
+      {/* 열 때마다 마운트해 현재 값으로 폼을 채운다 */}
+      {editOpen && (
+        <SubtaskFormModal
+          open
+          onOpenChange={setEditOpen}
+          title={`${subtask.issueNo} 수정`}
+          submitLabel="저장"
+          assignableUsers={selectAssignableUsers(usersQuery.data)}
+          defaultValues={subtask}
+          lockedType={subtask.type}
+          onSubmit={(values) =>
+            updateSubtask.mutate(
+              {
+                subtaskNo: subtask.issueNo,
+                // 이슈유형은 고정이라 넘기지 않는다
+                patch: {
+                  title: values.title,
+                  description: values.description,
+                  assignee: values.assignee,
+                  dueDate: values.dueDate,
+                },
+                actorName: user.name,
+              },
+              {
+                // 값이 그대로면 아무것도 기록되지 않으므로 수정했다고 알리지 않는다
+                onSuccess: (changed) =>
+                  changed && toast.success(`${subtask.issueNo} 하위작업을 수정했습니다.`),
+              }
+            )
+          }
+        />
+      )}
     </Page>
   )
 }

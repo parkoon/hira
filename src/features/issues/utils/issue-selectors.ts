@@ -70,6 +70,17 @@ export function getSubtaskDeletionState(subtask: Subtask) {
 }
 
 /**
+ * 하위작업 내용(제목·설명·담당자·목표일) 수정 가능 여부.
+ * 완료된 건은 기록이 확정된 것으로 본다. 권한은 화면이 따로 판정한다 (삭제와 같은 방식).
+ */
+export function getSubtaskEditState(subtask: Subtask) {
+  if (subtask.status === 'DONE') {
+    return { enabled: false, reason: '완료된 하위작업은 수정할 수 없어요' }
+  }
+  return { enabled: true, reason: null }
+}
+
+/**
  * 해당 단계의 유효한 증적과 정정 횟수 (시나리오 각주 3).
  * 같은 단계가 여러 건이면 마지막 건이 유효하고, 앞선 건들은 정정 이력이다.
  */
@@ -147,6 +158,17 @@ export function getRequestApproveState(request: Request, user: User) {
 
 /** 요청 제출은 등록자 본인이 한다 (시나리오 2) */
 export function canSubmitRequest(request: Request, user: User) {
+  return (
+    (request.status === 'DRAFT' || request.status === 'REJECTED') &&
+    request.requester.id === user.id
+  )
+}
+
+/**
+ * 이슈 내용 수정 — 제출 전(요청대기중·반려)의 등록자 본인만 (스펙 §3.4, §11.2).
+ * 검토 중에는 회수해야 고칠 수 있고, 승인 이후에는 아예 잠긴다. 첨부와 같은 규칙이다.
+ */
+export function canEditRequest(request: Request, user: User) {
   return (
     (request.status === 'DRAFT' || request.status === 'REJECTED') &&
     request.requester.id === user.id

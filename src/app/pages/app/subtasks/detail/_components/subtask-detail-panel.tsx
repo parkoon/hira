@@ -2,7 +2,7 @@ import { ExternalLinkIcon, GitBranchIcon } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { useApproveSubtaskMutation } from '@/features/issues/api/approve-subtask'
-import type { IssueActor, Subtask } from '@/features/issues/api/types'
+import type { Subtask } from '@/features/issues/api/types'
 import { ApprovalGate } from '@/features/issues/components/approval-gate'
 import { IssueKeyLink } from '@/features/issues/components/issue-key-link'
 import { PanelCard, PanelCardField } from '@/features/issues/components/panel-card'
@@ -16,18 +16,14 @@ import { Lozenge } from '@/shared/components/ui/lozenge'
 import { NameAvatar } from '@/shared/components/ui/name-avatar'
 import { paths } from '@/shared/config/paths'
 
-import { AssigneeMenu } from './assignee-menu'
 import { CreateBranchDialog } from './create-branch-dialog'
 
 type SubtaskDetailPanelProps = {
   subtask: Subtask
-  /** 담당자 배정·변경 가능 여부 */
-  canReassign: boolean
-  onReassign: (assignee: IssueActor) => void
 }
 
 /** 우측 컬럼 — 정보만 담는다. 상태 전이는 본문 제목 아래 액션 줄이 맡는다 */
-export function SubtaskDetailPanel({ subtask, canReassign, onReassign }: SubtaskDetailPanelProps) {
+export function SubtaskDetailPanel({ subtask }: SubtaskDetailPanelProps) {
   const { user } = useCurrentUser()
   const approveSubtask = useApproveSubtaskMutation()
 
@@ -78,12 +74,6 @@ export function SubtaskDetailPanel({ subtask, canReassign, onReassign }: Subtask
           <span className="flex items-center gap-1.5">
             <NameAvatar name={subtask.assignee.name} />
             {subtask.assignee.name}
-            {canReassign && (
-              <AssigneeMenu
-                assignee={subtask.assignee}
-                onChange={onReassign}
-              />
-            )}
           </span>
         </PanelCardField>
 

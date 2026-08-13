@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import type { Request, Subtask, TransitionEvidence } from '@/features/issues/api/types'
 import {
   canConfirmAcceptance,
+  canEditRequest,
   canSubmitRequest,
   getDeploymentUrl,
   getRequestAdvanceState,
@@ -12,6 +13,7 @@ import {
   getSubtaskApprovalState,
   getSubtaskDeletionState,
   getSubtaskDeployGate,
+  getSubtaskEditState,
   selectVisibleRequests,
 } from '@/features/issues/utils/issue-selectors'
 import type { User } from '@/features/users/api/types'
@@ -194,6 +196,26 @@ describe('canSubmitRequest / canConfirmAcceptance', () => {
   })
 })
 
+describe('canEditRequest', () => {
+  const requester = makeUser({ id: 'user-kim', name: '김현주', role: 'REQUESTER' })
+
+  it('요청대기중·반려 상태의 등록자만 내용을 수정할 수 있다', () => {
+    expect(canEditRequest(makeRequest({ status: 'DRAFT' }), requester)).toBe(true)
+    expect(canEditRequest(makeRequest({ status: 'REJECTED' }), requester)).toBe(true)
+  })
+
+  it('제출 후에는 등록자도 수정할 수 없다', () => {
+    expect(canEditRequest(makeRequest({ status: 'PENDING_APPROVAL' }), requester)).toBe(false)
+    expect(canEditRequest(makeRequest({ status: 'IN_PROGRESS' }), requester)).toBe(false)
+  })
+
+  it('등록자가 아니면 리드여도 수정할 수 없다', () => {
+    const lead = makeUser({ name: '최유진', role: 'LEAD' })
+
+    expect(canEditRequest(makeRequest({ status: 'DRAFT' }), lead)).toBe(false)
+  })
+})
+
 describe('getRequestAdvanceState', () => {
   it('하위작업이 없으면 인수테스트를 요청할 수 없다', () => {
     const state = getRequestAdvanceState(makeRequest({ status: 'IN_PROGRESS', subtasks: [] }))
@@ -307,6 +329,16 @@ describe('getDeploymentUrl', () => {
 
   it('이행 증적이 없으면 null이다', () => {
     expect(getDeploymentUrl(makeSubtask())).toBeNull()
+  })
+})
+
+describe('getSubtaskEditState', () => {
+  it('진행 중인 하위작업은 수정할 수 있다', () => {
+    expect(getSubtaskEditState(makeSubtask({ status: 'DEVELOPMENT' })).enabled).toBe(true)
+  })
+
+  it('완료된 하위작업은 수정할 수 없다', () => {
+    expect(getSubtaskEditState(makeSubtask({ status: 'DONE' })).enabled).toBe(false)
   })
 })
 

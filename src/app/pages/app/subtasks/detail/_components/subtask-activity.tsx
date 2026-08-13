@@ -5,8 +5,14 @@ import { NameAvatar } from '@/shared/components/ui/name-avatar'
 import { getEnumLabel } from '@/shared/utils/enum'
 import { getSubjectParticle } from '@/shared/utils/korean'
 
+/** 제목·설명·목표일 수정은 상태를 그대로 두고 내용만 남긴다 */
+function isEdit(entry: StatusHistoryEntry) {
+  return entry.fromStatus === entry.toStatus
+}
+
 function describeEntry(entry: StatusHistoryEntry) {
   if (entry.fromStatus === null) return '하위작업을 생성함'
+  if (isEdit(entry)) return '하위작업을 수정함'
 
   const from = getEnumLabel(SUBTASK_STATUS_META, entry.fromStatus)
   const to = getEnumLabel(SUBTASK_STATUS_META, entry.toStatus)
@@ -42,8 +48,11 @@ export function SubtaskActivity({ subtask }: { subtask: Subtask }) {
                 {entry.via === 'API' && <Lozenge tone="info">자동</Lozenge>}
               </p>
               <p className="text-muted-foreground text-[11px]">{entry.occurredAt}</p>
+              {/* 수정 기록의 내용은 '사유'가 아니다 — 무엇이 바뀌었는지를 그대로 적는다 */}
               {entry.reason && (
-                <p className="text-muted-foreground text-xs break-all">사유: {entry.reason}</p>
+                <p className="text-muted-foreground text-xs break-all">
+                  {isEdit(entry) ? entry.reason : `사유: ${entry.reason}`}
+                </p>
               )}
             </div>
           </div>
