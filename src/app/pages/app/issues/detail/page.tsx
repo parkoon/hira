@@ -28,6 +28,7 @@ import { RequestAcceptanceCard } from './_components/request-acceptance-card'
 import { RequestActivity } from './_components/request-activity'
 import { RequestAttachments } from './_components/request-attachments'
 import { RequestDetailPanel } from './_components/request-detail-panel'
+import { RequestStatusActions } from './_components/request-status-actions'
 import { SubtaskCreateModal } from './_components/subtask-create-modal'
 import { SubtaskList } from './_components/subtask-list'
 
@@ -73,6 +74,9 @@ function RequestDetailPage() {
             title={request.title}
             quickActions={
               <>
+                {/* 상태 전이가 이 화면의 주 액션이라 맨 앞에 둔다 */}
+                <RequestStatusActions request={request} />
+
                 <AttachFileButton
                   request={request}
                   onAttach={(files) =>

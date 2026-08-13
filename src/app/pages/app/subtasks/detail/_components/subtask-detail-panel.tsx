@@ -2,10 +2,11 @@ import { ExternalLinkIcon, GitBranchIcon } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { useApproveSubtaskMutation } from '@/features/issues/api/approve-subtask'
-import type { IssueActor, Request, Subtask } from '@/features/issues/api/types'
+import type { IssueActor, Subtask } from '@/features/issues/api/types'
 import { ApprovalGate } from '@/features/issues/components/approval-gate'
 import { IssueKeyLink } from '@/features/issues/components/issue-key-link'
 import { PanelCard, PanelCardField } from '@/features/issues/components/panel-card'
+import { SubtaskStatusLozenge } from '@/features/issues/components/subtask-status-lozenge'
 import { SUBTASK_STATUS_META, SUBTASK_TYPE_META } from '@/features/issues/constants/metadata'
 import { getSubtaskStep } from '@/features/issues/constants/transitions'
 import { getDeploymentUrl, getSubtaskApprovalState } from '@/features/issues/utils/issue-selectors'
@@ -16,28 +17,17 @@ import { paths } from '@/shared/config/paths'
 
 import { AssigneeMenu } from './assignee-menu'
 import { CreateBranchDialog } from './create-branch-dialog'
-import { SubtaskStatusChip } from './subtask-status-chip'
 import { SubtaskStepper } from './subtask-stepper'
-import { SubtaskTransitionActions } from './subtask-transition-actions'
 
 type SubtaskDetailPanelProps = {
   subtask: Subtask
-  request: Request
-  /** 전이는 담당자·리드만 가능 (스펙 §5.3) */
-  canTransition: boolean
   /** 담당자 배정·변경 가능 여부 */
   canReassign: boolean
   onReassign: (assignee: IssueActor) => void
 }
 
-/** 우측 컬럼 — Jira 이슈 뷰처럼 상태(전이) 버튼, 결재, 세부 사항, 진행 단계 카드 순서 */
-export function SubtaskDetailPanel({
-  subtask,
-  request,
-  canTransition,
-  canReassign,
-  onReassign,
-}: SubtaskDetailPanelProps) {
+/** 우측 컬럼 — 정보만 담는다. 상태 전이는 본문 제목 아래 액션 줄이 맡는다 */
+export function SubtaskDetailPanel({ subtask, canReassign, onReassign }: SubtaskDetailPanelProps) {
   const { user } = useCurrentUser()
   const approveSubtask = useApproveSubtaskMutation()
 
@@ -47,16 +37,6 @@ export function SubtaskDetailPanel({
 
   return (
     <div className="space-y-3">
-      {/* Jira처럼 상태는 카드 밖 최상단 — 하위작업은 순차 전진뿐이라 전진 버튼이 전이를 맡는다 */}
-      <div className="flex flex-wrap items-center gap-2">
-        <SubtaskStatusChip status={subtask.status} />
-        <SubtaskTransitionActions
-          subtask={subtask}
-          request={request}
-          canTransition={canTransition}
-        />
-      </div>
-
       {/* DBA 검증중에만 노출 — 결재가 떨어지면 제3자검증중으로 자동 전이한다 (시나리오 9) */}
       {subtask.status === 'DBA_VERIFICATION' && requiredApprovals.length > 0 && (
         <PanelCard title="DBA 검증 결재">
@@ -78,6 +58,10 @@ export function SubtaskDetailPanel({
       )}
 
       <PanelCard title="세부 사항">
+        <PanelCardField label="상태">
+          <SubtaskStatusLozenge status={subtask.status} />
+        </PanelCardField>
+
         <PanelCardField label="상위 이슈">
           <IssueKeyLink to={paths.app.issues.detail.getHref(subtask.parentIssueNo)}>
             {subtask.parentIssueNo}

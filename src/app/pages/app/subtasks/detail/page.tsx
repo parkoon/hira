@@ -19,6 +19,7 @@ import { paths } from '@/shared/config/paths'
 import { SubtaskActionsMenu } from './_components/subtask-actions-menu'
 import { SubtaskActivity } from './_components/subtask-activity'
 import { SubtaskDetailPanel } from './_components/subtask-detail-panel'
+import { SubtaskTransitionActions } from './_components/subtask-transition-actions'
 import { TransitionEvidenceCard } from './_components/transition-evidence-card'
 
 /** 화면 8 — 하위작업 상세 (Jira 신규 이슈 뷰 배치) */
@@ -72,6 +73,14 @@ function SubtaskDetailPage() {
                 canDelete={canManageSubtask}
               />
             }
+            quickActions={
+              /* 상태 전이가 이 화면의 주 액션이라 제목 아래에 둔다 */
+              <SubtaskTransitionActions
+                subtask={subtask}
+                request={request}
+                canTransition={canTransition}
+              />
+            }
           />
 
           <section className="space-y-2">
@@ -95,8 +104,6 @@ function SubtaskDetailPage() {
         <div className="w-full shrink-0 lg:sticky lg:top-3 lg:-m-1 lg:max-h-[calc(100dvh-4.5rem)] lg:w-102 lg:self-start lg:overflow-y-auto lg:p-1">
           <SubtaskDetailPanel
             subtask={subtask}
-            request={request}
-            canTransition={canTransition}
             canReassign={canManageSubtask}
             onReassign={(assignee) =>
               reassignSubtask.mutate(

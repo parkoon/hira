@@ -32,7 +32,10 @@ export function IssueDetailHeader({
         {actions && <div className="flex items-center gap-1">{actions}</div>}
       </div>
       <h1 className="text-xl font-semibold">{title}</h1>
-      {quickActions && <div className="flex flex-wrap items-center gap-1.5">{quickActions}</div>}
+      {/* empty:hidden — 상태에 따라 액션이 하나도 안 뜨는 화면에서 빈 줄이 남지 않게 한다 */}
+      {quickActions && (
+        <div className="flex flex-wrap items-center gap-1.5 empty:hidden">{quickActions}</div>
+      )}
     </div>
   )
 }

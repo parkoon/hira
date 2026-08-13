@@ -6,6 +6,7 @@ import { ApprovalGate } from '@/features/issues/components/approval-gate'
 import { PanelCard, PanelCardField } from '@/features/issues/components/panel-card'
 import { PersonalDataLozenge } from '@/features/issues/components/personal-data-lozenge'
 import { PriorityLabel } from '@/features/issues/components/priority-label'
+import { RequestStatusLozenge } from '@/features/issues/components/request-status-lozenge'
 import { APPROVAL_KIND_META } from '@/features/issues/constants/metadata'
 import { getDueDateStatus } from '@/features/issues/utils/due-date'
 import { getRequiredApprovals } from '@/features/issues/utils/issue-selectors'
@@ -13,10 +14,7 @@ import { useCurrentUser } from '@/features/users/hooks/use-current-user'
 import { Lozenge } from '@/shared/components/ui/lozenge'
 import { NameAvatar } from '@/shared/components/ui/name-avatar'
 
-import { RequestStatusActions } from './request-status-actions'
-import { RequestStatusChip } from './request-status-chip'
-
-/** 우측 컬럼 — Jira 이슈 뷰처럼 상태 버튼, 결재(Issue context), 세부 사항 카드 순서 */
+/** 우측 컬럼 — 정보만 담는다. 상태 전이는 본문 제목 아래 액션 줄이 맡는다 */
 export function RequestDetailPanel({ request }: { request: Request }) {
   const { user } = useCurrentUser()
   const approveRequest = useApproveRequestMutation()
@@ -26,12 +24,6 @@ export function RequestDetailPanel({ request }: { request: Request }) {
 
   return (
     <div className="space-y-3">
-      {/* Jira처럼 상태는 카드 밖 최상단 — 칩은 표시 전용, 전이는 액션 버튼이 맡는다 */}
-      <div className="flex flex-wrap items-center gap-2">
-        <RequestStatusChip status={request.status} />
-        <RequestStatusActions request={request} />
-      </div>
-
       {/* 승인 전에만 결재를 받는다 — 승인 이후엔 결재 이력을 활동 로그에서 본다 (시나리오 3) */}
       {request.status === 'PENDING_APPROVAL' && requiredApprovals.length > 0 && (
         <PanelCard title="요청 승인 결재">
@@ -52,6 +44,10 @@ export function RequestDetailPanel({ request }: { request: Request }) {
       )}
 
       <PanelCard title="세부 사항">
+        <PanelCardField label="상태">
+          <RequestStatusLozenge status={request.status} />
+        </PanelCardField>
+
         <PanelCardField label="요청자">
           <span className="flex items-center gap-1.5">
             <NameAvatar name={request.requester.name} />
