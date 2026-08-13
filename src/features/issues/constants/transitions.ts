@@ -1,4 +1,23 @@
-import type { Subtask, SubtaskStatus, SubtaskType } from '@/features/issues/api/types'
+import type {
+  RequestStatus,
+  Subtask,
+  SubtaskStatus,
+  SubtaskType,
+} from '@/features/issues/api/types'
+
+/**
+ * 이슈(부모) 흐름 — 등록에서 완료까지 한 줄로 이어지는 경로.
+ * 반려는 요청승인대기중에서 갈라져 나갔다가 재제출로 돌아오고, 회수는 역방향이라
+ * 어느 쪽도 이 배열에 넣지 않는다. 워크플로 안내가 두 흐름을 섞으면 읽을 수 없다.
+ */
+export const REQUEST_FLOW: RequestStatus[] = [
+  'DRAFT',
+  'PENDING_APPROVAL',
+  'IN_PROGRESS',
+  'ACCEPTANCE',
+  'DEPLOY_WAITING',
+  'DONE',
+]
 
 /** 배포형 기본 흐름 — DBA 검증을 거치지 않는 경우 (시나리오 6~18) */
 const DEPLOY_FLOW: SubtaskStatus[] = [
@@ -43,12 +62,6 @@ export function getSubtaskFlow(subtask: Subtask): SubtaskStatus[] {
 export const SUBTASK_READY_STATUS: Record<SubtaskType, SubtaskStatus> = {
   DEPLOY: 'DEPLOY_WAITING',
   NON_DEPLOY: 'DONE',
-}
-
-/** 플로우에서의 현재 단계 번호(1부터)와 전체 단계 수 */
-export function getSubtaskStep(subtask: Subtask) {
-  const flow = getSubtaskFlow(subtask)
-  return { step: flow.indexOf(subtask.status) + 1, total: flow.length }
 }
 
 /** 순차 전진만 허용 — 한 단계씩만 앞으로 이동 (시나리오 6~18) */

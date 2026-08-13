@@ -7,7 +7,9 @@ import { PanelCard, PanelCardField } from '@/features/issues/components/panel-ca
 import { PersonalDataLozenge } from '@/features/issues/components/personal-data-lozenge'
 import { PriorityLabel } from '@/features/issues/components/priority-label'
 import { RequestStatusLozenge } from '@/features/issues/components/request-status-lozenge'
-import { APPROVAL_KIND_META } from '@/features/issues/constants/metadata'
+import { WorkflowStepsPopover } from '@/features/issues/components/workflow-steps-popover'
+import { APPROVAL_KIND_META, REQUEST_STATUS_META } from '@/features/issues/constants/metadata'
+import { REQUEST_FLOW } from '@/features/issues/constants/transitions'
 import { getDueDateStatus } from '@/features/issues/utils/due-date'
 import { getRequiredApprovals } from '@/features/issues/utils/issue-selectors'
 import { useCurrentUser } from '@/features/users/hooks/use-current-user'
@@ -45,7 +47,18 @@ export function RequestDetailPanel({ request }: { request: Request }) {
 
       <PanelCard title="세부 사항">
         <PanelCardField label="상태">
-          <RequestStatusLozenge status={request.status} />
+          <span className="flex items-center gap-1.5">
+            <RequestStatusLozenge status={request.status} />
+            <WorkflowStepsPopover
+              steps={REQUEST_FLOW.map((status) => REQUEST_STATUS_META[status].label)}
+              currentIndex={REQUEST_FLOW.indexOf(request.status)}
+              note={
+                request.status === 'REJECTED'
+                  ? '반려는 이 흐름 밖입니다. 다시 제출하면 요청승인대기중으로 돌아갑니다.'
+                  : undefined
+              }
+            />
+          </span>
         </PanelCardField>
 
         <PanelCardField label="요청자">
@@ -79,12 +92,6 @@ export function RequestDetailPanel({ request }: { request: Request }) {
           )}
         </PanelCardField>
       </PanelCard>
-
-      {/* Jira의 Created/Updated 자리 — 카드 아래 작은 회색 텍스트 */}
-      <p className="text-muted-foreground px-1 text-[11px]">
-        등록 {request.createdAt}
-        {request.submittedAt && <> · 제출 {request.submittedAt}</>}
-      </p>
     </div>
   )
 }

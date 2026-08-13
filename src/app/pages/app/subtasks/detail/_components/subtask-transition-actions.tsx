@@ -92,6 +92,7 @@ export function SubtaskTransitionActions({
                 transitionSubtask.isPending
               }
               onClick={handleForward}
+              variant="outline"
             >
               {label}
             </Button>

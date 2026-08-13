@@ -7,8 +7,9 @@ import { ApprovalGate } from '@/features/issues/components/approval-gate'
 import { IssueKeyLink } from '@/features/issues/components/issue-key-link'
 import { PanelCard, PanelCardField } from '@/features/issues/components/panel-card'
 import { SubtaskStatusLozenge } from '@/features/issues/components/subtask-status-lozenge'
+import { WorkflowStepsPopover } from '@/features/issues/components/workflow-steps-popover'
 import { SUBTASK_STATUS_META, SUBTASK_TYPE_META } from '@/features/issues/constants/metadata'
-import { getSubtaskStep } from '@/features/issues/constants/transitions'
+import { getSubtaskFlow } from '@/features/issues/constants/transitions'
 import { getDeploymentUrl, getSubtaskApprovalState } from '@/features/issues/utils/issue-selectors'
 import { useCurrentUser } from '@/features/users/hooks/use-current-user'
 import { Lozenge } from '@/shared/components/ui/lozenge'
@@ -17,7 +18,6 @@ import { paths } from '@/shared/config/paths'
 
 import { AssigneeMenu } from './assignee-menu'
 import { CreateBranchDialog } from './create-branch-dialog'
-import { SubtaskStepper } from './subtask-stepper'
 
 type SubtaskDetailPanelProps = {
   subtask: Subtask
@@ -32,7 +32,7 @@ export function SubtaskDetailPanel({ subtask, canReassign, onReassign }: Subtask
   const approveSubtask = useApproveSubtaskMutation()
 
   const deploymentUrl = getDeploymentUrl(subtask)
-  const { step, total } = getSubtaskStep(subtask)
+  const flow = getSubtaskFlow(subtask)
   const requiredApprovals = getSubtaskApprovalState(subtask).required
 
   return (
@@ -59,7 +59,13 @@ export function SubtaskDetailPanel({ subtask, canReassign, onReassign }: Subtask
 
       <PanelCard title="세부 사항">
         <PanelCardField label="상태">
-          <SubtaskStatusLozenge status={subtask.status} />
+          <span className="flex items-center gap-1.5">
+            <SubtaskStatusLozenge status={subtask.status} />
+            <WorkflowStepsPopover
+              steps={flow.map((status) => SUBTASK_STATUS_META[status].label)}
+              currentIndex={flow.indexOf(subtask.status)}
+            />
+          </span>
         </PanelCardField>
 
         <PanelCardField label="상위 이슈">
@@ -135,14 +141,6 @@ export function SubtaskDetailPanel({ subtask, canReassign, onReassign }: Subtask
           )}
         </PanelCard>
       )}
-
-      {/* Jira 'More fields' 자리 — 접으면 헤더 요약으로 현재 위치를 알린다 */}
-      <PanelCard
-        title="진행 단계"
-        summary={`${step}/${total} · ${SUBTASK_STATUS_META[subtask.status].label}`}
-      >
-        <SubtaskStepper subtask={subtask} />
-      </PanelCard>
     </div>
   )
 }

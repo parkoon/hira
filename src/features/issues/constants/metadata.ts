@@ -9,11 +9,11 @@ import type { EnumMetadata } from '@/shared/utils/enum'
 
 /** 이슈(부모) 상태 — 시나리오 1~19 */
 export const REQUEST_STATUS_META = {
-  DRAFT: { label: '요청대기중', order: 10, tone: 'neutral', description: '임시저장' },
-  PENDING_APPROVAL: { label: '요청승인대기중', order: 20, tone: 'warning' },
+  DRAFT: { label: '요청 대기중', order: 10, tone: 'neutral', description: '임시저장' },
+  PENDING_APPROVAL: { label: '요청 승인 대기중', order: 20, tone: 'warning' },
   IN_PROGRESS: { label: '작업중', order: 30, tone: 'info' },
-  ACCEPTANCE: { label: '인수테스트중', order: 40, tone: 'warning' },
-  DEPLOY_WAITING: { label: '이행대기중', order: 50, tone: 'info' },
+  ACCEPTANCE: { label: '인수 테스트중', order: 40, tone: 'warning' },
+  DEPLOY_WAITING: { label: '이행 대기중', order: 50, tone: 'info' },
   DONE: { label: '완료', order: 60, tone: 'success' },
   REJECTED: { label: '반려', order: 70, tone: 'danger' },
 } satisfies Record<RequestStatus, EnumMetadata>
@@ -30,14 +30,14 @@ export const SUBTASK_TYPE_META = {
  * 하위작업별 플로우(`getSubtaskFlow`)의 인덱스를 사용한다.
  */
 export const SUBTASK_STATUS_META = {
-  TODO: { label: '작업대기중', order: 1, tone: 'neutral' },
-  ANALYSIS: { label: '분석설계중', order: 2, tone: 'info' },
+  TODO: { label: '작업 대기중', order: 1, tone: 'neutral' },
+  ANALYSIS: { label: '분석 설계중', order: 2, tone: 'info' },
   DEVELOPMENT: { label: '개발중', order: 3, tone: 'info' },
-  DBA_VERIFICATION: { label: 'DBA검증중', order: 4, tone: 'warning' },
-  THIRD_PARTY: { label: '제3자검증중', order: 5, tone: 'warning' },
-  FUNCTIONAL_TEST: { label: '기능테스트중', order: 6, tone: 'info' },
-  DEPLOY_WAITING: { label: '이행대기중', order: 7, tone: 'neutral' },
-  POST_DEPLOY_CHECK: { label: '이행후점검중', order: 8, tone: 'warning' },
+  DBA_VERIFICATION: { label: 'DBA 검증중', order: 4, tone: 'warning' },
+  THIRD_PARTY: { label: '제3자 검증중', order: 5, tone: 'warning' },
+  FUNCTIONAL_TEST: { label: '기능 테스트중', order: 6, tone: 'info' },
+  DEPLOY_WAITING: { label: '이행 대기중', order: 7, tone: 'neutral' },
+  POST_DEPLOY_CHECK: { label: '이행 후 점검중', order: 8, tone: 'warning' },
   IN_PROGRESS: { label: '작업중', order: 9, tone: 'info' },
   REVIEW: { label: '검토중', order: 10, tone: 'warning' },
   DONE: { label: '완료', order: 11, tone: 'success' },

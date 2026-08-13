@@ -25,7 +25,7 @@ function ActionButton({
   label,
   reason,
   pending = false,
-  variant = 'default',
+  variant = 'outline',
   onClick,
 }: {
   label: string

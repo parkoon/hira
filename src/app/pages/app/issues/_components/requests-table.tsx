@@ -43,7 +43,8 @@ export function RequestsTable({ requests }: { requests: Request[] }) {
       {
         field: 'status',
         headerName: '상태',
-        width: 110,
+        // '요청 승인 대기중'이 배지·셀 패딩까지 약 120px — 좁으면 배지가 잘린다
+        width: 140,
         cellRenderer: ({ data }: { data: Request }) => (
           <RequestStatusLozenge status={data.status} />
         ),

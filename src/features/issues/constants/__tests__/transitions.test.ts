@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
-import type { Subtask } from '@/features/issues/api/types'
+import type { RequestStatus, Subtask } from '@/features/issues/api/types'
+import { REQUEST_STATUS_META } from '@/features/issues/constants/metadata'
 import {
   getNextSubtaskStatus,
   getPostDevelopmentStatus,
   getSubtaskFlow,
-  getSubtaskStep,
+  REQUEST_FLOW,
 } from '@/features/issues/constants/transitions'
 
 const makeSubtask = (overrides: Partial<Subtask> = {}): Subtask => ({
@@ -48,15 +49,17 @@ describe('getSubtaskFlow', () => {
   })
 })
 
-describe('getSubtaskStep', () => {
-  it('현재 상태의 단계 번호와 전체 단계 수를 돌려준다', () => {
-    expect(getSubtaskStep(makeSubtask({ status: 'DEVELOPMENT' }))).toEqual({ step: 3, total: 8 })
+describe('REQUEST_FLOW', () => {
+  it('반려를 뺀 모든 이슈 상태가 흐름에 빠짐없이 들어간다', () => {
+    // 상태를 새로 추가하고 워크플로 안내에 반영하지 않으면 여기서 걸린다
+    const covered = [...REQUEST_FLOW, 'REJECTED' as const].sort()
+    const declared = (Object.keys(REQUEST_STATUS_META) as RequestStatus[]).sort()
+
+    expect(covered).toEqual(declared)
   })
 
-  it('같은 상태라도 DBA 검증이 붙으면 전체 단계 수가 늘어난다', () => {
-    const withDba = makeSubtask({ status: 'DEVELOPMENT', dbaVerificationRequest: '검토 요청' })
-
-    expect(getSubtaskStep(withDba)).toEqual({ step: 3, total: 9 })
+  it('반려는 선형 흐름 밖이라 포함하지 않는다', () => {
+    expect(REQUEST_FLOW).not.toContain('REJECTED')
   })
 })
 
