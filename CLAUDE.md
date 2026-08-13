@@ -77,19 +77,18 @@
 
 ### 기술 스택
 
-| 영역       | 라이브러리                               |
-| ---------- | ---------------------------------------- |
-| 프레임워크 | React 19, React Router v7                |
-| 서버 상태  | TanStack Query v5                        |
-| HTTP       | Axios (커스텀 타입 세이프 래퍼)          |
-| URL 상태   | nuqs (URL search param 관리)             |
-| 폼         | react-hook-form + zod                    |
-| 스타일     | Tailwind CSS v4                          |
-| 테이블     | ag-grid                                  |
-| API 타입   | OpenAPI 자동 생성 (`@/shared/types/api`) |
-| 목 서버    | MSW v2 (개발/테스트)                     |
-| 테스트     | Vitest + Testing Library                 |
-| E2E        | Playwright                               |
+| 영역       | 라이브러리                                     |
+| ---------- | ---------------------------------------------- |
+| 프레임워크 | React 19, React Router v7                      |
+| 서버 상태  | TanStack Query v5                              |
+| 백엔드     | Supabase (Postgres + Auth, supabase-js v2)     |
+| URL 상태   | nuqs (URL search param 관리)                   |
+| 폼         | react-hook-form + zod                          |
+| 스타일     | Tailwind CSS v4                                |
+| 테이블     | ag-grid                                        |
+| DB 타입    | Supabase 자동 생성 (`@/shared/types/database`) |
+| 테스트     | Vitest + Testing Library                       |
+| E2E        | Playwright                                     |
 
 ### 폴더 구조
 
@@ -119,11 +118,10 @@ src/
 │   ├── config/                   # 환경변수(env.ts), 라우트 경로(paths.ts)
 │   ├── constants/                # 앱 전역 상수
 │   ├── hooks/                    # 범용 커스텀 훅
-│   ├── lib/                      # 인프라 레이어 (api client, react-query)
+│   ├── lib/                      # 인프라 레이어 (supabase, react-query, audit-log)
 │   ├── stores/                   # 전역 클라이언트 상태 (UI 상태만)
-│   ├── types/                    # OpenAPI 자동생성 타입 (수기 편집 금지)
+│   ├── types/                    # Supabase 자동생성 타입 (수기 편집 금지)
 │   └── utils/                    # 순수 유틸 함수
-└── mocks/                        # MSW 핸들러 + 인메모리 store
 ```
 
 ### 컴포넌트 배치 기준 (에스컬레이션 순서)
@@ -136,8 +134,8 @@ src/
 
 ### 핵심 컨벤션
 
-- **타입 소스**: `@/shared/types/api`의 `paths`, `components`만 사용. 직접 타입 수기 작성 금지.
-- **API 레이어**: `features/{domain}/api/`에 `get-*.ts` / `post-*.ts` 등 HTTP 메서드 prefix 파일로 분리.
+- **타입 소스**: DB row 타입은 `@/shared/types/database`의 `Database` 생성 타입만 사용(수기 편집 금지). 앱 레이어가 쓰는 DTO는 `features/{domain}/api/types.ts`에 둔다.
+- **API 레이어**: `features/{domain}/api/`에 조회는 `get-*.ts`, 쓰기는 동작 이름(`create-*` / `transition-*` / `approve-*` 등) 파일로 분리. Supabase 클라이언트는 `@/shared/lib/supabase`만 쓴다.
 - **라우트 경로**: `@/shared/config/paths`의 `paths` 객체로 중앙 관리. 문자열 하드코딩 금지.
 - **URL search param**: `nuqs`로 관리. `useQueryState` / `useQueryStates` + 빌트인 파서 사용.
 - **enum 라벨**: `features/{domain}/constants/metadata.ts`의 `*_META` 상수로 관리. 화면별 하드코딩 금지.
@@ -150,13 +148,13 @@ src/
 
 ### 기본 사이클
 
-백엔드 작업이 완료되면 다음 순서로 진행한다.
+스키마 변경이 필요한 작업은 다음 순서로 진행한다.
 
 ```text
-1. pnpm openapi           # API 타입 자동 생성
-2. api.d.ts diff 확인     # 변경된 엔드포인트/스키마 파악 → 작업 범위 설계
-3. features/{domain}/api/ # 필요한 queryOptions, mutation hook 작성
-4. app/pages/             # 페이지 구현
+1. supabase/migrations/    # 마이그레이션 작성 후 원격 DB에 적용
+2. database.ts 재생성      # Supabase 타입 생성 결과로 갱신, diff 확인 → 작업 범위 설계
+3. features/{domain}/api/  # 필요한 queryOptions, mutation hook 작성
+4. app/pages/              # 페이지 구현
 ```
 
 ### 변경 범위 원칙

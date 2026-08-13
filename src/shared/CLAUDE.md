@@ -75,8 +75,9 @@ navigate('/app/posts')
 외부 라이브러리를 프로젝트에 맞게 설정하거나 래핑하는 인프라 레이어.
 순수 유틸 함수는 `utils/`에 둔다 ("외부 라이브러리 설정인가?" 가 lib/utils 구분 기준).
 
-- `api/api-client.ts` — 단일 `apiClient` 인스턴스. 직접 생성하지 않는다.
-- `api/index.ts` — `InferPathParams`, `InferBody`, `InferResponse` 등 타입 헬퍼.
+- `supabase.ts` — 단일 `supabase` 클라이언트 인스턴스. 직접 생성하지 않는다.
+- `supabase-error.ts` — Supabase 에러 판별 + 한국어 문구 매핑 (`isSupabaseError`, `getSupabaseErrorMessage`).
+- `audit-log.ts` — 감사 로그 기록 헬퍼 (`recordAuditLog`).
 - `react-query.ts` — `QueryClient` 설정 + 전역 에러 핸들링.
   - query 에러 → `ErrorBoundary`
   - mutation 에러 → `MutationCache` 전역 핸들러
@@ -84,12 +85,12 @@ navigate('/app/posts')
 
 ---
 
-## types/ — OpenAPI 자동생성 타입
+## types/ — Supabase 자동생성 타입
 
-`api.d.ts`는 자동 생성 파일. **수기 편집 금지.**
+`database.ts`는 Supabase 타입 생성 결과. **수기 편집 금지** — 마이그레이션 적용 후 재생성한다.
 
-앱 레이어에서 `components['schemas']['...']`를 직접 참조하지 않는다.
-도메인 DTO 타입은 `features/{domain}/api/types.ts`에 re-export해서 사용한다.
+앱 레이어에서 `Database['public']['Tables'][...]` row 타입을 직접 참조하지 않는다.
+도메인 DTO 타입은 `features/{domain}/api/types.ts`에 정의해서 사용한다.
 
 ---
 
