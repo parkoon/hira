@@ -75,9 +75,15 @@ export function RequestCreateModal() {
         requesterName: user.name,
       },
       {
-        onSuccess: (issueNo) => {
+        onSuccess: ({ issueNo, complete }) => {
           handleOpenChange(false)
-          toast.success(`${issueNo} 이슈를 등록했습니다. 내용을 확인하고 제출해 주세요.`)
+          if (complete) {
+            toast.success(`${issueNo} 이슈를 등록했습니다. 내용을 확인하고 제출해 주세요.`)
+          } else {
+            toast.warning(
+              `${issueNo} 이슈는 등록됐지만 일부 정보 저장에 실패했습니다. 상세 화면에서 내용을 확인해 주세요.`
+            )
+          }
           void navigate(paths.app.issues.detail.getHref(issueNo))
         },
       }

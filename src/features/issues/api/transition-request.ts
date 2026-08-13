@@ -8,6 +8,7 @@ import type {
 } from '@/features/issues/api/types'
 import { insertEvidence, insertHistory } from '@/features/issues/api/writers'
 import { REQUEST_STATUS_META } from '@/features/issues/constants/metadata'
+import { AppError } from '@/shared/lib/app-error'
 import { type AuditEventType, recordAuditLog } from '@/shared/lib/audit-log'
 import { supabase } from '@/shared/lib/supabase'
 
@@ -42,12 +43,12 @@ export const transitionRequestService = async ({
 }: TransitionRequestBody) => {
   const { data: current, error: readError } = await supabase
     .from('requests')
-    .select('status')
+    .select('status, submitted_at')
     .eq('issue_no', issueNo)
     .single()
   if (readError) throw readError
 
-  const { error } = await supabase
+  const { data: updated, error } = await supabase
     .from('requests')
     .update({
       status: toStatus,
@@ -60,10 +61,27 @@ export const transitionRequestService = async ({
           : {}),
     })
     .eq('issue_no', issueNo)
+    // 읽어 둔 상태 그대로일 때만 전이한다 — 낡은 화면이 이미 처리된 건을 덮어쓰지 못하고,
+    // 거부된 전이의 증적이 남지도 않는다
+    .eq('status', current.status)
+    .select('issue_no')
   if (error) throw error
+  if (updated.length === 0) {
+    throw new AppError('이미 처리된 요청입니다. 화면을 새로고침해 주세요.')
+  }
 
   if (evidence !== undefined) {
-    await insertEvidence({ requestIssueNo: issueNo }, current.status, evidence, actorName)
+    try {
+      await insertEvidence({ requestIssueNo: issueNo }, current.status, evidence, actorName)
+    } catch (evidenceError) {
+      // 증적 없이 상태만 넘어가면 사후 입력 경로가 없다 — 전이를 되돌려 재시도로 복구되게 한다
+      await supabase
+        .from('requests')
+        .update({ status: current.status, submitted_at: current.submitted_at })
+        .eq('issue_no', issueNo)
+        .eq('status', toStatus)
+      throw evidenceError
+    }
   }
 
   await insertHistory(

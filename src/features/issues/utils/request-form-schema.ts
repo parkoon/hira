@@ -1,6 +1,8 @@
 import { format } from 'date-fns'
 import { z } from 'zod'
 
+import { PRIORITIES } from '@/features/issues/constants/metadata'
+
 export const requestFormSchema = z.object({
   title: z.string().trim().min(1, '요청제목을 입력해 주세요'),
   dueDate: z
@@ -11,9 +13,9 @@ export const requestFormSchema = z.object({
       (value) => value >= format(new Date(), 'yyyy-MM-dd'),
       '오늘 이전 날짜는 선택할 수 없어요'
     ),
-  priority: z.enum(['URGENT', 'HIGH', 'NORMAL', 'LOW']),
+  priority: z.enum(PRIORITIES),
   description: z.string().trim().min(1, '상세내용을 입력해 주세요'),
-  // 개수·용량 제한은 고를 때 `validateAttachment`가 막으므로 여기선 담아만 둔다 (스펙 §4.2)
+  // 용량·확장자 제한은 고를 때 `validateAttachment`가 막으므로 여기선 담아만 둔다 (스펙 §4.2)
   attachments: z.array(z.instanceof(File)),
   // Step 2 — 컴플라이언스 확인. 미응답 시 제출 불가 (스펙 §4.1)
   handlesPersonalData: z.enum(['YES', 'NO'], { message: '개인정보 취급 여부를 선택해 주세요' }),

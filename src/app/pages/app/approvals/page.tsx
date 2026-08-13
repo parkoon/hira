@@ -43,8 +43,8 @@ function ApprovalInboxPage() {
   )
 
   const isSelfRegistered = useCallback(
-    (request: Request) => request.requester.name === user.name,
-    [user.name]
+    (request: Request) => request.requester.id === user.id,
+    [user.id]
   )
 
   const getApproveState = useCallback(

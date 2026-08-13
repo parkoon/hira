@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { getRequestsQueryKeyPrefix } from '@/features/issues/api/get-requests'
 import type { SubtaskDraft } from '@/features/issues/api/types'
-import { insertHistory, resolveProfileIdByName } from '@/features/issues/api/writers'
+import { insertHistory } from '@/features/issues/api/writers'
 import { recordAuditLog } from '@/shared/lib/audit-log'
 import { supabase } from '@/shared/lib/supabase'
 
@@ -33,10 +33,7 @@ export const createSubtaskService = async ({
   draft,
   actorName,
 }: CreateSubtaskBody) => {
-  const [issueNo, assigneeId] = await Promise.all([
-    nextSubtaskNo(parentIssueNo),
-    resolveProfileIdByName(draft.assignee.name),
-  ])
+  const issueNo = await nextSubtaskNo(parentIssueNo)
 
   const { error } = await supabase.from('subtasks').insert({
     issue_no: issueNo,
@@ -45,7 +42,7 @@ export const createSubtaskService = async ({
     title: draft.title,
     description: draft.description,
     status: 'TODO',
-    assignee_id: assigneeId,
+    assignee_id: draft.assignee.id,
     due_date: draft.dueDate,
   })
   if (error) throw error

@@ -11,8 +11,10 @@
 
 export type SupabaseErrorLike = {
   message: string
-  details: string
-  hint: string
+  // PostgREST는 DB가 DETAIL/HINT를 주지 않은 에러(23505의 hint, 42501·PGRST301 등)에서
+  // null로 내린다 — string으로 강제하면 실제 DB 에러가 전부 판별에서 걸러진다
+  details: string | null
+  hint: string | null
   code: string
 }
 
@@ -23,9 +25,9 @@ export function isSupabaseError(error: unknown): error is SupabaseErrorLike {
   const candidate = error as Record<string, unknown>
   return (
     typeof candidate.message === 'string' &&
-    typeof candidate.details === 'string' &&
-    typeof candidate.hint === 'string' &&
-    typeof candidate.code === 'string'
+    typeof candidate.code === 'string' &&
+    'details' in candidate &&
+    'hint' in candidate
   )
 }
 

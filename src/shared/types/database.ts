@@ -210,21 +210,18 @@ export type Database = {
         Row: {
           evidence_id: number
           id: number
-          label: string
           position: number
           url: string
         }
         Insert: {
           evidence_id: number
           id?: never
-          label?: string
           position?: number
           url: string
         }
         Update: {
           evidence_id?: number
           id?: never
-          label?: string
           position?: number
           url?: string
         }

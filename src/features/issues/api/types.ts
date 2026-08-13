@@ -1,6 +1,7 @@
 /**
- * 백엔드 API 확정 전 임시 수기 타입.
- * OpenAPI 스키마가 나오면 `@/shared/types/api`의 생성 타입으로 교체한다.
+ * 앱 레이어가 쓰는 도메인 DTO 타입.
+ * DB enum·row와의 정합성은 `@/shared/types/database`(Supabase 생성 타입)가 기준이고,
+ * snake_case row → 이 모양으로의 변환은 `get-requests.ts` 매퍼가 담당한다.
  */
 
 /**
@@ -80,6 +81,8 @@ export type Approval = {
 export type Priority = 'URGENT' | 'HIGH' | 'NORMAL' | 'LOW'
 
 export type IssueActor = {
+  /** profiles.id — 본인 판정·담당자 필터는 이름이 아니라 id로 한다 (동명이인 안전) */
+  id: string
   name: string
   dept: string
 }
@@ -91,7 +94,6 @@ export type Attachment = {
 
 export type ReferenceLink = {
   url: string
-  label: string
 }
 
 export type StatusHistoryEntry = {

@@ -36,7 +36,7 @@ const makeSubtask = (overrides: Partial<Subtask> = {}): Subtask => ({
   title: '하위작업',
   description: '',
   status: 'TODO',
-  assignee: { name: '임도윤', dept: '서비스개발실' },
+  assignee: { id: 'user-1', name: '임도윤', dept: '서비스개발실' },
   dueDate: null,
   completedAt: null,
   dbaVerificationRequest: null,
@@ -53,7 +53,7 @@ const makeRequest = (overrides: Partial<Request> = {}): Request => ({
   description: '',
   status: 'IN_PROGRESS',
   priority: 'NORMAL',
-  requester: { name: '김현주', dept: '보험운영팀', contact: '02-1234-5678' },
+  requester: { id: 'user-kim', name: '김현주', dept: '보험운영팀', contact: '02-1234-5678' },
   dueDate: '2026-12-31',
   createdAt: '2026-08-01',
   submittedAt: '2026-08-01',
@@ -84,11 +84,11 @@ describe('selectVisibleRequests', () => {
   const draft = makeRequest({ issueNo: 'WR-2026-0001', status: 'DRAFT' })
   const mine = makeRequest({
     issueNo: 'WR-2026-0002',
-    requester: { name: '김현주', dept: '보험운영팀', contact: '' },
+    requester: { id: 'user-kim', name: '김현주', dept: '보험운영팀', contact: '' },
   })
   const others = makeRequest({
     issueNo: 'WR-2026-0003',
-    requester: { name: '최유진', dept: '여신관리팀', contact: '' },
+    requester: { id: 'user-choi', name: '최유진', dept: '여신관리팀', contact: '' },
   })
 
   it('임시저장 건은 누구에게도 목록에 보이지 않는다', () => {
@@ -98,7 +98,7 @@ describe('selectVisibleRequests', () => {
   })
 
   it('요청자는 본인이 등록한 건만 본다', () => {
-    const requester = makeUser({ name: '김현주', role: 'REQUESTER' })
+    const requester = makeUser({ id: 'user-kim', name: '김현주', role: 'REQUESTER' })
     const visible = selectVisibleRequests([mine, others], requester)
 
     expect(visible.map((request) => request.issueNo)).toEqual(['WR-2026-0002'])
@@ -124,10 +124,12 @@ describe('getRequiredApprovals', () => {
 })
 
 describe('getRequestApproveState', () => {
-  const lead = makeUser({ name: '윤서진', role: 'LEAD' })
+  const lead = makeUser({ id: 'user-yoon', name: '윤서진', role: 'LEAD' })
 
   it('본인이 등록한 이슈는 직접 승인할 수 없다', () => {
-    const own = makeRequest({ requester: { name: '윤서진', dept: '서비스개발실', contact: '' } })
+    const own = makeRequest({
+      requester: { id: 'user-yoon', name: '윤서진', dept: '서비스개발실', contact: '' },
+    })
 
     expect(getRequestApproveState(own, lead).enabled).toBe(false)
   })
@@ -167,7 +169,7 @@ describe('getSubtaskApprovalState', () => {
 })
 
 describe('canSubmitRequest / canConfirmAcceptance', () => {
-  const requester = makeUser({ name: '김현주', role: 'REQUESTER' })
+  const requester = makeUser({ id: 'user-kim', name: '김현주', role: 'REQUESTER' })
 
   it('임시저장·반려 상태의 등록자만 제출할 수 있다', () => {
     expect(canSubmitRequest(makeRequest({ status: 'DRAFT' }), requester)).toBe(true)
@@ -293,8 +295,8 @@ describe('getDeploymentUrl', () => {
         makeEvidence({
           status: 'DEPLOY_WAITING',
           links: [
-            { url: 'https://jenkins.example.com/1', label: '배포' },
-            { url: 'https://jenkins.example.com/2', label: '재배포' },
+            { url: 'https://jenkins.example.com/1' },
+            { url: 'https://jenkins.example.com/2' },
           ],
         }),
       ],

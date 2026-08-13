@@ -23,14 +23,14 @@ type Tables = Database['public']['Tables']
  */
 const REQUEST_TREE_SELECT = `
   *,
-  requester:profiles!requests_requester_id_fkey(name, dept, contact),
+  requester:profiles!requests_requester_id_fkey(id, name, dept, contact),
   attachments(*),
   approvals(*),
   evidences(*, reference_links(*), attachments(*)),
   status_history(*),
   subtasks(
     *,
-    assignee:profiles!subtasks_assignee_id_fkey(name, dept),
+    assignee:profiles!subtasks_assignee_id_fkey(id, name, dept),
     approvals(*),
     evidences(*, reference_links(*), attachments(*)),
     status_history(*),
@@ -53,7 +53,7 @@ type EvidenceRow = Tables['evidences']['Row'] & {
 }
 
 type SubtaskRow = Tables['subtasks']['Row'] & {
-  assignee: Pick<Tables['profiles']['Row'], 'name' | 'dept'> | null
+  assignee: Pick<Tables['profiles']['Row'], 'id' | 'name' | 'dept'> | null
   approvals: Tables['approvals']['Row'][]
   evidences: EvidenceRow[]
   status_history: Tables['status_history']['Row'][]
@@ -62,7 +62,7 @@ type SubtaskRow = Tables['subtasks']['Row'] & {
 }
 
 type RequestRow = Tables['requests']['Row'] & {
-  requester: Pick<Tables['profiles']['Row'], 'name' | 'dept' | 'contact'> | null
+  requester: Pick<Tables['profiles']['Row'], 'id' | 'name' | 'dept' | 'contact'> | null
   attachments: Tables['attachments']['Row'][]
   approvals: Tables['approvals']['Row'][]
   evidences: EvidenceRow[]
@@ -71,9 +71,7 @@ type RequestRow = Tables['requests']['Row'] & {
 }
 
 const toLinks = (rows: Tables['reference_links']['Row'][]): ReferenceLink[] =>
-  [...rows]
-    .sort((a, b) => a.position - b.position || a.id - b.id)
-    .map((row) => ({ url: row.url, label: row.label }))
+  [...rows].sort((a, b) => a.position - b.position || a.id - b.id).map((row) => ({ url: row.url }))
 
 const toAttachments = (rows: Tables['attachments']['Row'][]): Attachment[] =>
   [...rows].sort((a, b) => a.id - b.id).map((row) => ({ fileName: row.file_name, size: row.size }))
@@ -87,10 +85,10 @@ const toApprovals = (rows: Tables['approvals']['Row'][]) =>
       approvedAt: toDateTime(row.approved_at),
     }))
 
-/** 화면은 최신 항목을 위에 놓는다 */
+/** 화면은 최신 항목을 위에 놓는다 — id가 단조 증가라 시계와 무관하게 기록 순서를 보존한다 */
 const toHistory = (rows: Tables['status_history']['Row'][]): StatusHistoryEntry[] =>
   [...rows]
-    .sort((a, b) => b.occurred_at.localeCompare(a.occurred_at) || b.id - a.id)
+    .sort((a, b) => b.id - a.id)
     .map((row) => ({
       id: row.id,
       occurredAt: toDateTime(row.occurred_at),
@@ -107,9 +105,8 @@ const toEvidenceContent = (row: EvidenceRow): EvidenceContent => ({
   memo: row.memo,
 })
 
-/** 같은 단계가 여러 건이면 마지막 건이 유효값이라 기록 순서를 그대로 지킨다 */
-const sortEvidences = (rows: EvidenceRow[]) =>
-  [...rows].sort((a, b) => a.recorded_at.localeCompare(b.recorded_at) || a.id - b.id)
+/** 같은 단계가 여러 건이면 마지막 건이 유효값 — id가 기록 순서라 시계 스큐에 흔들리지 않는다 */
+const sortEvidences = (rows: EvidenceRow[]) => [...rows].sort((a, b) => a.id - b.id)
 
 function toSubtask(row: SubtaskRow): Subtask {
   const branchRow = row.subtask_branches
@@ -121,7 +118,11 @@ function toSubtask(row: SubtaskRow): Subtask {
     title: row.title,
     description: row.description,
     status: row.status,
-    assignee: { name: row.assignee?.name ?? '', dept: row.assignee?.dept ?? '' },
+    assignee: {
+      id: row.assignee?.id ?? '',
+      name: row.assignee?.name ?? '',
+      dept: row.assignee?.dept ?? '',
+    },
     dueDate: row.due_date,
     completedAt: row.completed_at,
     dbaVerificationRequest: row.dba_verification_request,
@@ -152,6 +153,7 @@ function toRequest(row: RequestRow): Request {
     status: row.status,
     priority: row.priority,
     requester: {
+      id: row.requester?.id ?? '',
       name: row.requester?.name ?? '',
       dept: row.requester?.dept ?? '',
       contact: row.requester?.contact ?? '',

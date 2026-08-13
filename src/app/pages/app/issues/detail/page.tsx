@@ -11,6 +11,7 @@ import { IssueDescription } from '@/features/issues/components/issue-description
 import { IssueDetailHeader } from '@/features/issues/components/issue-detail-header'
 import {
   canConfirmAcceptance,
+  canViewRequest,
   selectRequestByIssueNo,
 } from '@/features/issues/utils/issue-selectors'
 import { getUsersQueryOptions } from '@/features/users/api/get-users'
@@ -43,7 +44,10 @@ function RequestDetailPage() {
 
   const request = selectRequestByIssueNo(requestsQuery.data, issueNo)
 
-  if (!request) {
+  // 요청자는 본인이 등록한 건만 볼 수 있다 (스펙 §3.3) — 목록과 같은 규칙을 URL 직접 접근에도 적용한다
+  const visible = request !== undefined && canViewRequest(request, user)
+
+  if (!request || !visible) {
     return (
       <Empty
         className="m-6 w-auto"
@@ -72,11 +76,16 @@ function RequestDetailPage() {
                 <AttachFileButton
                   request={request}
                   onAttach={(files) =>
-                    attachFiles.mutate({
-                      issueNo: request.issueNo,
-                      files,
-                      actorName: user.name,
-                    })
+                    attachFiles.mutate(
+                      {
+                        issueNo: request.issueNo,
+                        files,
+                        actorName: user.name,
+                      },
+                      {
+                        onSuccess: () => toast.success(`${files.length}개 파일을 첨부했습니다.`),
+                      }
+                    )
                   }
                 />
 
@@ -139,7 +148,11 @@ function RequestDetailPage() {
           const assignee = selectAssignableUsers(usersQuery.data).find(
             (candidate) => candidate.loginId === values.assigneeLoginId
           )
-          if (!assignee) return
+          // 모달이 이미 닫힌 뒤라 조용히 끝내면 생성된 줄 안다 — 드물지만(목록 갱신 경합) 알려준다
+          if (!assignee) {
+            toast.error('담당자를 찾을 수 없습니다. 하위작업을 다시 생성해 주세요.')
+            return
+          }
 
           createSubtask.mutate(
             {
@@ -148,7 +161,7 @@ function RequestDetailPage() {
                 type: values.type,
                 title: values.title,
                 description: values.description,
-                assignee: { name: assignee.name, dept: assignee.dept },
+                assignee: { id: assignee.id, name: assignee.name, dept: assignee.dept },
                 dueDate: values.dueDate,
               },
               actorName: user.name,

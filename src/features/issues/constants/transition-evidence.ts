@@ -1,4 +1,4 @@
-import type { RequestStatus, SubtaskStatus } from '@/features/issues/api/types'
+import type { EvidenceContent, RequestStatus, SubtaskStatus } from '@/features/issues/api/types'
 
 /**
  * 단계별 증적 안내 문구 (시나리오 각주 3).
@@ -27,11 +27,7 @@ export const REQUEST_EVIDENCE_HINT: Partial<Record<RequestStatus, string>> = {
  * 증적은 링크·첨부파일·메모 중 최소 한 가지가 있어야 한다.
  * 무엇으로 남길지는 단계가 아니라 담당자가 고른다.
  */
-export function hasEvidenceContent(evidence: {
-  links: { url: string }[]
-  attachments: unknown[]
-  memo: string
-}) {
+export function hasEvidenceContent(evidence: EvidenceContent) {
   return (
     evidence.links.some((link) => link.url.trim().length > 0) ||
     evidence.attachments.length > 0 ||

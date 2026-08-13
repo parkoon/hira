@@ -15,7 +15,6 @@ const EDITOR_CONTENT_CLASS = cn(
 type RichTextEditorProps = {
   value: string
   onChange: (html: string) => void
-  placeholder?: string
 }
 
 /** 상세내용 리치텍스트 에디터 — Tiptap (스펙 §4.1) */
@@ -24,7 +23,9 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
     extensions: [StarterKit],
     content: value,
     editorProps: { attributes: { class: EDITOR_CONTENT_CLASS } },
-    onUpdate: ({ editor }) => onChange(editor.isEmpty ? '' : editor.getHTML()),
+    // isEmpty는 공백만 있는 문단도 내용으로 치므로, 텍스트 기준으로 빈 값을 판정해
+    // 공백 상세내용이 필수 검증을 통과하지 못하게 한다
+    onUpdate: ({ editor }) => onChange(editor.getText().trim() ? editor.getHTML() : ''),
   })
 
   if (!editor) return null

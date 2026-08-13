@@ -1,6 +1,6 @@
 /**
- * 백엔드 API 확정 전 임시 수기 타입.
- * OpenAPI 스키마가 나오면 `@/shared/types/api`의 생성 타입으로 교체한다.
+ * 앱 레이어가 쓰는 도메인 DTO 타입.
+ * DB enum·row와의 정합성은 `@/shared/types/database`(Supabase 생성 타입)가 기준이다.
  */
 
 /** 감사 이벤트 — 스펙 §11.4 기록 이벤트 목록 */

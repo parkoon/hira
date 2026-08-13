@@ -77,3 +77,6 @@ export const PRIORITY_META = {
   NORMAL: { label: '보통', order: 30, tone: 'neutral' },
   LOW: { label: '낮음', order: 40, tone: 'neutral' },
 } satisfies Record<Priority, EnumMetadata>
+
+/** 값 목록이 필요한 곳(zod enum 등)의 단일 소스 — META 키에서 파생해 사본 드리프트를 막는다 */
+export const PRIORITIES = Object.keys(PRIORITY_META) as [Priority, ...Priority[]]

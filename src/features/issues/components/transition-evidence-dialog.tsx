@@ -17,7 +17,7 @@ import { Textarea } from '@/shared/components/ui/textarea'
 const acceptAttribute = ATTACHMENT_POLICY.allowedExtensions.map((ext) => `.${ext}`).join(',')
 
 const EMPTY_EVIDENCE: EvidenceContent = {
-  links: [{ url: '', label: '' }],
+  links: [{ url: '' }],
   attachments: [],
   memo: '',
 }
@@ -66,9 +66,7 @@ export function TransitionEvidenceDialog({
   const setLinkUrl = (index: number, url: string) =>
     setEvidence((previous) => ({
       ...previous,
-      links: previous.links.map((link, current) =>
-        current === index ? { ...link, url, label: url } : link
-      ),
+      links: previous.links.map((link, current) => (current === index ? { url } : link)),
     }))
 
   const handleFiles = (fileList: FileList | null) => {
@@ -158,7 +156,7 @@ export function TransitionEvidenceDialog({
               onClick={() =>
                 setEvidence((previous) => ({
                   ...previous,
-                  links: [...previous.links, { url: '', label: '' }],
+                  links: [...previous.links, { url: '' }],
                 }))
               }
             >

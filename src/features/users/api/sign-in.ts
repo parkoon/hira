@@ -36,7 +36,8 @@ export function useSignInMutation() {
   return useMutation({
     mutationKey: getSignInMutationKey(),
     mutationFn: signInService,
-    // 로그인한 사람이 바뀌면 화면에 남은 데이터도 전부 다시 받는다
-    onSuccess: () => queryClient.invalidateQueries(),
+    // 로그인한 사람이 바뀌면 캐시를 비운다 — invalidate만 하면 refetch가 끝날 때까지
+    // 이전 사용자의 데이터(메뉴·권한 가드)가 잠깐 렌더된다. sign-out과 같은 방식
+    onSuccess: () => queryClient.clear(),
   })
 }

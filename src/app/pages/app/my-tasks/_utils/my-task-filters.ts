@@ -32,13 +32,19 @@ function compareDueDate(a: Subtask, b: Subtask): number {
   return a.dueDate.localeCompare(b.dueDate)
 }
 
+/** 내림차순도 "목표일 없는 건은 뒤로"는 유지한다 — 부호만 뒤집으면 없는 건이 맨 앞에 온다 */
+function compareDueDateDesc(a: Subtask, b: Subtask): number {
+  if (!a.dueDate || !b.dueDate) return compareDueDate(a, b)
+  return b.dueDate.localeCompare(a.dueDate)
+}
+
 function sortSubtasks(subtasks: Subtask[], sort: string): Subtask[] {
   const sorted = [...subtasks]
   switch (sort) {
     case 'DUE_ASC':
       return sorted.sort(compareDueDate)
     case 'DUE_DESC':
-      return sorted.sort((a, b) => -compareDueDate(a, b))
+      return sorted.sort(compareDueDateDesc)
     default:
       return sorted.sort(
         (a, b) =>

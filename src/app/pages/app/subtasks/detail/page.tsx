@@ -1,11 +1,13 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router'
+import { toast } from 'sonner'
 
 import { getRequestsQueryOptions } from '@/features/issues/api/get-requests'
 import { useReassignSubtaskMutation } from '@/features/issues/api/reassign-subtask'
 import { IssueDescription } from '@/features/issues/components/issue-description'
 import { IssueDetailHeader } from '@/features/issues/components/issue-detail-header'
 import {
+  canViewRequest,
   selectRequestByIssueNo,
   selectSubtaskByIssueNo,
 } from '@/features/issues/utils/issue-selectors'
@@ -32,7 +34,10 @@ function SubtaskDetailPage() {
     ? selectRequestByIssueNo(requestsQuery.data, subtask.parentIssueNo)
     : undefined
 
-  if (!subtask || !request) {
+  // 요청자는 본인이 등록한 이슈의 하위작업만 볼 수 있다 (스펙 §3.3) — URL 직접 접근에도 적용
+  const visible = request !== undefined && canViewRequest(request, user)
+
+  if (!subtask || !request || !visible) {
     return (
       <Empty
         className="m-6 w-auto"
@@ -43,7 +48,7 @@ function SubtaskDetailPage() {
   }
 
   // 담당자 본인 또는 리드 이상만 전이할 수 있다 (스펙 §5.2)
-  const canTransition = hasRole('LEAD') || subtask.assignee.name === user.name
+  const canTransition = hasRole('LEAD') || subtask.assignee.id === user.id
   // 하위작업 배정·삭제는 작업자 이상이 수행한다 (스펙 §5.1)
   const canManageSubtask = hasRole('WORKER')
 
@@ -94,7 +99,12 @@ function SubtaskDetailPage() {
             canTransition={canTransition}
             canReassign={canManageSubtask}
             onReassign={(assignee) =>
-              reassignSubtask.mutate({ subtaskNo: subtask.issueNo, assignee })
+              reassignSubtask.mutate(
+                { subtaskNo: subtask.issueNo, assignee },
+                {
+                  onSuccess: () => toast.success(`담당자를 ${assignee.name}(으)로 변경했습니다.`),
+                }
+              )
             }
           />
         </div>

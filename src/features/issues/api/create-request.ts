@@ -1,11 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
 
+import { attachFilesService } from '@/features/issues/api/attach-files'
 import { getRequestsQueryKeyPrefix } from '@/features/issues/api/get-requests'
 import type { RequestDraft } from '@/features/issues/api/types'
 import { insertHistory } from '@/features/issues/api/writers'
-import { formatFileSize } from '@/features/issues/constants/attachment-policy'
-import { recordAuditLog } from '@/shared/lib/audit-log'
 import { supabase } from '@/shared/lib/supabase'
 
 export type CreateRequestBody = {
@@ -33,13 +32,19 @@ async function nextRequestNo() {
   return `${prefix}${String(next).padStart(4, '0')}`
 }
 
+export type CreateRequestResult = {
+  issueNo: string
+  /** 이슈 행 이후 단계(첨부·이력)까지 모두 저장됐는지 — 실패해도 이슈 자체는 만들어져 있다 */
+  complete: boolean
+}
+
 /** 등록은 임시저장까지 — 제출은 상세에서 별도로 한다 (시나리오 1·2) */
 export const createRequestService = async ({
   draft,
   files,
   requesterId,
   requesterName,
-}: CreateRequestBody): Promise<string> => {
+}: CreateRequestBody): Promise<CreateRequestResult> => {
   const issueNo = await nextRequestNo()
 
   const { error } = await supabase.from('requests').insert({
@@ -57,33 +62,23 @@ export const createRequestService = async ({
   })
   if (error) throw error
 
-  if (files.length > 0) {
-    const { error: attachmentError } = await supabase.from('attachments').insert(
-      files.map((file) => ({
-        request_issue_no: issueNo,
-        file_name: file.name,
-        size: file.size,
-      }))
+  // 이슈 행이 생긴 뒤의 실패는 등록 실패로 전파하지 않는다 — 등록 실패로 보이면
+  // 재등록으로 같은 이슈가 중복 채번되고, 먼저 생긴 건은 목록에 안 보이는 유령으로 남는다.
+  // 첨부는 상세 화면에서 다시 올릴 수 있으므로 만들어진 번호로 이동시킨다.
+  try {
+    // 첨부를 이력보다 먼저 저장한다 — File 객체는 모달이 닫히면 다시 얻을 수 없지만
+    // 이력은 DB에서 복구할 수 있다. 상세 화면의 첨부 추가와 같은 경로라 감사 로그까지 동일하다
+    await attachFilesService({ issueNo, files, actorName: requesterName })
+
+    await insertHistory(
+      { requestIssueNo: issueNo },
+      { actorName: requesterName, fromStatus: null, toStatus: 'DRAFT' }
     )
-    if (attachmentError) throw attachmentError
+  } catch {
+    return { issueNo, complete: false }
   }
 
-  await insertHistory(
-    { requestIssueNo: issueNo },
-    { actorName: requesterName, fromStatus: null, toStatus: 'DRAFT' }
-  )
-
-  if (files.length > 0) {
-    await recordAuditLog({
-      actorName: requesterName,
-      eventType: 'ATTACHMENT_UPLOAD',
-      targetLabel: issueNo,
-      targetIssueNo: issueNo,
-      detail: files.map((file) => `${file.name} (${formatFileSize(file.size)})`).join(', '),
-    })
-  }
-
-  return issueNo
+  return { issueNo, complete: true }
 }
 
 export const getCreateRequestMutationKey = () => ['/requests', 'create'] as const

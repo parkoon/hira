@@ -11,7 +11,7 @@ declare module '@tanstack/react-query' {
   }
 }
 
-import { ApiError } from './api/error'
+import { AppError } from './app-error'
 import { getSupabaseErrorMessage, isTransportError } from './supabase-error'
 
 // ============================================
@@ -19,34 +19,23 @@ import { getSupabaseErrorMessage, isTransportError } from './supabase-error'
 // ============================================
 
 /**
- * 재시도 가능한 에러인지 판단
- * - 서버 에러(5xx)와 네트워크 에러만 재시도
- * - 클라이언트 에러(4xx)는 재시도해도 동일한 결과
+ * 재시도 가능한 에러인지 판단.
+ * 서버에 닿지 못한 실패만 재시도한다 — PostgREST가 응답을 준 에러는 재시도해도 동일한 결과다.
  */
 const shouldRetry = (failureCount: number, error: unknown): boolean => {
   // 최대 3회 재시도
   if (failureCount >= 3) return false
 
-  // 서버 에러(5xx)만 재시도
-  if (error instanceof ApiError) {
-    return error.isServerError
-  }
-
-  // 네트워크 에러도 재시도
-  if (error instanceof Error && error.message === 'Network Error') {
-    return true
-  }
-
-  // Supabase는 ApiError를 던지지 않는다. 서버에 닿지 못한 실패만 재시도한다
   return isTransportError(error)
 }
 
 /**
  * 토스트·에러 화면에 띄울 문구.
- * Supabase 에러의 message는 영문 원문이라 그대로 쓰지 않고, 옮길 말이 있을 때만 바꾼다.
+ * 앱이 사용자용 문구로 직접 던진 AppError만 message를 그대로 보여주고,
+ * Supabase 에러는 옮길 말이 있을 때만 한국어로 바꾼다. 그 외에는 fallback.
  */
 export const getErrorMessage = (error: unknown, fallback: string): string => {
-  if (error instanceof ApiError) return error.message
+  if (error instanceof AppError) return error.message
   return getSupabaseErrorMessage(error) ?? fallback
 }
 

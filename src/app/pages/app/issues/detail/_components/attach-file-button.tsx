@@ -52,8 +52,8 @@ export function AttachFileButton({ request, onAttach }: AttachFileButtonProps) {
     }
 
     if (accepted.length === 0) return
+    // 성공 토스트는 호출 측 mutation onSuccess가 띄운다 — 저장 실패가 성공처럼 보이면 안 된다
     onAttach(accepted)
-    toast.success(`${accepted.length}개 파일을 첨부했습니다.`)
   }
 
   return (

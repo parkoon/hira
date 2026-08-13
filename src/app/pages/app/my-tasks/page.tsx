@@ -18,8 +18,8 @@ function MyTasksPage() {
   const requestsQuery = useSuspenseQuery(getRequestsQueryOptions())
 
   const subtasks = useMemo(
-    () => applyMyTaskFilters(selectSubtasksByAssignee(requestsQuery.data, user.name), filters),
-    [requestsQuery.data, user.name, filters]
+    () => applyMyTaskFilters(selectSubtasksByAssignee(requestsQuery.data, user.id), filters),
+    [requestsQuery.data, user.id, filters]
   )
 
   return (

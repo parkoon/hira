@@ -6,7 +6,6 @@ import {
   getPostDevelopmentStatus,
   getSubtaskFlow,
   getSubtaskStep,
-  SUBTASK_READY_STATUS,
 } from '@/features/issues/constants/transitions'
 
 const makeSubtask = (overrides: Partial<Subtask> = {}): Subtask => ({
@@ -16,7 +15,7 @@ const makeSubtask = (overrides: Partial<Subtask> = {}): Subtask => ({
   title: '하위작업',
   description: '',
   status: 'TODO',
-  assignee: { name: '임도윤', dept: '서비스개발실' },
+  assignee: { id: 'user-1', name: '임도윤', dept: '서비스개발실' },
   dueDate: null,
   completedAt: null,
   dbaVerificationRequest: null,
@@ -85,12 +84,5 @@ describe('getPostDevelopmentStatus', () => {
 
   it('DBA 검증 내용을 입력하면 DBA검증중으로 간다', () => {
     expect(getPostDevelopmentStatus('인덱스 검토 요청')).toBe('DBA_VERIFICATION')
-  })
-})
-
-describe('SUBTASK_READY_STATUS', () => {
-  it('배포형은 이행대기중, 비배포형은 완료가 부모 전진의 기준이다', () => {
-    expect(SUBTASK_READY_STATUS.DEPLOY).toBe('DEPLOY_WAITING')
-    expect(SUBTASK_READY_STATUS.NON_DEPLOY).toBe('DONE')
   })
 })

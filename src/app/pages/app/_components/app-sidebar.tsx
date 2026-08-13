@@ -37,8 +37,6 @@ type SidebarItem = {
   label: string
   icon: React.ReactNode
   url: string
-  /** url에 쿼리 파라미터가 붙어 pathname 매칭이 안 될 때, 이 prefix로 active 판정 */
-  activePrefix?: string
   minRole?: UserRole
   count?: number
 }
@@ -49,8 +47,7 @@ function hasAccess(userRole: UserRole, minRole?: UserRole): boolean {
 }
 
 function matchesNavItem(pathname: string, item: SidebarItem): boolean {
-  const path = item.activePrefix ?? item.url
-  return pathname === path || pathname.startsWith(`${path}/`)
+  return pathname === item.url || pathname.startsWith(`${item.url}/`)
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -70,7 +67,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       label: '내 작업함',
       icon: <SquareCheckIcon className="size-4" />,
       url: paths.app.myTasks.getHref(),
-      count: selectSubtasksByAssignee(requests, user.name).length,
+      count: selectSubtasksByAssignee(requests, user.id).length,
       minRole: 'WORKER',
     },
     {

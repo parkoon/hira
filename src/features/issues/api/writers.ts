@@ -9,14 +9,6 @@ import { supabase } from '@/shared/lib/supabase'
 /** 증적·이력은 이슈(부모)에도 하위작업(자식)에도 붙는다 */
 export type ActivityOwner = { requestIssueNo: string } | { subtaskIssueNo: string }
 
-/** 화면은 담당자를 이름으로 다루고, 저장은 프로필 id로 한다 */
-export async function resolveProfileIdByName(name: string) {
-  const { data, error } = await supabase.from('profiles').select('id').eq('name', name).limit(1)
-  if (error) throw error
-  if (data.length === 0) throw new Error(`'${name}' 사용자를 찾을 수 없습니다`)
-  return data[0].id
-}
-
 const ownerColumns = (owner: ActivityOwner) => ({
   request_issue_no: 'requestIssueNo' in owner ? owner.requestIssueNo : null,
   subtask_issue_no: 'subtaskIssueNo' in owner ? owner.subtaskIssueNo : null,
@@ -42,7 +34,8 @@ export async function insertEvidence(
       subtask_status: isRequest ? null : (status as SubtaskStatus),
       memo: evidence.memo,
       recorded_by: recordedBy,
-      recorded_at: new Date().toISOString(),
+      // 시각은 DB default now()에 맡긴다 — 클라이언트 시계가 어긋나면
+      // "마지막 건이 유효" 정렬이 사용자 PC 시계에 좌우된다
     })
     .select('id')
     .single()
@@ -53,7 +46,6 @@ export async function insertEvidence(
       evidence.links.map((link, position) => ({
         evidence_id: data.id,
         url: link.url,
-        label: link.label,
         position,
       }))
     )
@@ -83,7 +75,6 @@ export type HistoryEntryInput = {
 export async function insertHistory(owner: ActivityOwner, entry: HistoryEntryInput) {
   const { error } = await supabase.from('status_history').insert({
     ...ownerColumns(owner),
-    occurred_at: new Date().toISOString(),
     actor_name: entry.actorName,
     from_status: entry.fromStatus,
     to_status: entry.toStatus,
@@ -105,7 +96,6 @@ export async function insertApproval(
       ...ownerColumns(owner),
       kind,
       approved_by: approvedBy,
-      approved_at: new Date().toISOString(),
     })
     .select()
   // 23505 = unique_violation

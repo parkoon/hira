@@ -6,7 +6,10 @@ import { AUDIT_EVENT_META } from '@/features/audit-logs/constants/metadata'
 const HEADERS = ['일시', '행위자', '이벤트', '대상', '상세', 'IP'] as const
 
 function toCsvCell(value: string) {
-  return `"${value.replaceAll('"', '""')}"`
+  // =, +, -, @, 탭, CR로 시작하는 셀은 Excel이 수식으로 실행한다(CWE-1236) —
+  // 하위작업 제목·첨부파일명 등 사용자 입력이 그대로 들어오므로 텍스트로 강제한다
+  const safe = /^[=+\-@\t\r]/.test(value) ? `'${value}` : value
+  return `"${safe.replaceAll('"', '""')}"`
 }
 
 /** 감사 로그 CSV 내보내기 — 스펙 §11.4 */

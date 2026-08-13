@@ -2,7 +2,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { getRequestsQueryKeyPrefix } from '@/features/issues/api/get-requests'
 import type { IssueActor } from '@/features/issues/api/types'
-import { resolveProfileIdByName } from '@/features/issues/api/writers'
 import { supabase } from '@/shared/lib/supabase'
 
 export type ReassignSubtaskBody = {
@@ -11,11 +10,9 @@ export type ReassignSubtaskBody = {
 }
 
 export const reassignSubtaskService = async ({ subtaskNo, assignee }: ReassignSubtaskBody) => {
-  const assigneeId = await resolveProfileIdByName(assignee.name)
-
   const { error } = await supabase
     .from('subtasks')
-    .update({ assignee_id: assigneeId })
+    .update({ assignee_id: assignee.id })
     .eq('issue_no', subtaskNo)
   if (error) throw error
 }

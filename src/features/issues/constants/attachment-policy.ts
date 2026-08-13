@@ -20,7 +20,11 @@ export const ATTACHMENT_POLICY = {
 } as const
 
 export function getFileExtension(fileName: string) {
-  return fileName.split('.').pop()?.toLowerCase() ?? ''
+  // 점이 없거나 숨김 파일(.env)처럼 이름 전체가 점 뒤인 경우는 확장자 없음으로 본다 —
+  // split().pop()은 이름이 'pdf'인 무확장자 파일을 통과시킨다
+  const dotIndex = fileName.lastIndexOf('.')
+  if (dotIndex <= 0) return ''
+  return fileName.slice(dotIndex + 1).toLowerCase()
 }
 
 export function formatFileSize(bytes: number) {

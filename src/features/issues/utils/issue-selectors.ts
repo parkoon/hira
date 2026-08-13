@@ -11,14 +11,20 @@ import type { User } from '@/features/users/api/types'
 import { ROLE_LEVEL } from '@/features/users/constants/metadata'
 
 /**
+ * 이슈 열람 권한 — 요청자는 본인이 등록한 건만 볼 수 있다 (스펙 §3.3).
+ * 목록과 상세(직접 URL 접근)가 같은 규칙을 쓴다.
+ */
+export function canViewRequest(request: Request, user: User): boolean {
+  return ROLE_LEVEL[user.role] >= ROLE_LEVEL.WORKER || request.requester.id === user.id
+}
+
+/**
  * 목록에 노출할 이슈.
  * - 임시저장(요청대기중) 건은 목록에 노출하지 않는다 (스펙 §4.3)
- * - 요청자는 본인이 등록한 건만 볼 수 있다 (스펙 §3.3)
+ * - 열람 권한은 `canViewRequest`와 같은 규칙이다
  */
 export function selectVisibleRequests(requests: Request[], user: User): Request[] {
-  const submitted = requests.filter((request) => request.status !== 'DRAFT')
-  if (ROLE_LEVEL[user.role] >= ROLE_LEVEL.WORKER) return submitted
-  return submitted.filter((request) => request.requester.name === user.name)
+  return requests.filter((request) => request.status !== 'DRAFT' && canViewRequest(request, user))
 }
 
 /** 승인 대기함 대상 — 리드가 결정해야 할 제출 건 */
@@ -36,11 +42,11 @@ export function selectSubtaskByIssueNo(requests: Request[], issueNo: string): Su
     .find((subtask) => subtask.issueNo === issueNo)
 }
 
-/** 내 작업함 — 본인이 담당자인 하위작업 */
-export function selectSubtasksByAssignee(requests: Request[], assigneeName: string): Subtask[] {
+/** 내 작업함 — 본인이 담당자인 하위작업. 동명이인이 있어도 안전하게 id로 식별한다 */
+export function selectSubtasksByAssignee(requests: Request[], assigneeId: string): Subtask[] {
   return requests
     .flatMap((request) => request.subtasks)
-    .filter((subtask) => subtask.assignee.name === assigneeName)
+    .filter((subtask) => subtask.assignee.id === assigneeId)
 }
 
 export function getSubtaskProgress(request: Request) {
@@ -129,7 +135,7 @@ export function getSubtaskApprovalState(subtask: Subtask) {
  * 결재가 모두 떨어져야 하고, 본인이 등록한 건은 직접 승인할 수 없다.
  */
 export function getRequestApproveState(request: Request, user: User) {
-  if (request.requester.name === user.name) {
+  if (request.requester.id === user.id) {
     return { enabled: false, reason: '본인이 등록한 이슈는 직접 승인할 수 없어요' }
   }
   const approval = getRequestApprovalState(request)
@@ -143,18 +149,19 @@ export function getRequestApproveState(request: Request, user: User) {
 export function canSubmitRequest(request: Request, user: User) {
   return (
     (request.status === 'DRAFT' || request.status === 'REJECTED') &&
-    request.requester.name === user.name
+    request.requester.id === user.id
   )
 }
 
 /** 인수 확인은 등록자 본인만 한다 — 리드도 대행할 수 없다 (시나리오 14) */
 export function canConfirmAcceptance(request: Request, user: User) {
-  return request.requester.name === user.name
+  return request.requester.id === user.id
 }
 
 /**
- * 부모 단계 진행 버튼의 활성화 조건 — 시나리오 13·14·19.
- * 세 단계 모두 같은 모양(조건 + 미충족 사유)이라 한 함수로 판정한다.
+ * 부모 단계 진행 버튼의 활성화 조건 — 시나리오 13·19.
+ * 두 단계 모두 같은 모양(조건 + 미충족 사유)이라 한 함수로 판정한다.
+ * 인수 확인(시나리오 14)은 증적 팝업이 강제하는 별도 경로(canConfirmAcceptance)를 탄다.
  */
 export function getRequestAdvanceState(request: Request) {
   if (request.status === 'IN_PROGRESS') {
@@ -170,11 +177,6 @@ export function getRequestAdvanceState(request: Request) {
         reason: `하위작업 ${notReady.length}건이 아직 준비되지 않았어요 (배포형은 이행대기중, 비배포형은 완료)`,
       }
     }
-    return { enabled: true, reason: null }
-  }
-
-  if (request.status === 'ACCEPTANCE') {
-    // 증적 입력은 팝업이 강제하므로 여기서는 단계만 확인한다
     return { enabled: true, reason: null }
   }
 

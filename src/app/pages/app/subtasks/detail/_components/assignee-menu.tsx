@@ -1,6 +1,5 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { CheckIcon } from 'lucide-react'
-import { toast } from 'sonner'
 
 import type { IssueActor } from '@/features/issues/api/types'
 import { getUsersQueryOptions } from '@/features/users/api/get-users'
@@ -42,14 +41,14 @@ export function AssigneeMenu({ assignee, onChange }: AssigneeMenuProps) {
       >
         <DropdownMenuLabel>담당자 변경</DropdownMenuLabel>
         {assignableUsers.map((user) => {
-          const current = user.name === assignee.name
+          const current = user.id === assignee.id
           return (
             <DropdownMenuItem
               key={user.loginId}
               onSelect={() => {
                 if (current) return
-                onChange({ name: user.name, dept: user.dept })
-                toast.success(`담당자를 ${user.name}(으)로 변경했습니다.`)
+                // 성공 토스트는 mutation onSuccess에서 띄운다 — 실패해도 성공처럼 보이면 안 된다
+                onChange({ id: user.id, name: user.name, dept: user.dept })
               }}
             >
               <NameAvatar name={user.name} />

@@ -84,7 +84,13 @@ export function SubtaskTransitionActions({
         <TooltipTrigger asChild>
           <span className="inline-block">
             <Button
-              disabled={!canTransition || nextStatus === null || deployGate.blocked}
+              disabled={
+                !canTransition ||
+                nextStatus === null ||
+                deployGate.blocked ||
+                // 전이 중 재클릭하면 두 번째 전이가 증적을 다음 단계에 잘못 귀속시킨다
+                transitionSubtask.isPending
+              }
               onClick={handleForward}
             >
               {label}
@@ -94,70 +100,76 @@ export function SubtaskTransitionActions({
         {deployGate.reason && <TooltipContent>{deployGate.reason}</TooltipContent>}
       </Tooltip>
 
-      {/* 단계가 바뀌면 리마운트해 이전 단계의 입력값이 남지 않게 한다 */}
-      <TransitionEvidenceDialog
-        key={subtask.status}
-        open={evidenceOpen}
-        title={label}
-        hint={hint ?? ''}
-        outcome={nextStatus ? SUBTASK_STATUS_META[nextStatus].label : undefined}
-        confirmLabel={label}
-        confirmDisabled={isDevelopmentStep && dbaChecked && dbaRequest.trim().length === 0}
-        onOpenChange={(open) => {
-          setEvidenceOpen(open)
-          // 팝업은 key로 리셋되지만 DBA 입력은 밖에 있어 직접 비운다
-          if (!open) {
-            setDbaChecked(false)
-            setDbaRequest('')
+      {/* 열릴 때만 마운트한다 — 취소 후 다시 열면 빈 입력으로 시작해야 한다 */}
+      {evidenceOpen && (
+        <TransitionEvidenceDialog
+          open
+          title={label}
+          hint={hint ?? ''}
+          outcome={nextStatus ? SUBTASK_STATUS_META[nextStatus].label : undefined}
+          confirmLabel={label}
+          confirmDisabled={
+            (isDevelopmentStep && dbaChecked && dbaRequest.trim().length === 0) ||
+            transitionSubtask.isPending
           }
-        }}
-        onConfirm={(evidence) => {
-          if (!nextStatus) return
-          transitionSubtask.mutate(
-            {
-              subtaskNo: subtask.issueNo,
-              toStatus: nextStatus,
-              actorName: user.name,
-              evidence,
-              ...(isDevelopmentStep && { dbaVerificationRequest: dbaChecked ? dbaRequest : null }),
-            },
-            {
-              onSuccess: () =>
-                toast.success(`${SUBTASK_STATUS_META[nextStatus].label}(으)로 전이했습니다.`),
+          onOpenChange={(open) => {
+            setEvidenceOpen(open)
+            // 팝업은 언마운트로 리셋되지만 DBA 입력은 밖에 있어 직접 비운다
+            if (!open) {
+              setDbaChecked(false)
+              setDbaRequest('')
             }
-          )
-        }}
-      >
-        {isDevelopmentStep && (
-          <div className="bg-muted space-y-3 rounded-md px-3 py-2.5">
-            <label className="flex items-start gap-2 text-[13px]">
-              <Checkbox
-                checked={dbaChecked}
-                onCheckedChange={(checked) => setDbaChecked(checked === true)}
-              />
-              <span>
-                DBA 검증을 받습니다
-                <span className="text-muted-foreground block text-xs">
-                  체크하면 제3자검증 전에 DBA 검증중 단계를 거칩니다.
-                </span>
-              </span>
-            </label>
-
-            {dbaChecked && (
-              <Field>
-                <FieldLabel htmlFor="dba-request">검증받을 내용</FieldLabel>
-                <Textarea
-                  id="dba-request"
-                  rows={3}
-                  value={dbaRequest}
-                  placeholder="예: 납입내역 조회 쿼리 인덱스 설계와 5년치 조회 성능"
-                  onChange={(event) => setDbaRequest(event.target.value)}
+          }}
+          onConfirm={(evidence) => {
+            if (!nextStatus) return
+            transitionSubtask.mutate(
+              {
+                subtaskNo: subtask.issueNo,
+                toStatus: nextStatus,
+                actorName: user.name,
+                evidence,
+                ...(isDevelopmentStep && {
+                  dbaVerificationRequest: dbaChecked ? dbaRequest : null,
+                }),
+              },
+              {
+                onSuccess: () =>
+                  toast.success(`${SUBTASK_STATUS_META[nextStatus].label}(으)로 전이했습니다.`),
+              }
+            )
+          }}
+        >
+          {isDevelopmentStep && (
+            <div className="bg-muted space-y-3 rounded-md px-3 py-2.5">
+              <label className="flex items-start gap-2 text-[13px]">
+                <Checkbox
+                  checked={dbaChecked}
+                  onCheckedChange={(checked) => setDbaChecked(checked === true)}
                 />
-              </Field>
-            )}
-          </div>
-        )}
-      </TransitionEvidenceDialog>
+                <span>
+                  DBA 검증을 받습니다
+                  <span className="text-muted-foreground block text-xs">
+                    체크하면 제3자검증 전에 DBA 검증중 단계를 거칩니다.
+                  </span>
+                </span>
+              </label>
+
+              {dbaChecked && (
+                <Field>
+                  <FieldLabel htmlFor="dba-request">검증받을 내용</FieldLabel>
+                  <Textarea
+                    id="dba-request"
+                    rows={3}
+                    value={dbaRequest}
+                    placeholder="예: 납입내역 조회 쿼리 인덱스 설계와 5년치 조회 성능"
+                    onChange={(event) => setDbaRequest(event.target.value)}
+                  />
+                </Field>
+              )}
+            </div>
+          )}
+        </TransitionEvidenceDialog>
+      )}
     </>
   )
 }

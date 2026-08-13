@@ -24,12 +24,15 @@ import { CompleteRequestDialog } from './complete-request-dialog'
 function ActionButton({
   label,
   reason,
+  pending = false,
   variant = 'default',
   onClick,
 }: {
   label: string
   /** 있으면 버튼을 막고 이유를 툴팁으로 보여준다 */
   reason?: string | null
+  /** 전이 진행 중 — 재클릭하면 이력·감사 로그가 중복으로 쌓인다 */
+  pending?: boolean
   variant?: 'default' | 'outline' | 'destructive'
   onClick: () => void
 }) {
@@ -39,7 +42,7 @@ function ActionButton({
         <span className="inline-block">
           <Button
             variant={variant}
-            disabled={Boolean(reason)}
+            disabled={Boolean(reason) || pending}
             onClick={onClick}
           >
             {label}
@@ -64,7 +67,7 @@ export function RequestStatusActions({ request }: { request: Request }) {
   const transitionRequest = useTransitionRequestMutation()
 
   const isLead = hasRole('LEAD')
-  const isRequester = request.requester.name === user.name
+  const isRequester = request.requester.id === user.id
 
   /** confirm을 거쳐 전이한다 — 모든 상태변화에 확인 팝업 (시나리오 각주 1) */
   const confirmTransition = (input: {
@@ -93,6 +96,7 @@ export function RequestStatusActions({ request }: { request: Request }) {
     return (
       <ActionButton
         label="제출"
+        pending={transitionRequest.isPending}
         onClick={() =>
           confirmTransition({
             action: '제출',
@@ -116,6 +120,7 @@ export function RequestStatusActions({ request }: { request: Request }) {
           <ActionButton
             label="회수"
             variant="outline"
+            pending={transitionRequest.isPending}
             onClick={() =>
               confirmTransition({
                 action: '회수',
@@ -132,6 +137,7 @@ export function RequestStatusActions({ request }: { request: Request }) {
             <ActionButton
               label="승인"
               reason={approveState.reason}
+              pending={transitionRequest.isPending}
               onClick={() =>
                 confirmTransition({
                   action: '승인',
@@ -146,6 +152,7 @@ export function RequestStatusActions({ request }: { request: Request }) {
               label="반려"
               variant="destructive"
               reason={isRequester ? '본인이 등록한 이슈는 직접 반려할 수 없어요' : null}
+              pending={transitionRequest.isPending}
               onClick={() => setRejectOpen(true)}
             />
 
@@ -173,6 +180,7 @@ export function RequestStatusActions({ request }: { request: Request }) {
       <ActionButton
         label="인수테스트 요청"
         reason={advance.reason}
+        pending={transitionRequest.isPending}
         onClick={() =>
           confirmTransition({
             action: '인수테스트 요청',
@@ -191,31 +199,36 @@ export function RequestStatusActions({ request }: { request: Request }) {
       <>
         <ActionButton
           label="인수 확인"
+          pending={transitionRequest.isPending}
           onClick={() => setEvidenceOpen(true)}
         />
 
-        <TransitionEvidenceDialog
-          open={evidenceOpen}
-          title="인수 확인"
-          hint={REQUEST_EVIDENCE_HINT.ACCEPTANCE ?? ''}
-          outcome={REQUEST_STATUS_META.DEPLOY_WAITING.label}
-          confirmLabel="인수 확인"
-          onOpenChange={setEvidenceOpen}
-          onConfirm={(evidence) => {
-            transitionRequest.mutate(
-              {
-                issueNo: request.issueNo,
-                toStatus: 'DEPLOY_WAITING',
-                actorName: user.name,
-                evidence,
-              },
-              {
-                onSuccess: () =>
-                  toast.success('인수 확인을 마쳤습니다. 이제 하위작업을 이행할 수 있어요.'),
-              }
-            )
-          }}
-        />
+        {/* 열릴 때만 마운트한다 — 취소 후 다시 열면 빈 입력으로 시작해야 한다 */}
+        {evidenceOpen && (
+          <TransitionEvidenceDialog
+            open
+            title="인수 확인"
+            hint={REQUEST_EVIDENCE_HINT.ACCEPTANCE ?? ''}
+            outcome={REQUEST_STATUS_META.DEPLOY_WAITING.label}
+            confirmLabel="인수 확인"
+            confirmDisabled={transitionRequest.isPending}
+            onOpenChange={setEvidenceOpen}
+            onConfirm={(evidence) => {
+              transitionRequest.mutate(
+                {
+                  issueNo: request.issueNo,
+                  toStatus: 'DEPLOY_WAITING',
+                  actorName: user.name,
+                  evidence,
+                },
+                {
+                  onSuccess: () =>
+                    toast.success('인수 확인을 마쳤습니다. 이제 하위작업을 이행할 수 있어요.'),
+                }
+              )
+            }}
+          />
+        )}
       </>
     )
   }
@@ -229,6 +242,7 @@ export function RequestStatusActions({ request }: { request: Request }) {
         <ActionButton
           label="최종 완료"
           reason={advance.reason}
+          pending={transitionRequest.isPending}
           onClick={() => setCompleteOpen(true)}
         />
 
