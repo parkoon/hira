@@ -91,10 +91,17 @@ describe('selectVisibleTasks', () => {
     requester: { id: 'user-choi', name: '최유진', dept: '여신관리팀', contact: '' },
   })
 
-  it('임시저장 건은 누구에게도 목록에 보이지 않는다', () => {
+  it('임시저장 건은 등록자가 아니면 목록에 보이지 않는다', () => {
     const visible = selectVisibleTasks([draft, mine], makeUser({ role: 'LEAD' }))
 
     expect(visible.map((task) => task.taskNo)).toEqual(['WR-2026-0002'])
+  })
+
+  it('임시저장 건은 등록자 본인에게는 보인다', () => {
+    const requester = makeUser({ id: 'user-kim', name: '김현주', role: 'REQUESTER' })
+    const visible = selectVisibleTasks([draft, mine], requester)
+
+    expect(visible.map((task) => task.taskNo)).toEqual(['WR-2026-0001', 'WR-2026-0002'])
   })
 
   it('요청자는 본인이 등록한 건만 본다', () => {

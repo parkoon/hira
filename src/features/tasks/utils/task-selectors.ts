@@ -19,11 +19,14 @@ export function canViewTask(task: Task, user: User): boolean {
 
 /**
  * 목록에 노출할 작업.
- * - 임시저장(요청대기중) 건은 목록에 노출하지 않는다 (스펙 §4.3)
+ * - 임시저장(요청대기중) 건은 등록자 본인에게만 노출한다 — 제출 전에는 조직의 업무
+ *   대상이 아니지만, 본인에게마저 숨기면 목록으로 돌아갈 길이 없다 (스펙 §4.3 완화)
  * - 열람 권한은 `canViewTask`와 같은 규칙이다
  */
 export function selectVisibleTasks(tasks: Task[], user: User): Task[] {
-  return tasks.filter((task) => task.status !== 'DRAFT' && canViewTask(task, user))
+  return tasks.filter(
+    (task) => (task.status !== 'DRAFT' || task.requester.id === user.id) && canViewTask(task, user)
+  )
 }
 
 /** 승인 대기함 대상 — 리드가 결정해야 할 제출 건 */
