@@ -28,7 +28,11 @@ export function PanelCard({ title, action, children }: PanelCardProps) {
   )
 }
 
-/** 카드 안의 필드 행 — Jira처럼 라벨 왼쪽·값 오른쪽 2컬럼 */
+/**
+ * 카드 안의 필드 행 — Jira처럼 라벨 왼쪽·값 오른쪽 2컬럼.
+ * 라벨 폭은 행마다 재지 않고 고정한다 — 재면 행끼리 값 시작점이 어긋난다.
+ * 6rem은 가장 긴 라벨('배포 완료 URL')이 한 줄에 들어가는 선이다.
+ */
 export function PanelCardField({
   label,
   className,
@@ -41,7 +45,7 @@ export function PanelCardField({
   return (
     <div
       className={cn(
-        'grid grid-cols-[7.5rem_minmax(0,1fr)] items-center gap-x-2 py-1.5 first:pt-0 last:pb-0',
+        'grid grid-cols-[6rem_minmax(0,1fr)] items-center gap-x-2 py-1.5 first:pt-0 last:pb-0',
         className
       )}
     >

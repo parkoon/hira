@@ -5,12 +5,10 @@ import { useApproveSubtaskMutation } from '@/features/tasks/api/approve-subtask'
 import type { Subtask, Task } from '@/features/tasks/api/types'
 import { ApprovalGate } from '@/features/tasks/components/approval-gate'
 import { PanelCard, PanelCardField } from '@/features/tasks/components/panel-card'
-import { TaskLink } from '@/features/tasks/components/task-link'
 import { SUBTASK_TYPE_META } from '@/features/tasks/constants/metadata'
 import { getDeploymentUrl, getSubtaskApprovalState } from '@/features/tasks/utils/task-selectors'
 import { useCurrentUser } from '@/features/users/hooks/use-current-user'
 import { NameAvatar } from '@/shared/components/ui/name-avatar'
-import { paths } from '@/shared/config/paths'
 
 import { CreateBranchDialog } from './create-branch-dialog'
 import { SubtaskProgressCard } from './subtask-progress-card'
@@ -59,12 +57,6 @@ export function SubtaskDetailPanel({ subtask, task, canTransition }: SubtaskDeta
       />
 
       <PanelCard title="세부 사항">
-        <PanelCardField label="상위 작업">
-          <TaskLink to={paths.app.tasks.detail.getHref(subtask.parentTaskNo)}>
-            {subtask.parentTaskNo}
-          </TaskLink>
-        </PanelCardField>
-
         <PanelCardField label="담당자">
           <span className="flex items-center gap-1.5">
             <NameAvatar name={subtask.assignee.name} />
@@ -78,6 +70,31 @@ export function SubtaskDetailPanel({ subtask, task, canTransition }: SubtaskDeta
 
         {subtask.completedAt && (
           <PanelCardField label="완료일">{subtask.completedAt}</PanelCardField>
+        )}
+
+        {/* 브랜치가 없으면 생성 액션, 생기면 링크로 대체된다 (하위작업과 1:1) */}
+        {subtask.type === 'DEPLOY' && (
+          <PanelCardField label="브랜치">
+            {subtask.branch ? (
+              <a
+                href={subtask.branch.branchUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="group flex min-w-0 items-center gap-1.5"
+              >
+                <GitBranchIcon className="text-muted-foreground size-3.5 shrink-0" />
+                <span className="truncate text-blue-700 group-hover:underline dark:text-blue-400">
+                  {subtask.branch.branchName}
+                </span>
+                <span className="text-muted-foreground shrink-0 text-xs">
+                  {subtask.branch.repoFullName.split('/')[1]}
+                </span>
+                <ExternalLinkIcon className="text-muted-foreground size-3 shrink-0" />
+              </a>
+            ) : (
+              <CreateBranchDialog subtaskNo={subtask.subtaskNo} />
+            )}
+          </PanelCardField>
         )}
 
         {deploymentUrl && (
@@ -94,31 +111,6 @@ export function SubtaskDetailPanel({ subtask, task, canTransition }: SubtaskDeta
           </PanelCardField>
         )}
       </PanelCard>
-
-      {/* Jira Development 패널처럼 — 브랜치가 없으면 생성 액션, 생기면 링크로 대체된다 (1:1) */}
-      {subtask.type === 'DEPLOY' && (
-        <PanelCard title="개발">
-          {subtask.branch ? (
-            <a
-              href={subtask.branch.branchUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="group flex min-w-0 items-center gap-1.5"
-            >
-              <GitBranchIcon className="text-muted-foreground size-3.5 shrink-0" />
-              <span className="truncate text-blue-700 group-hover:underline dark:text-blue-400">
-                {subtask.branch.branchName}
-              </span>
-              <span className="text-muted-foreground shrink-0 text-xs">
-                {subtask.branch.repoFullName.split('/')[1]}
-              </span>
-              <ExternalLinkIcon className="text-muted-foreground size-3 shrink-0" />
-            </a>
-          ) : (
-            <CreateBranchDialog subtaskNo={subtask.subtaskNo} />
-          )}
-        </PanelCard>
-      )}
     </div>
   )
 }
