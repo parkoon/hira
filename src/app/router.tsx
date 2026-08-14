@@ -33,21 +33,21 @@ export const createAppRouter = () =>
               index: true,
               element: (
                 <Navigate
-                  to={paths.app.issues.root.getHref()}
+                  to={paths.app.tasks.root.getHref()}
                   replace
                 />
               ),
             },
             {
-              path: paths.app.issues.root.path,
-              lazy: () => import('./pages/app/issues/page'),
+              path: paths.app.tasks.root.path,
+              lazy: () => import('./pages/app/tasks/page'),
             },
             {
-              path: paths.app.issues.detail.path,
-              lazy: () => import('./pages/app/issues/detail/page'),
+              path: paths.app.tasks.detail.path,
+              lazy: () => import('./pages/app/tasks/detail/page'),
             },
             {
-              path: paths.app.issues.subtask.path,
+              path: paths.app.tasks.subtask.path,
               lazy: () => import('./pages/app/subtasks/detail/page'),
             },
             // 아래 화면들은 역할이 모자라면 열리지 않는다 — 사이드바 노출 조건과 같은 기준

@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 
 import { getOrgReposQueryOptions } from '@/features/gitea/api/get-org-repos'
 import { usePostBranchMutation } from '@/features/gitea/api/post-branch'
-import { useRecordSubtaskBranchMutation } from '@/features/issues/api/record-subtask-branch'
+import { useRecordSubtaskBranchMutation } from '@/features/tasks/api/record-subtask-branch'
 import { useCurrentUser } from '@/features/users/hooks/use-current-user'
 import { Button } from '@/shared/components/ui/button'
 import { Field, FieldDescription, FieldLabel } from '@/shared/components/ui/field'
@@ -25,7 +25,7 @@ type CreateBranchDialogProps = {
 }
 
 /**
- * 저장소를 골라 이슈 번호가 들어간 브랜치를 만들고 하위작업에 기록한다.
+ * 저장소를 골라 하위작업 번호가 들어간 브랜치를 만들고 하위작업에 기록한다.
  * Gitea 호출은 임시 목(mock)이다 — 실제 생성은 2차 백엔드 중계가 생기면 붙는다.
  */
 export function CreateBranchDialog({ subtaskNo }: CreateBranchDialogProps) {

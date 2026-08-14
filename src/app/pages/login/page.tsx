@@ -29,7 +29,7 @@ function LoginPage() {
   const login = (id: string) =>
     signIn.mutate(
       { loginId: id, password: DEMO_PASSWORD },
-      { onSuccess: () => void navigate(paths.app.issues.root.getHref()) }
+      { onSuccess: () => void navigate(paths.app.tasks.root.getHref()) }
     )
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {

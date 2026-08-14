@@ -1,20 +1,20 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 
-import { useTransitionSubtaskMutation } from '@/features/issues/api/transition-subtask'
-import type { Request, Subtask } from '@/features/issues/api/types'
-import { ActionButton } from '@/features/issues/components/action-button'
-import { PanelCard } from '@/features/issues/components/panel-card'
-import { TransitionEvidenceDialog } from '@/features/issues/components/transition-evidence-dialog'
-import { WorkflowSteps } from '@/features/issues/components/workflow-steps'
-import { SUBTASK_ADVANCE_LABEL, SUBTASK_STATUS_META } from '@/features/issues/constants/metadata'
-import { EVIDENCE_HINT } from '@/features/issues/constants/transition-evidence'
+import { useTransitionSubtaskMutation } from '@/features/tasks/api/transition-subtask'
+import type { Subtask, Task } from '@/features/tasks/api/types'
+import { ActionButton } from '@/features/tasks/components/action-button'
+import { PanelCard } from '@/features/tasks/components/panel-card'
+import { TransitionEvidenceDialog } from '@/features/tasks/components/transition-evidence-dialog'
+import { WorkflowSteps } from '@/features/tasks/components/workflow-steps'
+import { SUBTASK_ADVANCE_LABEL, SUBTASK_STATUS_META } from '@/features/tasks/constants/metadata'
+import { EVIDENCE_HINT } from '@/features/tasks/constants/transition-evidence'
 import {
   getNextSubtaskStatus,
   getPostDevelopmentStatus,
   getSubtaskFlow,
-} from '@/features/issues/constants/transitions'
-import { getSubtaskDeployGate } from '@/features/issues/utils/issue-selectors'
+} from '@/features/tasks/constants/transitions'
+import { getSubtaskDeployGate } from '@/features/tasks/utils/task-selectors'
 import { useCurrentUser } from '@/features/users/hooks/use-current-user'
 import { Checkbox } from '@/shared/components/ui/checkbox'
 import { Field, FieldLabel } from '@/shared/components/ui/field'
@@ -24,7 +24,7 @@ import { useConfirm } from '@/shared/hooks/use-confirm'
 type SubtaskProgressCardProps = {
   subtask: Subtask
   /** 이행 게이트 판정에 부모 상태가 필요하다 (시나리오 17) */
-  request: Request
+  task: Task
   /** 전이는 담당자·리드만 가능 (스펙 §5.3) */
   canTransition: boolean
 }
@@ -33,7 +33,7 @@ type SubtaskProgressCardProps = {
  * 상태에 관한 전부 — 지금 어디까지 왔는지(레일)와 다음 단계로 미는 액션을 한 카드에 둔다.
  * 하위작업은 흐름을 벗어나는 경로가 없어 제목 줄의 액션 하나가 전부다.
  */
-export function SubtaskProgressCard({ subtask, request, canTransition }: SubtaskProgressCardProps) {
+export function SubtaskProgressCard({ subtask, task, canTransition }: SubtaskProgressCardProps) {
   const [evidenceOpen, setEvidenceOpen] = useState(false)
   const [dbaChecked, setDbaChecked] = useState(false)
   const [dbaRequest, setDbaRequest] = useState('')
@@ -45,7 +45,7 @@ export function SubtaskProgressCard({ subtask, request, canTransition }: Subtask
   // DBA 검증중은 결재가 떨어지면 자동으로 넘어가고, 완료는 더 갈 곳이 없다
   const label = SUBTASK_ADVANCE_LABEL[subtask.status]
   // 이행은 부모 인수 확인이 끝나야 가능하다 (시나리오 17)
-  const deployGate = getSubtaskDeployGate(request, subtask)
+  const deployGate = getSubtaskDeployGate(task, subtask)
   const hint = EVIDENCE_HINT[subtask.status]
 
   const isDevelopmentStep = subtask.status === 'DEVELOPMENT'
@@ -64,13 +64,13 @@ export function SubtaskProgressCard({ subtask, request, canTransition }: Subtask
     void confirm
       .open({
         title: label,
-        description: `${subtask.issueNo} 하위작업이 ${SUBTASK_STATUS_META[nextStatus].label}(으)로 바뀝니다.`,
+        description: `${subtask.subtaskNo} 하위작업이 ${SUBTASK_STATUS_META[nextStatus].label}(으)로 바뀝니다.`,
         confirm: { text: label },
       })
       .then((ok) => {
         if (!ok) return
         transitionSubtask.mutate(
-          { subtaskNo: subtask.issueNo, toStatus: nextStatus, actorName: user.name },
+          { subtaskNo: subtask.subtaskNo, toStatus: nextStatus, actorName: user.name },
           {
             onSuccess: () =>
               toast.success(`${SUBTASK_STATUS_META[nextStatus].label}(으)로 전이했습니다.`),
@@ -127,7 +127,7 @@ export function SubtaskProgressCard({ subtask, request, canTransition }: Subtask
             if (!nextStatus) return
             transitionSubtask.mutate(
               {
-                subtaskNo: subtask.issueNo,
+                subtaskNo: subtask.subtaskNo,
                 toStatus: nextStatus,
                 actorName: user.name,
                 evidence,
@@ -159,9 +159,9 @@ export function SubtaskProgressCard({ subtask, request, canTransition }: Subtask
 
               {dbaChecked && (
                 <Field>
-                  <FieldLabel htmlFor="dba-request">검증받을 내용</FieldLabel>
+                  <FieldLabel htmlFor="dba-task">검증받을 내용</FieldLabel>
                   <Textarea
-                    id="dba-request"
+                    id="dba-task"
                     rows={3}
                     value={dbaRequest}
                     placeholder="예: 납입내역 조회 쿼리 인덱스 설계와 5년치 조회 성능"

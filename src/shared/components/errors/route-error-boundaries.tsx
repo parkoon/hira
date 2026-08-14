@@ -92,9 +92,9 @@ function ErrorState({ info }: { info: RouteErrorInfo }) {
         asChild
         variant="outline"
       >
-        <Link to={paths.app.issues.root.getHref()}>
+        <Link to={paths.app.tasks.root.getHref()}>
           <HomeIcon />
-          이슈 목록으로 이동
+          작업 목록으로 이동
         </Link>
       </Button>
     </Empty>

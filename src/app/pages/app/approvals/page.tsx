@@ -3,14 +3,14 @@ import { useQueryStates } from 'nuqs'
 import { useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
-import { getRequestsQueryOptions } from '@/features/issues/api/get-requests'
-import { useTransitionRequestMutation } from '@/features/issues/api/transition-request'
-import type { Request } from '@/features/issues/api/types'
-import { RejectReasonDialog } from '@/features/issues/components/reject-reason-dialog'
+import { getTasksQueryOptions } from '@/features/tasks/api/get-tasks'
+import { useTransitionTaskMutation } from '@/features/tasks/api/transition-task'
+import type { Task } from '@/features/tasks/api/types'
+import { RejectReasonDialog } from '@/features/tasks/components/reject-reason-dialog'
 import {
-  getRequestApproveState,
-  selectPendingApprovalRequests,
-} from '@/features/issues/utils/issue-selectors'
+  getTaskApproveState,
+  selectPendingApprovalTasks,
+} from '@/features/tasks/utils/task-selectors'
 import { useCurrentUser } from '@/features/users/hooks/use-current-user'
 import { Page } from '@/shared/components/ui/layout/page'
 import { useConfirm } from '@/shared/hooks/use-confirm'
@@ -23,56 +23,44 @@ import { applyApprovalFilters, approvalFilterParsers } from './_utils/approval-f
 function ApprovalInboxPage() {
   const { user } = useCurrentUser()
   const confirm = useConfirm()
-  const [rejectTarget, setRejectTarget] = useState<Request | null>(null)
+  const [rejectTarget, setRejectTarget] = useState<Task | null>(null)
   const [filters] = useQueryStates(approvalFilterParsers)
 
-  const requestsQuery = useSuspenseQuery(getRequestsQueryOptions())
-  const transitionRequest = useTransitionRequestMutation()
+  const tasksQuery = useSuspenseQuery(getTasksQueryOptions())
+  const transitionTask = useTransitionTaskMutation()
 
-  const pendingRequests = useMemo(
-    () => selectPendingApprovalRequests(requestsQuery.data),
-    [requestsQuery.data]
-  )
+  const pendingTasks = useMemo(() => selectPendingApprovalTasks(tasksQuery.data), [tasksQuery.data])
   const requesters = useMemo(
-    () => [...new Set(pendingRequests.map((request) => request.requester.name))],
-    [pendingRequests]
+    () => [...new Set(pendingTasks.map((task) => task.requester.name))],
+    [pendingTasks]
   )
-  const requests = useMemo(
-    () => applyApprovalFilters(pendingRequests, filters),
-    [pendingRequests, filters]
-  )
+  const tasks = useMemo(() => applyApprovalFilters(pendingTasks, filters), [pendingTasks, filters])
 
-  const isSelfRegistered = useCallback(
-    (request: Request) => request.requester.id === user.id,
-    [user.id]
-  )
+  const isSelfRegistered = useCallback((task: Task) => task.requester.id === user.id, [user.id])
 
-  const getApproveState = useCallback(
-    (request: Request) => getRequestApproveState(request, user),
-    [user]
-  )
+  const getApproveState = useCallback((task: Task) => getTaskApproveState(task, user), [user])
 
   const handleApprove = useCallback(
-    (request: Request) => {
+    (task: Task) => {
       void confirm
         .open({
-          title: `${request.issueNo} 승인`,
+          title: `${task.taskNo} 승인`,
           description:
-            '승인하면 이슈가 작업중으로 전이되고, 이후 이슈 본문·첨부·컴플라이언스 응답은 수정할 수 없습니다.',
+            '승인하면 작업이 작업중으로 전이되고, 이후 작업 본문·첨부·컴플라이언스 응답은 수정할 수 없습니다.',
           confirm: { text: '승인' },
         })
         .then((ok) => {
           if (!ok) return
-          transitionRequest.mutate(
-            { issueNo: request.issueNo, toStatus: 'IN_PROGRESS', actorName: user.name },
-            { onSuccess: () => toast.success(`${request.issueNo} 이슈를 승인했습니다.`) }
+          transitionTask.mutate(
+            { taskNo: task.taskNo, toStatus: 'IN_PROGRESS', actorName: user.name },
+            { onSuccess: () => toast.success(`${task.taskNo} 작업을 승인했습니다.`) }
           )
         })
     },
-    [confirm, transitionRequest, user.name]
+    [confirm, transitionTask, user.name]
   )
 
-  const handleReject = useCallback((request: Request) => setRejectTarget(request), [])
+  const handleReject = useCallback((task: Task) => setRejectTarget(task), [])
 
   return (
     <Page
@@ -81,13 +69,13 @@ function ApprovalInboxPage() {
     >
       <div className="mb-3 px-2 pt-2">
         <p className="text-muted-foreground mb-2 text-xs">
-          개인정보 취급 건은 강조 표시됩니다. 본인이 등록한 이슈는 직접 승인·반려할 수 없습니다.
+          개인정보 취급 건은 강조 표시됩니다. 본인이 등록한 작업은 직접 승인·반려할 수 없습니다.
         </p>
         <ApprovalFilters requesters={requesters} />
       </div>
 
       <ApprovalsTable
-        requests={requests}
+        tasks={tasks}
         isSelfRegistered={isSelfRegistered}
         getApproveState={getApproveState}
         onApprove={handleApprove}
@@ -95,13 +83,13 @@ function ApprovalInboxPage() {
       />
 
       <RejectReasonDialog
-        request={rejectTarget}
+        task={rejectTarget}
         onOpenChange={(open) => !open && setRejectTarget(null)}
         onConfirm={(reason) => {
           if (!rejectTarget) return
-          transitionRequest.mutate(
-            { issueNo: rejectTarget.issueNo, toStatus: 'REJECTED', actorName: user.name, reason },
-            { onSuccess: () => toast.success(`${rejectTarget.issueNo} 이슈를 반려했습니다.`) }
+          transitionTask.mutate(
+            { taskNo: rejectTarget.taskNo, toStatus: 'REJECTED', actorName: user.name, reason },
+            { onSuccess: () => toast.success(`${rejectTarget.taskNo} 작업을 반려했습니다.`) }
           )
         }}
       />

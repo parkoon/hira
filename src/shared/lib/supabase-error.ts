@@ -45,7 +45,7 @@ export function isTransportError(error: unknown): boolean {
  * 제약·정책은 마이그레이션에 정의돼 있고, 여기 없는 코드는 사용자가 손쓸 수 없는 서버 문제다.
  */
 const MESSAGE_BY_CODE: Record<string, string> = {
-  // 결재 유니크 인덱스, 이슈번호 PK — 동시에 같은 동작을 했을 때
+  // 결재 유니크 인덱스, 작업번호 PK — 동시에 같은 동작을 했을 때
   '23505': '이미 처리된 요청입니다. 화면을 새로고침해 주세요.',
   // evidences/attachments의 소유자 CHECK
   '23514': '허용되지 않는 값이라 저장하지 못했습니다.',

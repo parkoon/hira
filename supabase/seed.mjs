@@ -1,7 +1,7 @@
 /**
  * 계정 시드 — 로그인에 필요한 인증 계정과 프로필만 만든다.
  *
- * 이슈·하위작업·증적·감사로그 같은 업무 데이터는 넣지 않는다. 그건 화면에서 직접
+ * 작업·하위작업·증적·감사로그 같은 업무 데이터는 넣지 않는다. 그건 화면에서 직접
  * 만들어야 실제로 쓰이는 흐름이 검증되고, 더미가 섞이면 무엇이 내가 만든 것인지 알 수 없다.
  *
  * 그래서 이 스크립트는 업무 데이터를 지우지 않는다 — 여러 번 돌려도 안전하다.
@@ -131,7 +131,7 @@ async function main() {
 
   for (const [email, id] of stale) {
     const { error } = await supabase.auth.admin.deleteUser(id)
-    // 그 사람이 등록한 이슈가 남아 있으면 프로필이 잡혀 있어 지울 수 없다.
+    // 그 사람이 등록한 작업이 남아 있으면 프로필이 잡혀 있어 지울 수 없다.
     // 업무 데이터를 건드리지 않는 것이 우선이므로 넘어가고 무엇이 남았는지만 알린다.
     if (error) kept.push(email)
   }
@@ -139,7 +139,7 @@ async function main() {
   console.log(`계정/프로필 ${USERS.length}건`)
   if (stale.length > kept.length) console.log(`이전 계정 ${stale.length - kept.length}건 정리`)
   if (kept.length > 0) {
-    console.log(`남긴 계정 ${kept.length}건 (등록한 이슈가 있어 삭제 불가): ${kept.join(', ')}`)
+    console.log(`남긴 계정 ${kept.length}건 (등록한 작업이 있어 삭제 불가): ${kept.join(', ')}`)
   }
   console.log('\n계정 시드 완료 — 업무 데이터는 화면에서 직접 만드세요')
 }

@@ -1,6 +1,6 @@
 import { useQueryStates } from 'nuqs'
 
-import { SUBTASK_STATUS_META } from '@/features/issues/constants/metadata'
+import { SUBTASK_STATUS_META } from '@/features/tasks/constants/metadata'
 import { FilterBar, type FilterBarField, toChipValue } from '@/shared/components/ui/filter-bar'
 import { toEnumOptions } from '@/shared/utils/enum'
 

@@ -1,13 +1,13 @@
 import { ExternalLinkIcon, GitBranchIcon } from 'lucide-react'
 import { toast } from 'sonner'
 
-import { useApproveSubtaskMutation } from '@/features/issues/api/approve-subtask'
-import type { Request, Subtask } from '@/features/issues/api/types'
-import { ApprovalGate } from '@/features/issues/components/approval-gate'
-import { IssueKeyLink } from '@/features/issues/components/issue-key-link'
-import { PanelCard, PanelCardField } from '@/features/issues/components/panel-card'
-import { SUBTASK_TYPE_META } from '@/features/issues/constants/metadata'
-import { getDeploymentUrl, getSubtaskApprovalState } from '@/features/issues/utils/issue-selectors'
+import { useApproveSubtaskMutation } from '@/features/tasks/api/approve-subtask'
+import type { Subtask, Task } from '@/features/tasks/api/types'
+import { ApprovalGate } from '@/features/tasks/components/approval-gate'
+import { PanelCard, PanelCardField } from '@/features/tasks/components/panel-card'
+import { TaskLink } from '@/features/tasks/components/task-link'
+import { SUBTASK_TYPE_META } from '@/features/tasks/constants/metadata'
+import { getDeploymentUrl, getSubtaskApprovalState } from '@/features/tasks/utils/task-selectors'
 import { useCurrentUser } from '@/features/users/hooks/use-current-user'
 import { NameAvatar } from '@/shared/components/ui/name-avatar'
 import { paths } from '@/shared/config/paths'
@@ -18,12 +18,12 @@ import { SubtaskProgressCard } from './subtask-progress-card'
 type SubtaskDetailPanelProps = {
   subtask: Subtask
   /** 이행 게이트 판정에 부모 상태가 필요하다 (시나리오 17) */
-  request: Request
+  task: Task
   canTransition: boolean
 }
 
 /** 우측 컬럼 — DBA 결재 + 진행 상태(전이) 카드 + 세부 사항 + 개발(브랜치) */
-export function SubtaskDetailPanel({ subtask, request, canTransition }: SubtaskDetailPanelProps) {
+export function SubtaskDetailPanel({ subtask, task, canTransition }: SubtaskDetailPanelProps) {
   const { user } = useCurrentUser()
   const approveSubtask = useApproveSubtaskMutation()
 
@@ -41,7 +41,7 @@ export function SubtaskDetailPanel({ subtask, request, canTransition }: SubtaskD
             approvals={subtask.approvals}
             onApprove={(kind) => {
               approveSubtask.mutate(
-                { subtaskNo: subtask.issueNo, kind, actorName: user.name },
+                { subtaskNo: subtask.subtaskNo, kind, actorName: user.name },
                 {
                   onSuccess: () =>
                     toast.success('DBA 결재를 승인했습니다. 제3자검증중으로 넘어갑니다.'),
@@ -54,15 +54,15 @@ export function SubtaskDetailPanel({ subtask, request, canTransition }: SubtaskD
 
       <SubtaskProgressCard
         subtask={subtask}
-        request={request}
+        task={task}
         canTransition={canTransition}
       />
 
       <PanelCard title="세부 사항">
-        <PanelCardField label="상위 이슈">
-          <IssueKeyLink to={paths.app.issues.detail.getHref(subtask.parentIssueNo)}>
-            {subtask.parentIssueNo}
-          </IssueKeyLink>
+        <PanelCardField label="상위 작업">
+          <TaskLink to={paths.app.tasks.detail.getHref(subtask.parentTaskNo)}>
+            {subtask.parentTaskNo}
+          </TaskLink>
         </PanelCardField>
 
         <PanelCardField label="담당자">
@@ -72,7 +72,7 @@ export function SubtaskDetailPanel({ subtask, request, canTransition }: SubtaskD
           </span>
         </PanelCardField>
 
-        <PanelCardField label="이슈유형">{SUBTASK_TYPE_META[subtask.type].label}</PanelCardField>
+        <PanelCardField label="유형">{SUBTASK_TYPE_META[subtask.type].label}</PanelCardField>
 
         <PanelCardField label="목표일">{subtask.dueDate ?? '—'}</PanelCardField>
 
@@ -115,7 +115,7 @@ export function SubtaskDetailPanel({ subtask, request, canTransition }: SubtaskD
               <ExternalLinkIcon className="text-muted-foreground size-3 shrink-0" />
             </a>
           ) : (
-            <CreateBranchDialog subtaskNo={subtask.issueNo} />
+            <CreateBranchDialog subtaskNo={subtask.subtaskNo} />
           )}
         </PanelCard>
       )}

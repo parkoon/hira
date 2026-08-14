@@ -5,19 +5,19 @@ export const USER_ROLE_META = {
   REQUESTER: {
     label: '요청자',
     order: 10,
-    description: '이슈 등록 · 본인 이슈 조회',
+    description: '작업 등록 · 본인 작업 조회',
     tone: 'neutral',
   },
   WORKER: {
     label: '작업자',
     order: 20,
-    description: '전체 이슈 조회 · 담당 하위작업 전이',
+    description: '전체 작업 조회 · 담당 하위작업 전이',
     tone: 'neutral',
   },
   LEAD: {
     label: '리드',
     order: 30,
-    description: '이슈 승인/반려 · 하위작업 배정 · 최종 완료',
+    description: '작업 승인/반려 · 하위작업 배정 · 최종 완료',
     tone: 'info',
   },
   ADMIN: {

@@ -3,16 +3,16 @@ import { useState } from 'react'
 import { useParams } from 'react-router'
 import { toast } from 'sonner'
 
-import { getRequestsQueryOptions } from '@/features/issues/api/get-requests'
-import { useUpdateSubtaskMutation } from '@/features/issues/api/update-subtask'
-import { IssueDescription } from '@/features/issues/components/issue-description'
-import { IssueDetailHeader } from '@/features/issues/components/issue-detail-header'
-import { SubtaskFormModal } from '@/features/issues/components/subtask-form-modal'
+import { getTasksQueryOptions } from '@/features/tasks/api/get-tasks'
+import { useUpdateSubtaskMutation } from '@/features/tasks/api/update-subtask'
+import { SubtaskFormModal } from '@/features/tasks/components/subtask-form-modal'
+import { TaskDescription } from '@/features/tasks/components/task-description'
+import { TaskDetailHeader } from '@/features/tasks/components/task-detail-header'
 import {
-  canViewRequest,
-  selectRequestByIssueNo,
-  selectSubtaskByIssueNo,
-} from '@/features/issues/utils/issue-selectors'
+  canViewTask,
+  selectSubtaskBySubtaskNo,
+  selectTaskByTaskNo,
+} from '@/features/tasks/utils/task-selectors'
 import { getUsersQueryOptions } from '@/features/users/api/get-users'
 import { useCurrentUser } from '@/features/users/hooks/use-current-user'
 import { selectAssignableUsers } from '@/features/users/utils/user-selectors'
@@ -31,20 +31,18 @@ function SubtaskDetailPage() {
   const { user, hasRole } = useCurrentUser()
   const [editOpen, setEditOpen] = useState(false)
 
-  const requestsQuery = useSuspenseQuery(getRequestsQueryOptions())
+  const tasksQuery = useSuspenseQuery(getTasksQueryOptions())
   // 수정 모달이 열릴 때 화면이 서스펜드되지 않도록 담당자 후보를 미리 받아 둔다
   const usersQuery = useSuspenseQuery(getUsersQueryOptions())
   const updateSubtask = useUpdateSubtaskMutation()
 
-  const subtask = selectSubtaskByIssueNo(requestsQuery.data, subtaskNo)
-  const request = subtask
-    ? selectRequestByIssueNo(requestsQuery.data, subtask.parentIssueNo)
-    : undefined
+  const subtask = selectSubtaskBySubtaskNo(tasksQuery.data, subtaskNo)
+  const task = subtask ? selectTaskByTaskNo(tasksQuery.data, subtask.parentTaskNo) : undefined
 
-  // 요청자는 본인이 등록한 이슈의 하위작업만 볼 수 있다 (스펙 §3.3) — URL 직접 접근에도 적용
-  const visible = request !== undefined && canViewRequest(request, user)
+  // 요청자는 본인이 등록한 작업의 하위작업만 볼 수 있다 (스펙 §3.3) — URL 직접 접근에도 적용
+  const visible = task !== undefined && canViewTask(task, user)
 
-  if (!subtask || !request || !visible) {
+  if (!subtask || !task || !visible) {
     return (
       <Empty
         className="m-6 w-auto"
@@ -63,14 +61,14 @@ function SubtaskDetailPage() {
     <Page>
       <div className="flex flex-col gap-6 lg:flex-row">
         <div className="min-w-0 flex-1 space-y-6">
-          <IssueDetailHeader
+          <TaskDetailHeader
             breadcrumb={[
-              { label: '이슈 목록', to: paths.app.issues.root.getHref() },
+              { label: '작업 목록', to: paths.app.tasks.root.getHref() },
               {
-                label: subtask.parentIssueNo,
-                to: paths.app.issues.detail.getHref(subtask.parentIssueNo),
+                label: subtask.parentTaskNo,
+                to: paths.app.tasks.detail.getHref(subtask.parentTaskNo),
               },
-              { label: subtask.issueNo },
+              { label: subtask.subtaskNo },
             ]}
             title={subtask.title}
             actions={
@@ -85,7 +83,7 @@ function SubtaskDetailPage() {
 
           <section className="space-y-2">
             <h2 className="text-sm font-semibold">설명</h2>
-            <IssueDescription html={subtask.description} />
+            <TaskDescription html={subtask.description} />
           </section>
 
           <TransitionEvidenceCard
@@ -104,7 +102,7 @@ function SubtaskDetailPage() {
         <div className="w-full shrink-0 lg:sticky lg:top-3 lg:-m-1 lg:max-h-[calc(100dvh-4.5rem)] lg:w-102 lg:self-start lg:overflow-y-auto lg:p-1">
           <SubtaskDetailPanel
             subtask={subtask}
-            request={request}
+            task={task}
             canTransition={canTransition}
           />
         </div>
@@ -115,7 +113,7 @@ function SubtaskDetailPage() {
         <SubtaskFormModal
           open
           onOpenChange={setEditOpen}
-          title={`${subtask.issueNo} 수정`}
+          title={`${subtask.subtaskNo} 수정`}
           submitLabel="저장"
           assignableUsers={selectAssignableUsers(usersQuery.data)}
           defaultValues={subtask}
@@ -123,8 +121,8 @@ function SubtaskDetailPage() {
           onSubmit={(values) =>
             updateSubtask.mutate(
               {
-                subtaskNo: subtask.issueNo,
-                // 이슈유형은 고정이라 넘기지 않는다
+                subtaskNo: subtask.subtaskNo,
+                // 유형은 고정이라 넘기지 않는다
                 patch: {
                   title: values.title,
                   description: values.description,
@@ -136,7 +134,7 @@ function SubtaskDetailPage() {
               {
                 // 값이 그대로면 아무것도 기록되지 않으므로 수정했다고 알리지 않는다
                 onSuccess: (changed) =>
-                  changed && toast.success(`${subtask.issueNo} 하위작업을 수정했습니다.`),
+                  changed && toast.success(`${subtask.subtaskNo} 하위작업을 수정했습니다.`),
               }
             )
           }

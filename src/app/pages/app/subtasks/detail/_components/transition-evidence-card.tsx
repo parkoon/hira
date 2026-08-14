@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 
-import { useRecordEvidenceMutation } from '@/features/issues/api/record-evidence'
-import type { Subtask, SubtaskStatus } from '@/features/issues/api/types'
-import { EvidenceContentView } from '@/features/issues/components/evidence-content-view'
-import { TransitionEvidenceDialog } from '@/features/issues/components/transition-evidence-dialog'
-import { SUBTASK_ADVANCE_LABEL } from '@/features/issues/constants/metadata'
-import { getEvidenceSteps, getStepEvidence } from '@/features/issues/utils/issue-selectors'
+import { useRecordEvidenceMutation } from '@/features/tasks/api/record-evidence'
+import type { Subtask, SubtaskStatus } from '@/features/tasks/api/types'
+import { EvidenceContentView } from '@/features/tasks/components/evidence-content-view'
+import { TransitionEvidenceDialog } from '@/features/tasks/components/transition-evidence-dialog'
+import { SUBTASK_ADVANCE_LABEL } from '@/features/tasks/constants/metadata'
+import { getEvidenceSteps, getStepEvidence } from '@/features/tasks/utils/task-selectors'
 import { useCurrentUser } from '@/features/users/hooks/use-current-user'
 import { Button } from '@/shared/components/ui/button'
 import { Lozenge } from '@/shared/components/ui/lozenge'
@@ -103,7 +103,7 @@ export function TransitionEvidenceCard({ subtask, canEdit }: TransitionEvidenceC
           onConfirm={(evidence) => {
             recordEvidence.mutate(
               {
-                subtaskNo: subtask.issueNo,
+                subtaskNo: subtask.subtaskNo,
                 status: editTarget,
                 evidence,
                 actorName: user.name,

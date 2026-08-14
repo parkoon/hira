@@ -2,10 +2,10 @@ import type { ColDef } from 'ag-grid-community'
 import { AgGridProvider, AgGridReact } from 'ag-grid-react'
 import { useMemo } from 'react'
 
-import type { Request } from '@/features/issues/api/types'
-import { IssueKeyLink } from '@/features/issues/components/issue-key-link'
-import { PersonalDataLozenge } from '@/features/issues/components/personal-data-lozenge'
-import { PriorityLabel } from '@/features/issues/components/priority-label'
+import type { Task } from '@/features/tasks/api/types'
+import { PersonalDataLozenge } from '@/features/tasks/components/personal-data-lozenge'
+import { PriorityLabel } from '@/features/tasks/components/priority-label'
+import { TaskLink } from '@/features/tasks/components/task-link'
 import { Button } from '@/shared/components/ui/button'
 import { NameAvatar } from '@/shared/components/ui/name-avatar'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/components/ui/tooltip'
@@ -18,30 +18,30 @@ import {
 } from '@/shared/lib/ag-grid'
 
 type ApprovalsTableProps = {
-  requests: Request[]
-  /** 본인이 등록한 이슈는 본인이 승인/반려할 수 없다 (스펙 §11.1) */
-  isSelfRegistered: (request: Request) => boolean
+  tasks: Task[]
+  /** 본인이 등록한 작업은 본인이 승인/반려할 수 없다 (스펙 §11.1) */
+  isSelfRegistered: (task: Task) => boolean
   /** 승인은 결재가 모두 떨어져야 가능하다 (시나리오 3) */
-  getApproveState: (request: Request) => { enabled: boolean; reason: string | null }
-  onApprove: (request: Request) => void
-  onReject: (request: Request) => void
+  getApproveState: (task: Task) => { enabled: boolean; reason: string | null }
+  onApprove: (task: Task) => void
+  onReject: (task: Task) => void
 }
 
 export function ApprovalsTable({
-  requests,
+  tasks,
   isSelfRegistered,
   getApproveState,
   onApprove,
   onReject,
 }: ApprovalsTableProps) {
-  const columnDefs = useMemo<ColDef<Request>[]>(
+  const columnDefs = useMemo<ColDef<Task>[]>(
     () => [
       {
-        field: 'issueNo',
-        headerName: '이슈번호',
+        field: 'taskNo',
+        headerName: '작업번호',
         width: 140,
         cellRenderer: ({ value }: { value: string }) => (
-          <IssueKeyLink to={paths.app.issues.detail.getHref(value)}>{value}</IssueKeyLink>
+          <TaskLink to={paths.app.tasks.detail.getHref(value)}>{value}</TaskLink>
         ),
       },
       {
@@ -49,7 +49,7 @@ export function ApprovalsTable({
         headerName: '제목',
         flex: 1,
         minWidth: 280,
-        cellRenderer: ({ data }: { data: Request }) => (
+        cellRenderer: ({ data }: { data: Task }) => (
           <span className="flex items-center gap-1.5">
             <span className="truncate">{data.title}</span>
             {data.handlesPersonalData && <PersonalDataLozenge withIcon />}
@@ -63,7 +63,7 @@ export function ApprovalsTable({
         headerName: '요청자',
         width: 130,
         valueGetter: ({ data }) => data?.requester.name,
-        cellRenderer: ({ data }: { data: Request }) => (
+        cellRenderer: ({ data }: { data: Task }) => (
           <span className="flex items-center gap-1.5">
             <NameAvatar name={data.requester.name} />
             {data.requester.name}
@@ -75,13 +75,13 @@ export function ApprovalsTable({
         field: 'priority',
         headerName: '우선순위',
         width: 110,
-        cellRenderer: ({ data }: { data: Request }) => <PriorityLabel priority={data.priority} />,
+        cellRenderer: ({ data }: { data: Task }) => <PriorityLabel priority={data.priority} />,
       },
       {
         headerName: '액션',
         width: 180,
         sortable: false,
-        cellRenderer: ({ data }: { data: Request }) => {
+        cellRenderer: ({ data }: { data: Task }) => {
           // 반려는 결재와 무관하게 할 수 있다. 승인만 결재 완료를 기다린다
           const selfRegistered = isSelfRegistered(data)
           const approve = getApproveState(data)
@@ -117,7 +117,7 @@ export function ApprovalsTable({
                   </span>
                 </TooltipTrigger>
                 {selfRegistered && (
-                  <TooltipContent>본인이 등록한 이슈는 직접 반려할 수 없어요</TooltipContent>
+                  <TooltipContent>본인이 등록한 작업은 직접 반려할 수 없어요</TooltipContent>
                 )}
               </Tooltip>
             </span>
@@ -131,9 +131,9 @@ export function ApprovalsTable({
   return (
     <AgGridProvider modules={AG_GRID_MODULES}>
       <div className="min-h-0 w-full flex-1 border-t">
-        <AgGridReact<Request>
+        <AgGridReact<Task>
           theme={agGridTheme}
-          rowData={requests}
+          rowData={tasks}
           columnDefs={columnDefs}
           defaultColDef={AG_GRID_DEFAULT_COL_DEF}
           localeText={AG_GRID_LOCALE}

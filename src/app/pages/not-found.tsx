@@ -12,7 +12,7 @@ function NotFoundPage() {
         asChild
         variant="outline"
       >
-        <Link to={paths.app.issues.root.getHref()}>이슈 목록으로 이동</Link>
+        <Link to={paths.app.tasks.root.getHref()}>작업 목록으로 이동</Link>
       </Button>
     </div>
   )

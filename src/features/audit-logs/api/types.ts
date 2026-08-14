@@ -8,11 +8,11 @@ export type AuditEventType =
   | 'LOGIN_SUCCESS'
   | 'LOGIN_FAILURE'
   | 'LOGOUT'
-  | 'ISSUE_SUBMIT'
-  | 'ISSUE_UPDATE'
-  | 'ISSUE_APPROVE'
-  | 'ISSUE_REJECT'
-  | 'ISSUE_COMPLETE'
+  | 'TASK_SUBMIT'
+  | 'TASK_UPDATE'
+  | 'TASK_APPROVE'
+  | 'TASK_REJECT'
+  | 'TASK_COMPLETE'
   | 'SUBTASK_CREATE'
   | 'SUBTASK_UPDATE'
   | 'SUBTASK_TRANSITION'
@@ -28,8 +28,8 @@ export type AuditLog = {
   actorName: string
   eventType: AuditEventType
   targetLabel: string | null
-  /** 이슈 번호 대상이면 상세 화면으로 이동 가능 */
-  targetIssueNo: string | null
+  /** 작업 번호 대상이면 상세 화면으로 이동 가능 */
+  targetTaskNo: string | null
   detail: string | null
   ipAddress: string
 }

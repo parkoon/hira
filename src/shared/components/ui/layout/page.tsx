@@ -4,7 +4,7 @@ import { cn } from '@/shared/utils/cn'
 
 type PageProps = {
   children: React.ReactNode
-  /** 우측 상단 액션 영역 (예: 이슈 등록 버튼) */
+  /** 우측 상단 액션 영역 (예: 작업 등록 버튼) */
   action?: React.ReactNode
   /**
    * 콘텐츠가 화면 끝까지 닿아야 할 때 children 여백을 끈다.

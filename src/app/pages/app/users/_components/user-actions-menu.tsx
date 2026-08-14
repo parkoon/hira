@@ -27,7 +27,7 @@ export function UserActionsMenu({ user, onRoleChange, onRevoke }: UserActionsMen
     const confirmed = await confirm.open({
       title: `${user.name} 역할 회수`,
       description:
-        '역할을 회수하면 요청자로 돌아갑니다. 전체 이슈 조회와 하위작업 권한이 사라지고 명부에서도 빠집니다.',
+        '역할을 회수하면 요청자로 돌아갑니다. 전체 작업 조회와 하위작업 권한이 사라지고 명부에서도 빠집니다.',
       confirm: { text: '역할 회수', variant: 'destructive' },
     })
     if (!confirmed) return

@@ -18,7 +18,7 @@ export const getAuditLogsService = async (): Promise<AuditLog[]> => {
     actorName: row.actor_name,
     eventType: row.event_type,
     targetLabel: row.target_label,
-    targetIssueNo: row.target_issue_no,
+    targetTaskNo: row.target_task_no,
     detail: row.detail,
     ipAddress: row.ip_address,
   }))

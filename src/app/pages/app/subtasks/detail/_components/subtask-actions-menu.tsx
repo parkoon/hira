@@ -2,12 +2,9 @@ import { MoreHorizontalIcon, PencilIcon, Trash2Icon } from 'lucide-react'
 import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 
-import { useDeleteSubtaskMutation } from '@/features/issues/api/delete-subtask'
-import type { Subtask } from '@/features/issues/api/types'
-import {
-  getSubtaskDeletionState,
-  getSubtaskEditState,
-} from '@/features/issues/utils/issue-selectors'
+import { useDeleteSubtaskMutation } from '@/features/tasks/api/delete-subtask'
+import type { Subtask } from '@/features/tasks/api/types'
+import { getSubtaskDeletionState, getSubtaskEditState } from '@/features/tasks/utils/task-selectors'
 import { Button } from '@/shared/components/ui/button'
 import {
   DropdownMenu,
@@ -43,19 +40,19 @@ export function SubtaskActionsMenu({
 
   const handleDelete = async () => {
     const confirmed = await confirm.open({
-      title: `${subtask.issueNo} 삭제`,
+      title: `${subtask.subtaskNo} 삭제`,
       description:
-        '삭제한 하위작업은 복구할 수 없습니다. 상위 이슈의 진행률에서도 함께 제외됩니다.',
+        '삭제한 하위작업은 복구할 수 없습니다. 상위 작업의 진행률에서도 함께 제외됩니다.',
       confirm: { text: '삭제', variant: 'destructive' },
     })
     if (!confirmed) return
 
     deleteSubtask.mutate(
-      { subtaskNo: subtask.issueNo },
+      { subtaskNo: subtask.subtaskNo },
       {
         onSuccess: () => {
-          toast.success(`${subtask.issueNo} 하위작업을 삭제했습니다.`)
-          void navigate(paths.app.issues.detail.getHref(subtask.parentIssueNo))
+          toast.success(`${subtask.subtaskNo} 하위작업을 삭제했습니다.`)
+          void navigate(paths.app.tasks.detail.getHref(subtask.parentTaskNo))
         },
       }
     )

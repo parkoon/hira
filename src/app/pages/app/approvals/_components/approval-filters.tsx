@@ -1,7 +1,7 @@
 import { useQueryStates } from 'nuqs'
 import { useMemo } from 'react'
 
-import { PRIORITY_META } from '@/features/issues/constants/metadata'
+import { PRIORITY_META } from '@/features/tasks/constants/metadata'
 import { FilterBar, type FilterBarField } from '@/shared/components/ui/filter-bar'
 import { toEnumOptions } from '@/shared/utils/enum'
 
@@ -32,7 +32,7 @@ export function ApprovalFilters({ requesters }: { requesters: string[] }) {
       }
       search={filters.q}
       onSearchChange={(q) => void setFilters({ q })}
-      searchPlaceholder="이슈번호, 제목 검색"
+      searchPlaceholder="작업번호, 제목 검색"
     />
   )
 }

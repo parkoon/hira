@@ -10,7 +10,7 @@
 
 ```text
 src/features/
-└── {domain}/              # 업무 도메인 (예: issues, users, audit-logs, gitea)
+└── {domain}/              # 업무 도메인 (예: tasks, users, audit-logs, gitea)
     ├── api/               # queryOptions, mutation hooks (Supabase 호출)
     │   ├── get-*.ts       # 조회
     │   ├── create-*.ts    # 쓰기 — 동작 이름으로 (transition-*, approve-*, ...)
@@ -23,7 +23,7 @@ src/features/
     └── utils/             # 도메인 전용 순수 유틸 함수
 ```
 
-현재 도메인: `issues`, `users`, `audit-logs`, `gitea`
+현재 도메인: `tasks`, `users`, `audit-logs`, `gitea`
 
 ---
 
@@ -31,7 +31,7 @@ src/features/
 
 업무 개념 단위. 주 테이블 이름과 대체로 일치한다.
 
-- 이슈·하위작업·증적·결재 → `features/issues/`
+- 작업·하위작업·증적·결재 → `features/tasks/`
 - 사용자·역할 → `features/users/`
 - 의미상 같은 도메인이면 폴더를 쪼개지 않고 통합한다
 
@@ -92,8 +92,8 @@ kebab-case. 조회는 `get-` prefix, 쓰기는 도메인 동작 이름을 그대
 
 | 종류 | 패턴               | 예시                                         |
 | ---- | ------------------ | -------------------------------------------- |
-| 조회 | `get-{리소스}.ts`  | `get-requests.ts`, `get-users.ts`            |
-| 쓰기 | `{동작}-{대상}.ts` | `create-request.ts`, `transition-subtask.ts` |
+| 조회 | `get-{리소스}.ts`  | `get-tasks.ts`, `get-users.ts`               |
+| 쓰기 | `{동작}-{대상}.ts` | `create-task.ts`, `transition-subtask.ts`    |
 | 공유 | `writers.ts`       | 증적·이력·결재처럼 여러 mutation이 쓰는 헬퍼 |
 
 ---
@@ -107,7 +107,7 @@ DB row 타입은 `@/shared/types/database`의 `Database` 생성 타입(수기 �
 import type { Database } from '@/shared/types/database'
 
 type Tables = Database['public']['Tables']
-type RequestRow = Tables['requests']['Row']
+type TaskRow = Tables['tasks']['Row']
 ```
 
 ---
@@ -121,20 +121,20 @@ import { queryOptions } from '@tanstack/react-query'
 import { supabase } from '@/shared/lib/supabase'
 import type { Database } from '@/shared/types/database'
 
-export const getRequestsService = async (): Promise<Request[]> => {
-  const { data, error } = await supabase.from('requests').select(REQUEST_TREE_SELECT)
+export const getTasksService = async (): Promise<Task[]> => {
+  const { data, error } = await supabase.from('tasks').select(TASK_TREE_SELECT)
   if (error) throw error
-  return data.map(toRequest)
+  return data.map(toTask)
 }
 
-export const getRequestsQueryKeyPrefix = () => ['/requests'] as const
+export const getTasksQueryKeyPrefix = () => ['/tasks'] as const
 
-export const getRequestsQueryKey = () => [...getRequestsQueryKeyPrefix()] as const
+export const getTasksQueryKey = () => [...getTasksQueryKeyPrefix()] as const
 
-export const getRequestsQueryOptions = () =>
+export const getTasksQueryOptions = () =>
   queryOptions({
-    queryKey: getRequestsQueryKey(),
-    queryFn: getRequestsService,
+    queryKey: getTasksQueryKey(),
+    queryFn: getTasksService,
   })
 ```
 
@@ -169,10 +169,10 @@ queryOptions({
 
 ```ts
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { getRequestsQueryKeyPrefix } from '@/features/issues/api/get-requests'
+import { getTasksQueryKeyPrefix } from '@/features/tasks/api/get-tasks'
 import { supabase } from '@/shared/lib/supabase'
 
-export const getCreateRequestMutationKey = () => ['/requests', 'create'] as const
+export const getCreateTaskMutationKey = () => ['/tasks', 'create'] as const
 ```
 
 다단계 쓰기(상태 update + 증적 + 이력) 규칙:
@@ -194,8 +194,8 @@ export const getCreateRequestMutationKey = () => ['/requests', 'create'] as cons
 같은 리소스에 뮤테이션이 여러 개면 두 번째 요소로 동작을 구분한다.
 
 ```text
-['/requests', 'create']
-['/requests', 'transition']
+['/tasks', 'create']
+['/tasks', 'transition']
 ['/subtasks', 'approve']
 ```
 
@@ -217,11 +217,11 @@ export const getCreateRequestMutationKey = () => ['/requests', 'create'] as cons
 
 ```text
 // O
-['/requests'] as const
-['/requests/{issueNo}', issueNo] as const
+['/tasks'] as const
+['/tasks/{taskNo}', taskNo] as const
 
 // X
-['requests', 'my']
+['tasks', 'my']
 ['auditLogs']
 ```
 
@@ -232,9 +232,9 @@ export const getCreateRequestMutationKey = () => ['/requests', 'create'] as cons
 앱 레이어(`src/app/`)가 직접 참조할 의미 있는 이름의 타입만 정의한다.
 
 ```ts
-export type Request = {
-  issueNo: string
-  status: RequestStatus
+export type Task = {
+  taskNo: string
+  status: TaskStatus
   // ...화면이 쓰는 모양 그대로
 }
 ```

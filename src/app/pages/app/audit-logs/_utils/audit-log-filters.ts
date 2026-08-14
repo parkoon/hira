@@ -12,14 +12,14 @@ export const auditLogFilterParsers = {
   period: parseAsString.withDefault(AUDIT_LOG_DEFAULT_PERIOD),
   actor: parseAsArrayOf(parseAsString).withDefault([]),
   event: parseAsArrayOf(parseAsString).withDefault([]),
-  issueNo: parseAsString.withDefault(''),
+  taskNo: parseAsString.withDefault(''),
 }
 
 type AuditLogFilters = {
   period: string
   actor: string[]
   event: string[]
-  issueNo: string
+  taskNo: string
 }
 
 function getPeriodStart(period: string, now: Date): Date | null {
@@ -37,7 +37,7 @@ function getPeriodStart(period: string, now: Date): Date | null {
 
 export function applyAuditLogFilters(logs: AuditLog[], filters: AuditLogFilters): AuditLog[] {
   const periodStart = getPeriodStart(filters.period, new Date())
-  const issueKeyword = filters.issueNo.trim().toLowerCase()
+  const taskKeyword = filters.taskNo.trim().toLowerCase()
   const events = filters.event.filter((value) => isKnownEnumValue(AUDIT_EVENT_META, value))
 
   return logs.filter((log) => {
@@ -48,8 +48,8 @@ export function applyAuditLogFilters(logs: AuditLog[], filters: AuditLogFilters)
     if (events.length > 0 && !events.includes(log.eventType)) {
       return false
     }
-    if (issueKeyword.length > 0) {
-      return (log.targetLabel ?? '').toLowerCase().includes(issueKeyword)
+    if (taskKeyword.length > 0) {
+      return (log.targetLabel ?? '').toLowerCase().includes(taskKeyword)
     }
     return true
   })

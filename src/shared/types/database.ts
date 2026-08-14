@@ -14,39 +14,39 @@ export type Database = {
           approved_by: string
           id: number
           kind: Database['public']['Enums']['approval_kind']
-          request_issue_no: string | null
-          subtask_issue_no: string | null
+          subtask_no: string | null
+          task_no: string | null
         }
         Insert: {
           approved_at?: string
           approved_by: string
           id?: never
           kind: Database['public']['Enums']['approval_kind']
-          request_issue_no?: string | null
-          subtask_issue_no?: string | null
+          subtask_no?: string | null
+          task_no?: string | null
         }
         Update: {
           approved_at?: string
           approved_by?: string
           id?: never
           kind?: Database['public']['Enums']['approval_kind']
-          request_issue_no?: string | null
-          subtask_issue_no?: string | null
+          subtask_no?: string | null
+          task_no?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: 'approvals_request_issue_no_fkey'
-            columns: ['request_issue_no']
-            isOneToOne: false
-            referencedRelation: 'requests'
-            referencedColumns: ['issue_no']
-          },
-          {
-            foreignKeyName: 'approvals_subtask_issue_no_fkey'
-            columns: ['subtask_issue_no']
+            foreignKeyName: 'approvals_subtask_no_fkey'
+            columns: ['subtask_no']
             isOneToOne: false
             referencedRelation: 'subtasks'
-            referencedColumns: ['issue_no']
+            referencedColumns: ['subtask_no']
+          },
+          {
+            foreignKeyName: 'approvals_task_no_fkey'
+            columns: ['task_no']
+            isOneToOne: false
+            referencedRelation: 'tasks'
+            referencedColumns: ['task_no']
           },
         ]
       }
@@ -55,22 +55,22 @@ export type Database = {
           evidence_id: number | null
           file_name: string
           id: number
-          request_issue_no: string | null
           size: number
+          task_no: string | null
         }
         Insert: {
           evidence_id?: number | null
           file_name: string
           id?: never
-          request_issue_no?: string | null
           size?: number
+          task_no?: string | null
         }
         Update: {
           evidence_id?: number | null
           file_name?: string
           id?: never
-          request_issue_no?: string | null
           size?: number
+          task_no?: string | null
         }
         Relationships: [
           {
@@ -81,11 +81,11 @@ export type Database = {
             referencedColumns: ['id']
           },
           {
-            foreignKeyName: 'attachments_request_issue_no_fkey'
-            columns: ['request_issue_no']
+            foreignKeyName: 'attachments_task_no_fkey'
+            columns: ['task_no']
             isOneToOne: false
-            referencedRelation: 'requests'
-            referencedColumns: ['issue_no']
+            referencedRelation: 'tasks'
+            referencedColumns: ['task_no']
           },
         ]
       }
@@ -97,8 +97,8 @@ export type Database = {
           id: number
           ip_address: string
           occurred_at: string
-          target_issue_no: string | null
           target_label: string | null
+          target_task_no: string | null
         }
         Insert: {
           actor_name: string
@@ -107,8 +107,8 @@ export type Database = {
           id?: never
           ip_address?: string
           occurred_at?: string
-          target_issue_no?: string | null
           target_label?: string | null
+          target_task_no?: string | null
         }
         Update: {
           actor_name?: string
@@ -117,8 +117,8 @@ export type Database = {
           id?: never
           ip_address?: string
           occurred_at?: string
-          target_issue_no?: string | null
           target_label?: string | null
+          target_task_no?: string | null
         }
         Relationships: []
       }
@@ -128,45 +128,45 @@ export type Database = {
           memo: string
           recorded_at: string
           recorded_by: string
-          request_issue_no: string | null
-          request_status: Database['public']['Enums']['request_status'] | null
-          subtask_issue_no: string | null
+          subtask_no: string | null
           subtask_status: Database['public']['Enums']['subtask_status'] | null
+          task_no: string | null
+          task_status: Database['public']['Enums']['task_status'] | null
         }
         Insert: {
           id?: never
           memo?: string
           recorded_at?: string
           recorded_by: string
-          request_issue_no?: string | null
-          request_status?: Database['public']['Enums']['request_status'] | null
-          subtask_issue_no?: string | null
+          subtask_no?: string | null
           subtask_status?: Database['public']['Enums']['subtask_status'] | null
+          task_no?: string | null
+          task_status?: Database['public']['Enums']['task_status'] | null
         }
         Update: {
           id?: never
           memo?: string
           recorded_at?: string
           recorded_by?: string
-          request_issue_no?: string | null
-          request_status?: Database['public']['Enums']['request_status'] | null
-          subtask_issue_no?: string | null
+          subtask_no?: string | null
           subtask_status?: Database['public']['Enums']['subtask_status'] | null
+          task_no?: string | null
+          task_status?: Database['public']['Enums']['task_status'] | null
         }
         Relationships: [
           {
-            foreignKeyName: 'evidences_request_issue_no_fkey'
-            columns: ['request_issue_no']
-            isOneToOne: false
-            referencedRelation: 'requests'
-            referencedColumns: ['issue_no']
-          },
-          {
-            foreignKeyName: 'evidences_subtask_issue_no_fkey'
-            columns: ['subtask_issue_no']
+            foreignKeyName: 'evidences_subtask_no_fkey'
+            columns: ['subtask_no']
             isOneToOne: false
             referencedRelation: 'subtasks'
-            referencedColumns: ['issue_no']
+            referencedColumns: ['subtask_no']
+          },
+          {
+            foreignKeyName: 'evidences_task_no_fkey'
+            columns: ['task_no']
+            isOneToOne: false
+            referencedRelation: 'tasks'
+            referencedColumns: ['task_no']
           },
         ]
       }
@@ -235,59 +235,6 @@ export type Database = {
           },
         ]
       }
-      requests: {
-        Row: {
-          consumer_protection_target: boolean
-          created_at: string
-          dark_pattern_checked: boolean
-          description: string
-          due_date: string
-          handles_personal_data: boolean
-          issue_no: string
-          priority: Database['public']['Enums']['priority']
-          requester_id: string
-          status: Database['public']['Enums']['request_status']
-          submitted_at: string | null
-          title: string
-        }
-        Insert: {
-          consumer_protection_target?: boolean
-          created_at?: string
-          dark_pattern_checked?: boolean
-          description?: string
-          due_date: string
-          handles_personal_data?: boolean
-          issue_no: string
-          priority?: Database['public']['Enums']['priority']
-          requester_id: string
-          status?: Database['public']['Enums']['request_status']
-          submitted_at?: string | null
-          title: string
-        }
-        Update: {
-          consumer_protection_target?: boolean
-          created_at?: string
-          dark_pattern_checked?: boolean
-          description?: string
-          due_date?: string
-          handles_personal_data?: boolean
-          issue_no?: string
-          priority?: Database['public']['Enums']['priority']
-          requester_id?: string
-          status?: Database['public']['Enums']['request_status']
-          submitted_at?: string | null
-          title?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: 'requests_requester_id_fkey'
-            columns: ['requester_id']
-            isOneToOne: false
-            referencedRelation: 'profiles'
-            referencedColumns: ['id']
-          },
-        ]
-      }
       status_history: {
         Row: {
           actor_name: string
@@ -295,8 +242,8 @@ export type Database = {
           id: number
           occurred_at: string
           reason: string | null
-          request_issue_no: string | null
-          subtask_issue_no: string | null
+          subtask_no: string | null
+          task_no: string | null
           to_status: string
           via: Database['public']['Enums']['history_via']
         }
@@ -306,8 +253,8 @@ export type Database = {
           id?: never
           occurred_at?: string
           reason?: string | null
-          request_issue_no?: string | null
-          subtask_issue_no?: string | null
+          subtask_no?: string | null
+          task_no?: string | null
           to_status: string
           via?: Database['public']['Enums']['history_via']
         }
@@ -317,25 +264,25 @@ export type Database = {
           id?: never
           occurred_at?: string
           reason?: string | null
-          request_issue_no?: string | null
-          subtask_issue_no?: string | null
+          subtask_no?: string | null
+          task_no?: string | null
           to_status?: string
           via?: Database['public']['Enums']['history_via']
         }
         Relationships: [
           {
-            foreignKeyName: 'status_history_request_issue_no_fkey'
-            columns: ['request_issue_no']
-            isOneToOne: false
-            referencedRelation: 'requests'
-            referencedColumns: ['issue_no']
-          },
-          {
-            foreignKeyName: 'status_history_subtask_issue_no_fkey'
-            columns: ['subtask_issue_no']
+            foreignKeyName: 'status_history_subtask_no_fkey'
+            columns: ['subtask_no']
             isOneToOne: false
             referencedRelation: 'subtasks'
-            referencedColumns: ['issue_no']
+            referencedColumns: ['subtask_no']
+          },
+          {
+            foreignKeyName: 'status_history_task_no_fkey'
+            columns: ['task_no']
+            isOneToOne: false
+            referencedRelation: 'tasks'
+            referencedColumns: ['task_no']
           },
         ]
       }
@@ -347,7 +294,7 @@ export type Database = {
           created_by: string
           id: number
           repo_full_name: string
-          subtask_issue_no: string
+          subtask_no: string
         }
         Insert: {
           branch_name: string
@@ -356,7 +303,7 @@ export type Database = {
           created_by: string
           id?: never
           repo_full_name: string
-          subtask_issue_no: string
+          subtask_no: string
         }
         Update: {
           branch_name?: string
@@ -365,15 +312,15 @@ export type Database = {
           created_by?: string
           id?: never
           repo_full_name?: string
-          subtask_issue_no?: string
+          subtask_no?: string
         }
         Relationships: [
           {
-            foreignKeyName: 'subtask_branches_subtask_issue_no_fkey'
-            columns: ['subtask_issue_no']
-            isOneToOne: false
+            foreignKeyName: 'subtask_branches_subtask_no_fkey'
+            columns: ['subtask_no']
+            isOneToOne: true
             referencedRelation: 'subtasks'
-            referencedColumns: ['issue_no']
+            referencedColumns: ['subtask_no']
           },
         ]
       }
@@ -384,9 +331,9 @@ export type Database = {
           dba_verification_request: string | null
           description: string
           due_date: string | null
-          issue_no: string
-          parent_issue_no: string
+          parent_task_no: string
           status: Database['public']['Enums']['subtask_status']
+          subtask_no: string
           title: string
           type: Database['public']['Enums']['subtask_type']
         }
@@ -396,9 +343,9 @@ export type Database = {
           dba_verification_request?: string | null
           description?: string
           due_date?: string | null
-          issue_no: string
-          parent_issue_no: string
+          parent_task_no: string
           status?: Database['public']['Enums']['subtask_status']
+          subtask_no: string
           title: string
           type: Database['public']['Enums']['subtask_type']
         }
@@ -408,9 +355,9 @@ export type Database = {
           dba_verification_request?: string | null
           description?: string
           due_date?: string | null
-          issue_no?: string
-          parent_issue_no?: string
+          parent_task_no?: string
           status?: Database['public']['Enums']['subtask_status']
+          subtask_no?: string
           title?: string
           type?: Database['public']['Enums']['subtask_type']
         }
@@ -423,11 +370,64 @@ export type Database = {
             referencedColumns: ['id']
           },
           {
-            foreignKeyName: 'subtasks_parent_issue_no_fkey'
-            columns: ['parent_issue_no']
+            foreignKeyName: 'subtasks_parent_task_no_fkey'
+            columns: ['parent_task_no']
             isOneToOne: false
-            referencedRelation: 'requests'
-            referencedColumns: ['issue_no']
+            referencedRelation: 'tasks'
+            referencedColumns: ['task_no']
+          },
+        ]
+      }
+      tasks: {
+        Row: {
+          consumer_protection_target: boolean
+          created_at: string
+          dark_pattern_checked: boolean
+          description: string
+          due_date: string
+          handles_personal_data: boolean
+          priority: Database['public']['Enums']['priority']
+          requester_id: string
+          status: Database['public']['Enums']['task_status']
+          submitted_at: string | null
+          task_no: string
+          title: string
+        }
+        Insert: {
+          consumer_protection_target?: boolean
+          created_at?: string
+          dark_pattern_checked?: boolean
+          description?: string
+          due_date: string
+          handles_personal_data?: boolean
+          priority?: Database['public']['Enums']['priority']
+          requester_id: string
+          status?: Database['public']['Enums']['task_status']
+          submitted_at?: string | null
+          task_no: string
+          title: string
+        }
+        Update: {
+          consumer_protection_target?: boolean
+          created_at?: string
+          dark_pattern_checked?: boolean
+          description?: string
+          due_date?: string
+          handles_personal_data?: boolean
+          priority?: Database['public']['Enums']['priority']
+          requester_id?: string
+          status?: Database['public']['Enums']['task_status']
+          submitted_at?: string | null
+          task_no?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'tasks_requester_id_fkey'
+            columns: ['requester_id']
+            isOneToOne: false
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
           },
         ]
       }
@@ -444,28 +444,20 @@ export type Database = {
         | 'LOGIN_SUCCESS'
         | 'LOGIN_FAILURE'
         | 'LOGOUT'
-        | 'ISSUE_SUBMIT'
-        | 'ISSUE_APPROVE'
-        | 'ISSUE_REJECT'
-        | 'ISSUE_COMPLETE'
+        | 'TASK_SUBMIT'
+        | 'TASK_APPROVE'
+        | 'TASK_REJECT'
+        | 'TASK_COMPLETE'
         | 'SUBTASK_CREATE'
         | 'SUBTASK_TRANSITION'
         | 'ROLE_CHANGE'
         | 'ATTACHMENT_UPLOAD'
         | 'ATTACHMENT_DOWNLOAD'
         | 'SUBTASK_UPDATE'
-        | 'ISSUE_UPDATE'
+        | 'TASK_UPDATE'
         | 'ATTACHMENT_DELETE'
       history_via: 'MANUAL' | 'API'
       priority: 'URGENT' | 'HIGH' | 'NORMAL' | 'LOW'
-      request_status:
-        | 'DRAFT'
-        | 'PENDING_APPROVAL'
-        | 'IN_PROGRESS'
-        | 'ACCEPTANCE'
-        | 'DEPLOY_WAITING'
-        | 'DONE'
-        | 'REJECTED'
       subtask_status:
         | 'TODO'
         | 'ANALYSIS'
@@ -479,6 +471,14 @@ export type Database = {
         | 'REVIEW'
         | 'DONE'
       subtask_type: 'DEPLOY' | 'NON_DEPLOY'
+      task_status:
+        | 'DRAFT'
+        | 'PENDING_APPROVAL'
+        | 'IN_PROGRESS'
+        | 'ACCEPTANCE'
+        | 'DEPLOY_WAITING'
+        | 'DONE'
+        | 'REJECTED'
       user_role: 'REQUESTER' | 'WORKER' | 'LEAD' | 'ADMIN'
     }
     CompositeTypes: {
@@ -606,30 +606,21 @@ export const Constants = {
         'LOGIN_SUCCESS',
         'LOGIN_FAILURE',
         'LOGOUT',
-        'ISSUE_SUBMIT',
-        'ISSUE_APPROVE',
-        'ISSUE_REJECT',
-        'ISSUE_COMPLETE',
+        'TASK_SUBMIT',
+        'TASK_APPROVE',
+        'TASK_REJECT',
+        'TASK_COMPLETE',
         'SUBTASK_CREATE',
         'SUBTASK_TRANSITION',
         'ROLE_CHANGE',
         'ATTACHMENT_UPLOAD',
         'ATTACHMENT_DOWNLOAD',
         'SUBTASK_UPDATE',
-        'ISSUE_UPDATE',
+        'TASK_UPDATE',
         'ATTACHMENT_DELETE',
       ],
       history_via: ['MANUAL', 'API'],
       priority: ['URGENT', 'HIGH', 'NORMAL', 'LOW'],
-      request_status: [
-        'DRAFT',
-        'PENDING_APPROVAL',
-        'IN_PROGRESS',
-        'ACCEPTANCE',
-        'DEPLOY_WAITING',
-        'DONE',
-        'REJECTED',
-      ],
       subtask_status: [
         'TODO',
         'ANALYSIS',
@@ -644,6 +635,15 @@ export const Constants = {
         'DONE',
       ],
       subtask_type: ['DEPLOY', 'NON_DEPLOY'],
+      task_status: [
+        'DRAFT',
+        'PENDING_APPROVAL',
+        'IN_PROGRESS',
+        'ACCEPTANCE',
+        'DEPLOY_WAITING',
+        'DONE',
+        'REJECTED',
+      ],
       user_role: ['REQUESTER', 'WORKER', 'LEAD', 'ADMIN'],
     },
   },

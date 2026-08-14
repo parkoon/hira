@@ -34,9 +34,9 @@ export function AuditLogFilters({ actors }: { actors: string[] }) {
           event: value.event ?? [],
         })
       }
-      search={filters.issueNo}
-      onSearchChange={(issueNo) => void setFilters({ issueNo })}
-      searchPlaceholder="이슈번호 검색"
+      search={filters.taskNo}
+      onSearchChange={(taskNo) => void setFilters({ taskNo })}
+      searchPlaceholder="작업번호 검색"
     />
   )
 }

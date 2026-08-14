@@ -3,11 +3,11 @@ import { AgGridProvider, AgGridReact } from 'ag-grid-react'
 import { TriangleAlertIcon } from 'lucide-react'
 import { useMemo } from 'react'
 
-import type { Subtask } from '@/features/issues/api/types'
-import { IssueKeyLink } from '@/features/issues/components/issue-key-link'
-import { SubtaskStatusLozenge } from '@/features/issues/components/subtask-status-lozenge'
-import { SUBTASK_TYPE_META } from '@/features/issues/constants/metadata'
-import { getDueDateStatus } from '@/features/issues/utils/due-date'
+import type { Subtask } from '@/features/tasks/api/types'
+import { SubtaskStatusLozenge } from '@/features/tasks/components/subtask-status-lozenge'
+import { TaskLink } from '@/features/tasks/components/task-link'
+import { SUBTASK_TYPE_META } from '@/features/tasks/constants/metadata'
+import { getDueDateStatus } from '@/features/tasks/utils/due-date'
 import { Lozenge } from '@/shared/components/ui/lozenge'
 import { paths } from '@/shared/config/paths'
 import {
@@ -22,22 +22,22 @@ export function MyTasksTable({ subtasks }: { subtasks: Subtask[] }) {
   const columnDefs = useMemo<ColDef<Subtask>[]>(
     () => [
       {
-        field: 'issueNo',
+        field: 'subtaskNo',
         headerName: '작업번호',
         width: 175,
         cellRenderer: ({ data }: { data: Subtask }) => (
-          <IssueKeyLink to={paths.app.issues.subtask.getHref(data.parentIssueNo, data.issueNo)}>
-            {data.issueNo}
-          </IssueKeyLink>
+          <TaskLink to={paths.app.tasks.subtask.getHref(data.parentTaskNo, data.subtaskNo)}>
+            {data.subtaskNo}
+          </TaskLink>
         ),
       },
       { field: 'title', headerName: '제목', flex: 1, minWidth: 260 },
       {
-        field: 'parentIssueNo',
-        headerName: '상위이슈',
+        field: 'parentTaskNo',
+        headerName: '상위작업',
         width: 150,
         cellRenderer: ({ value }: { value: string }) => (
-          <IssueKeyLink to={paths.app.issues.detail.getHref(value)}>{value}</IssueKeyLink>
+          <TaskLink to={paths.app.tasks.detail.getHref(value)}>{value}</TaskLink>
         ),
       },
       {

@@ -4,7 +4,7 @@ import { useMemo } from 'react'
 
 import type { AuditLog } from '@/features/audit-logs/api/types'
 import { AUDIT_EVENT_META } from '@/features/audit-logs/constants/metadata'
-import { IssueKeyLink } from '@/features/issues/components/issue-key-link'
+import { TaskLink } from '@/features/tasks/components/task-link'
 import { Lozenge } from '@/shared/components/ui/lozenge'
 import { paths } from '@/shared/config/paths'
 import {
@@ -33,11 +33,11 @@ export function AuditLogsTable({ logs }: { logs: AuditLog[] }) {
         width: 160,
         cellRenderer: ({ data }: { data: AuditLog }) => {
           if (!data.targetLabel) return <span className="text-muted-foreground">—</span>
-          if (!data.targetIssueNo) return data.targetLabel
+          if (!data.targetTaskNo) return data.targetLabel
           return (
-            <IssueKeyLink to={paths.app.issues.detail.getHref(data.targetIssueNo)}>
+            <TaskLink to={paths.app.tasks.detail.getHref(data.targetTaskNo)}>
               {data.targetLabel}
-            </IssueKeyLink>
+            </TaskLink>
           )
         },
       },

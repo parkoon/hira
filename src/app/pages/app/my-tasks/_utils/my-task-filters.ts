@@ -1,7 +1,7 @@
 import { parseAsArrayOf, parseAsString } from 'nuqs'
 
-import type { Subtask, SubtaskStatus } from '@/features/issues/api/types'
-import { SUBTASK_STATUS_META } from '@/features/issues/constants/metadata'
+import type { Subtask, SubtaskStatus } from '@/features/tasks/api/types'
+import { SUBTASK_STATUS_META } from '@/features/tasks/constants/metadata'
 import { isKnownEnumValue } from '@/shared/utils/enum'
 
 import { MY_TASK_DEFAULT_SORT } from '../_constants'
@@ -61,7 +61,7 @@ export function applyMyTaskFilters(subtasks: Subtask[], filters: MyTaskFilters):
     if (statuses.length > 0 && !statuses.includes(subtask.status)) {
       return false
     }
-    if (query && !`${subtask.issueNo} ${subtask.title}`.toLowerCase().includes(query)) {
+    if (query && !`${subtask.subtaskNo} ${subtask.title}`.toLowerCase().includes(query)) {
       return false
     }
     return true

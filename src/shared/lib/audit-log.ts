@@ -10,10 +10,10 @@ export type AuditEventType = Database['public']['Enums']['audit_event_type']
 export type AuditLogEntry = {
   actorName: string
   eventType: AuditEventType
-  /** 목록의 '대상' 열. 이슈번호이거나 사용자 이름이다 */
+  /** 목록의 '대상' 열. 작업번호이거나 사용자 이름이다 */
   targetLabel?: string | null
-  /** 채워두면 대상에서 이슈 상세로 이동할 수 있다 */
-  targetIssueNo?: string | null
+  /** 채워두면 대상에서 작업 상세로 이동할 수 있다 */
+  targetTaskNo?: string | null
   detail?: string | null
 }
 
@@ -36,7 +36,7 @@ export async function recordAuditLog(entries: AuditLogEntry | AuditLogEntry[]): 
       actor_name: entry.actorName,
       event_type: entry.eventType,
       target_label: entry.targetLabel ?? null,
-      target_issue_no: entry.targetIssueNo ?? null,
+      target_task_no: entry.targetTaskNo ?? null,
       detail: entry.detail ?? null,
     }))
   )

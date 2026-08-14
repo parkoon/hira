@@ -13,19 +13,19 @@ export const paths = {
       path: '/app',
       getHref: () => '/app',
     },
-    issues: {
+    tasks: {
       root: {
-        path: 'issues',
-        getHref: () => '/app/issues',
+        path: 'tasks',
+        getHref: () => '/app/tasks',
       },
       detail: {
-        path: 'issues/:issueNo',
-        getHref: (issueNo: string) => `/app/issues/${issueNo}`,
+        path: 'tasks/:taskNo',
+        getHref: (taskNo: string) => `/app/tasks/${taskNo}`,
       },
       subtask: {
-        path: 'issues/:issueNo/subtasks/:subtaskNo',
-        getHref: (issueNo: string, subtaskNo: string) =>
-          `/app/issues/${issueNo}/subtasks/${subtaskNo}`,
+        path: 'tasks/:taskNo/subtasks/:subtaskNo',
+        getHref: (taskNo: string, subtaskNo: string) =>
+          `/app/tasks/${taskNo}/subtasks/${subtaskNo}`,
       },
     },
     myTasks: {

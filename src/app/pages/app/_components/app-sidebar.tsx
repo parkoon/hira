@@ -9,11 +9,11 @@ import {
 import * as React from 'react'
 import { Link, useLocation } from 'react-router'
 
-import { getRequestsQueryOptions } from '@/features/issues/api/get-requests'
+import { getTasksQueryOptions } from '@/features/tasks/api/get-tasks'
 import {
-  selectPendingApprovalRequests,
+  selectPendingApprovalTasks,
   selectSubtasksByAssignee,
-} from '@/features/issues/utils/issue-selectors'
+} from '@/features/tasks/utils/task-selectors'
 import type { UserRole } from '@/features/users/api/types'
 import { ROLE_LEVEL } from '@/features/users/constants/metadata'
 import { useCurrentUser } from '@/features/users/hooks/use-current-user'
@@ -54,27 +54,27 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { pathname } = useLocation()
   const { user } = useCurrentUser()
   const role = user.role
-  const requestsQuery = useSuspenseQuery(getRequestsQueryOptions())
-  const requests = requestsQuery.data
+  const tasksQuery = useSuspenseQuery(getTasksQueryOptions())
+  const tasks = tasksQuery.data
 
   const navItems: SidebarItem[] = [
     {
-      label: '이슈 목록',
+      label: '작업 목록',
       icon: <ClipboardListIcon className="size-4" />,
-      url: paths.app.issues.root.getHref(),
+      url: paths.app.tasks.root.getHref(),
     },
     {
-      label: '내 작업함',
+      label: '내 하위작업',
       icon: <SquareCheckIcon className="size-4" />,
       url: paths.app.myTasks.getHref(),
-      count: selectSubtasksByAssignee(requests, user.id).length,
+      count: selectSubtasksByAssignee(tasks, user.id).length,
       minRole: 'WORKER',
     },
     {
       label: '승인 대기함',
       icon: <InboxIcon className="size-4" />,
       url: paths.app.approvals.getHref(),
-      count: selectPendingApprovalRequests(requests).length,
+      count: selectPendingApprovalTasks(tasks).length,
       minRole: 'LEAD',
     },
     {
@@ -105,7 +105,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               size="lg"
               asChild
             >
-              <Link to={paths.app.issues.root.getHref()}>
+              <Link to={paths.app.tasks.root.getHref()}>
                 <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#f18d00]">
                   <img
                     src={logo}

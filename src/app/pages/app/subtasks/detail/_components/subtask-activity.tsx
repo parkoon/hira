@@ -1,5 +1,5 @@
-import type { StatusHistoryEntry, Subtask } from '@/features/issues/api/types'
-import { SUBTASK_STATUS_META } from '@/features/issues/constants/metadata'
+import type { StatusHistoryEntry, Subtask } from '@/features/tasks/api/types'
+import { SUBTASK_STATUS_META } from '@/features/tasks/constants/metadata'
 import { Lozenge } from '@/shared/components/ui/lozenge'
 import { NameAvatar } from '@/shared/components/ui/name-avatar'
 import { getEnumLabel } from '@/shared/utils/enum'
