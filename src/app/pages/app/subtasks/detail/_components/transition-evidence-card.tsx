@@ -1,3 +1,4 @@
+import { PencilIcon } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
@@ -28,7 +29,6 @@ export function TransitionEvidenceCard({ subtask, canEdit }: TransitionEvidenceC
   const recordEvidence = useRecordEvidenceMutation()
 
   const steps = getEvidenceSteps(subtask)
-  if (steps.length === 0) return null
 
   const stepLabel = (status: SubtaskStatus) => SUBTASK_ADVANCE_LABEL[status] ?? status
 
@@ -36,59 +36,66 @@ export function TransitionEvidenceCard({ subtask, canEdit }: TransitionEvidenceC
     <section className="space-y-2">
       <h2 className="text-sm font-semibold">단계별 증적</h2>
 
-      <ol>
-        {steps.map((status, index) => {
-          const { latest, revisions } = getStepEvidence(subtask, status)
-          if (!latest) return null
+      {steps.length === 0 ? (
+        <p className="text-muted-foreground rounded-lg border border-dashed px-3 py-4 text-center text-[13px]">
+          아직 남긴 증적이 없습니다.
+        </p>
+      ) : (
+        <ol>
+          {steps.map((status, index) => {
+            const { latest, revisions } = getStepEvidence(subtask, status)
+            if (!latest) return null
 
-          const last = index === steps.length - 1
+            const last = index === steps.length - 1
 
-          return (
-            <li
-              key={status}
-              className="flex gap-2.5"
-            >
-              <div className="flex w-6 shrink-0 flex-col items-center">
-                {/* 증적이 있다는 건 그 단계를 끝냈다는 뜻이라 스테퍼의 완료 색을 쓴다 */}
-                <span
-                  aria-hidden
-                  className="mt-1.5 size-2.5 shrink-0 rounded-full bg-emerald-600 ring-3 ring-emerald-600/15"
-                />
-                {!last && (
+            return (
+              <li
+                key={status}
+                className="flex gap-2.5"
+              >
+                <div className="flex w-6 shrink-0 flex-col items-center">
+                  {/* 증적이 있다는 건 그 단계를 끝냈다는 뜻이라 스테퍼의 완료 색을 쓴다 */}
                   <span
                     aria-hidden
-                    className="bg-border mt-1 w-0.5 flex-1"
+                    className="mt-1.5 size-2.5 shrink-0 rounded-full bg-emerald-600 ring-3 ring-emerald-600/15"
                   />
-                )}
-              </div>
-
-              <div className={cn('min-w-0 flex-1 space-y-0.5', !last && 'pb-4')}>
-                <div className="flex items-start gap-2.5">
-                  <p className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5 text-[13px] font-medium">
-                    {stepLabel(status)}
-                    {revisions > 0 && <Lozenge tone="warning">{revisions}회 정정</Lozenge>}
-                  </p>
-
-                  {canEdit && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setEditTarget(status)}
-                    >
-                      수정
-                    </Button>
+                  {!last && (
+                    <span
+                      aria-hidden
+                      className="bg-border mt-1 w-0.5 flex-1"
+                    />
                   )}
                 </div>
 
-                <EvidenceContentView evidence={latest} />
-                <p className="text-muted-foreground text-[11px]">
-                  {latest.recordedBy} · {latest.recordedAt}
-                </p>
-              </div>
-            </li>
-          )
-        })}
-      </ol>
+                <div className={cn('min-w-0 flex-1 space-y-0.5', !last && 'pb-4')}>
+                  <div className="flex items-start gap-2.5">
+                    <p className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5 text-[13px] font-medium">
+                      {stepLabel(status)}
+                      {revisions > 0 && <Lozenge tone="warning">{revisions}회 정정</Lozenge>}
+                    </p>
+
+                    {canEdit && (
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        aria-label={`${stepLabel(status)} 증적 정정`}
+                        onClick={() => setEditTarget(status)}
+                      >
+                        <PencilIcon />
+                      </Button>
+                    )}
+                  </div>
+
+                  <EvidenceContentView evidence={latest} />
+                  <p className="text-muted-foreground text-[11px]">
+                    {latest.recordedBy} · {latest.recordedAt}
+                  </p>
+                </div>
+              </li>
+            )
+          })}
+        </ol>
+      )}
 
       {/* 대상이 바뀌면 리마운트해 입력값을 초기화한다 */}
       {editTarget && (
