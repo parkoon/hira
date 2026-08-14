@@ -1,4 +1,4 @@
-import { PlusIcon, SquareCheckIcon } from 'lucide-react'
+import { PlusIcon } from 'lucide-react'
 import { Link } from 'react-router'
 
 import type { Task } from '@/features/tasks/api/types'
@@ -73,13 +73,16 @@ export function SubtaskList({ task, canCreate, createBlockedReason, onCreate }: 
             <Link
               key={subtask.subtaskNo}
               to={paths.app.tasks.subtask.getHref(task.taskNo, subtask.subtaskNo)}
-              className="hover:bg-muted/50 flex items-center gap-2.5 px-3 py-2 text-[13px] transition-colors"
+              className="group hover:bg-muted/50 flex items-center gap-2.5 px-3 py-2 text-[13px] transition-colors"
             >
-              <SquareCheckIcon className="size-3.5 shrink-0 text-blue-700 dark:text-blue-400" />
-              <span className="shrink-0 font-medium text-blue-700 dark:text-blue-400">
+              {/* 부모 번호는 모든 행에 반복되므로 꼬리만 남긴다 (WR-2026-0001-01 → -01) */}
+              <span className="text-muted-foreground shrink-0">
                 {subtask.subtaskNo.slice(task.taskNo.length)}
               </span>
-              <span className="flex-1 truncate">{subtask.title}</span>
+              {/* 행 전체가 링크라, 누르려는 대상인 제목이 링크색을 갖는다 */}
+              <span className="flex-1 truncate font-medium text-blue-700 group-hover:underline dark:text-blue-400">
+                {subtask.title}
+              </span>
               <NameAvatar name={subtask.assignee.name} />
               <SubtaskStatusLozenge status={subtask.status} />
             </Link>
