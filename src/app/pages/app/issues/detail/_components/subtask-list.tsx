@@ -32,9 +32,6 @@ export function SubtaskList({
 }: SubtaskListProps) {
   const { done, total } = getSubtaskProgress(request)
 
-  // 만들 수도 없고 만들어진 것도 없으면 빈 섹션만 남는다 — 그럴 땐 그리지 않는다
-  if (total === 0 && !canCreate) return null
-
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2.5">
