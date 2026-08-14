@@ -18,7 +18,7 @@ export function TaskCreateModal() {
 
   return (
     <>
-      <Button onClick={() => setOpen(true)}>새 작업</Button>
+      <Button onClick={() => setOpen(true)}>작업 요청</Button>
 
       {/* 열 때마다 마운트해 빈 폼으로 시작한다 */}
       {open && (
