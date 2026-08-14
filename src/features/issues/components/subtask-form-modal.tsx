@@ -4,7 +4,7 @@ import { z } from 'zod'
 
 import type { IssueActor, SubtaskDraft, SubtaskType } from '@/features/issues/api/types'
 import { RichTextEditor } from '@/features/issues/components/rich-text-editor'
-import { SubtaskTypeLabel } from '@/features/issues/components/subtask-type-label'
+import { SUBTASK_TYPE_META } from '@/features/issues/constants/metadata'
 import { DatePicker } from '@/shared/components/ui/date-picker'
 import { Field, FieldError, FieldLabel } from '@/shared/components/ui/field'
 import { Input } from '@/shared/components/ui/input'
@@ -113,9 +113,7 @@ export function SubtaskFormModal({
             <FieldLabel>이슈유형</FieldLabel>
             {lockedType ? (
               <>
-                <span className="text-[13px]">
-                  <SubtaskTypeLabel type={lockedType} />
-                </span>
+                <span className="text-[13px]">{SUBTASK_TYPE_META[lockedType].label}</span>
                 <p className="text-muted-foreground text-[11px]">
                   워크플로를 결정하는 값이라 생성 후에는 바꿀 수 없어요
                 </p>
