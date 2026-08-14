@@ -74,7 +74,9 @@ const toLinks = (rows: Tables['reference_links']['Row'][]): ReferenceLink[] =>
   [...rows].sort((a, b) => a.position - b.position || a.id - b.id).map((row) => ({ url: row.url }))
 
 const toAttachments = (rows: Tables['attachments']['Row'][]): Attachment[] =>
-  [...rows].sort((a, b) => a.id - b.id).map((row) => ({ fileName: row.file_name, size: row.size }))
+  [...rows]
+    .sort((a, b) => a.id - b.id)
+    .map((row) => ({ id: row.id, fileName: row.file_name, size: row.size }))
 
 const toApprovals = (rows: Tables['approvals']['Row'][]) =>
   [...rows]

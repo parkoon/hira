@@ -3,6 +3,7 @@ import { useRef, useState } from 'react'
 import { useController, useFormContext } from 'react-hook-form'
 import { toast } from 'sonner'
 
+import type { Attachment } from '@/features/issues/api/types'
 import {
   ATTACHMENT_POLICY,
   formatFileSize,
@@ -14,21 +15,32 @@ import { cn } from '@/shared/utils/cn'
 
 const acceptAttribute = ATTACHMENT_POLICY.allowedExtensions.map((ext) => `.${ext}`).join(',')
 
-/** 고른 파일은 폼이 들고 있는다 — 저장 시 이슈와 함께 등록된다 (스펙 §4.2) */
-export function AttachmentField() {
+/**
+ * 고른 파일은 폼이 들고 있는다 — 저장 시 이슈와 함께 등록된다 (스펙 §4.2).
+ * 이미 붙어 있는 첨부는 목록으로만 보여준다. 파일 본문을 보관하지 않아(`attach-files.ts`)
+ * 폼 값으로 되살릴 수 없고, 되살린 척하면 저장할 때 같은 파일이 한 번 더 쌓인다.
+ */
+export function AttachmentField({ existing = [] }: { existing?: Attachment[] }) {
   const inputRef = useRef<HTMLInputElement>(null)
   const { control } = useFormContext<RequestFormValues>()
   const { field } = useController({ control, name: 'attachments' })
+  const removed = useController({ control, name: 'removedAttachmentIds' })
   const [dragging, setDragging] = useState(false)
 
   const files = field.value
   const setFiles = field.onChange
 
+  const removedIds = removed.field.value
+  const keptExisting = existing.filter((attachment) => !removedIds.includes(attachment.id))
+
   const addFiles = (incoming: FileList | null) => {
     if (!incoming) return
 
     const accepted: File[] = []
-    let totalSize = files.reduce((sum, file) => sum + file.size, 0)
+    // 용량 상한은 이미 붙어 있는 첨부까지 합쳐 계산한다 (이슈당 200MB)
+    let totalSize =
+      keptExisting.reduce((sum, item) => sum + item.size, 0) +
+      files.reduce((sum, file) => sum + file.size, 0)
 
     for (const file of incoming) {
       const error = validateAttachment(file, totalSize)
@@ -45,6 +57,33 @@ export function AttachmentField() {
 
   return (
     <div className="space-y-2">
+      {keptExisting.length > 0 && (
+        <ul className="space-y-1">
+          {keptExisting.map((attachment) => (
+            <li
+              key={attachment.id}
+              className="text-muted-foreground flex items-center gap-2 rounded border border-dashed px-2 py-1.5 text-[13px]"
+            >
+              <PaperclipIcon className="size-3.5 shrink-0" />
+              <span className="truncate">{attachment.fileName}</span>
+              <span className="ml-auto shrink-0 text-[11px]">
+                {formatFileSize(attachment.size)}
+              </span>
+              {/* 저장을 눌러야 실제로 지워진다 — 취소하면 그대로 남는다 */}
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-xs"
+                aria-label={`${attachment.fileName} 첨부 떼기`}
+                onClick={() => removed.field.onChange([...removedIds, attachment.id])}
+              >
+                <XIcon />
+              </Button>
+            </li>
+          ))}
+        </ul>
+      )}
+
       <div
         onDragOver={(event) => {
           event.preventDefault()

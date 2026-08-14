@@ -4,13 +4,13 @@ import { cn } from '@/shared/utils/cn'
 
 type ActionButtonProps = {
   label: string
-  /** 있으면 버튼을 막고 이유를 툴팁으로 보여준다 */
+  /** 있으면 막고 이유를 툴팁으로 보여준다 — 막힌 버튼은 이유 없이 회색으로 두지 않는다 */
   reason?: string | null
   /** 전이 진행 중 — 재클릭하면 이력·감사 로그가 중복으로 쌓인다 */
   pending?: boolean
-  variant?: 'default' | 'outline' | 'destructive'
-  /** 팝오버 안처럼 폭을 꽉 채워야 할 때 */
-  fullWidth?: boolean
+  variant?: 'default' | 'outline' | 'destructive' | 'link'
+  size?: 'default' | 'sm'
+  className?: string
   onClick: () => void
 }
 
@@ -20,16 +20,18 @@ export function ActionButton({
   reason,
   pending = false,
   variant = 'outline',
-  fullWidth = false,
+  size = 'default',
+  className,
   onClick,
 }: ActionButtonProps) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <span className={cn('inline-block', fullWidth && 'w-full')}>
+        <span className="inline-block">
           <Button
             variant={variant}
-            className={cn(fullWidth && 'w-full')}
+            size={size}
+            className={cn(className)}
             disabled={Boolean(reason) || pending}
             onClick={onClick}
           >

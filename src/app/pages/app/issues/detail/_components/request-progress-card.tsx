@@ -3,8 +3,11 @@ import { toast } from 'sonner'
 
 import { useTransitionRequestMutation } from '@/features/issues/api/transition-request'
 import type { Request, RequestStatus } from '@/features/issues/api/types'
-import { StatusWorkflowPopover } from '@/features/issues/components/status-workflow-popover'
+import { ActionButton } from '@/features/issues/components/action-button'
+import { PanelCard } from '@/features/issues/components/panel-card'
+import { RejectReasonDialog } from '@/features/issues/components/reject-reason-dialog'
 import { TransitionEvidenceDialog } from '@/features/issues/components/transition-evidence-dialog'
+import { WorkflowSteps } from '@/features/issues/components/workflow-steps'
 import { REQUEST_STATUS_META } from '@/features/issues/constants/metadata'
 import { REQUEST_EVIDENCE_HINT } from '@/features/issues/constants/transition-evidence'
 import { REQUEST_FLOW } from '@/features/issues/constants/transitions'
@@ -17,10 +20,9 @@ import {
 import { useCurrentUser } from '@/features/users/hooks/use-current-user'
 import { useConfirm } from '@/shared/hooks/use-confirm'
 
-import { ActionButton } from './action-button'
 import { CompleteRequestDialog } from './complete-request-dialog'
 
-/** 현재 상태에서 흐름을 한 칸 앞으로 미는 액션. 상태마다 하나뿐이다 */
+/** 흐름을 한 칸 앞으로 미는 액션. 상태마다 하나뿐이라 카드 제목 줄에 올린다 */
 type ForwardAction = {
   label: string
   /** 있으면 막고 이유를 툴팁으로 보여준다 */
@@ -29,19 +31,19 @@ type ForwardAction = {
 }
 
 /**
- * 상태 칩 + 워크플로 + 정방향 진행. 회수·반려는 흐름을 벗어나는 경로라
- * 제목 아래 액션 줄(`RequestStatusActions`)이 맡는다 — 되돌리기 어려운 액션이 팝오버에 숨으면 안 된다.
- * 팝업들은 팝오버 밖에 둔다 — 안에 두면 팝오버가 닫히며 입력하던 팝업까지 사라진다.
+ * 상태에 관한 전부 — 지금 어디까지 왔는지(레일)와 어디로 갈 수 있는지(액션)를 한 카드에 둔다.
+ * 앞으로 가는 길은 제목 줄에, 흐름을 벗어나는 길(회수·반려)은 레일 아래에 둬 위계를 자리로 드러낸다.
  */
-export function RequestStatusControl({ request }: { request: Request }) {
-  const [open, setOpen] = useState(false)
+export function RequestProgressCard({ request }: { request: Request }) {
   const [evidenceOpen, setEvidenceOpen] = useState(false)
   const [completeOpen, setCompleteOpen] = useState(false)
+  const [rejectOpen, setRejectOpen] = useState(false)
   const { user, hasRole } = useCurrentUser()
   const confirm = useConfirm()
   const transitionRequest = useTransitionRequestMutation()
 
   const isLead = hasRole('LEAD')
+  const isRequester = request.requester.id === user.id
 
   /** confirm을 거쳐 전이한다 — 모든 상태변화에 확인 팝업 (시나리오 각주 1) */
   const confirmTransition = (input: {
@@ -130,39 +132,71 @@ export function RequestStatusControl({ request }: { request: Request }) {
   }
 
   const forward = resolveForwardAction()
+  // 회수·반려는 요청승인대기중에만 있다 (시나리오 3)
+  const canWithdraw = request.status === 'PENDING_APPROVAL' && isRequester
+  const canReject = request.status === 'PENDING_APPROVAL' && isLead
 
   return (
     <>
-      <StatusWorkflowPopover
-        open={open}
-        onOpenChange={setOpen}
-        label={REQUEST_STATUS_META[request.status].label}
-        steps={REQUEST_FLOW.map((status) => REQUEST_STATUS_META[status].label)}
-        currentIndex={REQUEST_FLOW.indexOf(request.status)}
-        note={
-          request.status === 'REJECTED'
-            ? '반려는 이 흐름 밖입니다. 다시 제출하면 요청승인대기중으로 돌아갑니다.'
-            : undefined
-        }
+      <PanelCard
+        title="진행 상태"
         action={
           forward && (
             <ActionButton
-              fullWidth
-              // 팝오버 안에서는 이게 유일한 액션이라 주 버튼으로 둔다 (하위작업 쪽과 같은 모양)
-              variant="default"
               label={forward.label}
               reason={forward.reason}
               pending={transitionRequest.isPending}
-              onClick={() => {
-                setOpen(false)
-                forward.onClick()
-              }}
+              variant="default"
+              onClick={forward.onClick}
             />
           )
         }
-      />
+      >
+        <WorkflowSteps
+          steps={REQUEST_FLOW.map((status) => REQUEST_STATUS_META[status].label)}
+          currentIndex={REQUEST_FLOW.indexOf(request.status)}
+          note={
+            request.status === 'REJECTED'
+              ? '반려는 이 흐름 밖입니다. 다시 제출하면 요청승인대기중으로 돌아갑니다.'
+              : undefined
+          }
+        />
 
-      {/* 열릴 때만 마운트한다 — 취소 후 다시 열면 빈 입력으로 시작해야 한다 */}
+        {/* 흐름 밖 경로는 링크 톤으로 낮춘다 — 보이되 시선은 제목 줄의 주 버튼이 먼저 가져간다 */}
+        {(canWithdraw || canReject) && (
+          <div className="mt-3 flex items-center gap-3 border-t pt-2">
+            {canWithdraw && (
+              <ActionButton
+                label="회수"
+                variant="link"
+                size="sm"
+                pending={transitionRequest.isPending}
+                onClick={() =>
+                  confirmTransition({
+                    action: '회수',
+                    description: '회수하면 요청대기중으로 돌아가 내용을 다시 수정할 수 있습니다.',
+                    toStatus: 'DRAFT',
+                    successMessage: `${request.issueNo} 이슈를 회수했습니다.`,
+                  })
+                }
+              />
+            )}
+            {canReject && (
+              <ActionButton
+                label="반려"
+                variant="link"
+                size="sm"
+                className="text-destructive"
+                reason={isRequester ? '본인이 등록한 이슈는 직접 반려할 수 없어요' : null}
+                pending={transitionRequest.isPending}
+                onClick={() => setRejectOpen(true)}
+              />
+            )}
+          </div>
+        )}
+      </PanelCard>
+
+      {/* 팝업은 카드 밖 형제로 둔다 — 카드가 다시 그려져도 입력하던 팝업이 살아 있어야 한다 */}
       {evidenceOpen && (
         <TransitionEvidenceDialog
           open
@@ -197,6 +231,17 @@ export function RequestStatusControl({ request }: { request: Request }) {
           transitionRequest.mutate(
             { issueNo: request.issueNo, toStatus: 'DONE', actorName: user.name },
             { onSuccess: () => toast.success(`${request.issueNo} 이슈를 최종 완료했습니다.`) }
+          )
+        }}
+      />
+
+      <RejectReasonDialog
+        request={rejectOpen ? request : null}
+        onOpenChange={(open) => !open && setRejectOpen(false)}
+        onConfirm={(reason) => {
+          transitionRequest.mutate(
+            { issueNo: request.issueNo, toStatus: 'REJECTED', actorName: user.name, reason },
+            { onSuccess: () => toast.success(`${request.issueNo} 이슈를 반려했습니다.`) }
           )
         }}
       />

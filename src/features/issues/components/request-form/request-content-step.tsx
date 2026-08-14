@@ -1,5 +1,6 @@
 import { Controller, useFormContext } from 'react-hook-form'
 
+import type { Attachment } from '@/features/issues/api/types'
 import { RichTextEditor } from '@/features/issues/components/rich-text-editor'
 import type { RequestFormValues } from '@/features/issues/utils/request-form-schema'
 import { Field, FieldError, FieldLabel } from '@/shared/components/ui/field'
@@ -8,8 +9,17 @@ import { Input } from '@/shared/components/ui/input'
 import { AttachmentField } from './attachment-field'
 import { RequiredMark } from './required-mark'
 
+type RequestContentStepProps = {
+  withAttachments: boolean
+  /** 이미 붙어 있는 첨부 — 수정에서만 있다 */
+  existingAttachments?: Attachment[]
+}
+
 /** 화면 3 — 이슈 등록 Step 1 (이슈 내용). 완료요청일·우선순위 등 메타 필드는 모달 aside에 있다 */
-export function RequestContentStep({ withAttachments }: { withAttachments: boolean }) {
+export function RequestContentStep({
+  withAttachments,
+  existingAttachments,
+}: RequestContentStepProps) {
   const {
     control,
     register,
@@ -50,7 +60,7 @@ export function RequestContentStep({ withAttachments }: { withAttachments: boole
       {withAttachments && (
         <Field>
           <FieldLabel>파일첨부</FieldLabel>
-          <AttachmentField />
+          <AttachmentField existing={existingAttachments} />
         </Field>
       )}
     </div>

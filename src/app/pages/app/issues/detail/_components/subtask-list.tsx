@@ -1,50 +1,99 @@
-import { SquareCheckIcon } from 'lucide-react'
+import { PlusIcon, SquareCheckIcon } from 'lucide-react'
 import { Link } from 'react-router'
 
 import type { Request } from '@/features/issues/api/types'
 import { SubtaskStatusLozenge } from '@/features/issues/components/subtask-status-lozenge'
 import { getSubtaskProgress } from '@/features/issues/utils/issue-selectors'
+import { Button } from '@/shared/components/ui/button'
 import { Card } from '@/shared/components/ui/card'
 import { NameAvatar } from '@/shared/components/ui/name-avatar'
 import { Progress } from '@/shared/components/ui/progress'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/components/ui/tooltip'
 import { paths } from '@/shared/config/paths'
 
-export function SubtaskList({ request }: { request: Request }) {
+type SubtaskListProps = {
+  request: Request
+  /** 하위작업을 만들 수 있는 주체인지 — 아니면 섹션에 생성 버튼이 없다 */
+  canCreate: boolean
+  /** 주체는 맞는데 지금은 안 되는 이유 (없으면 활성) */
+  createBlockedReason: string | null
+  onCreate: () => void
+}
+
+/**
+ * 하위작업 섹션. 생성 버튼은 대상 옆에 둔다 — 만들면 바로 이 목록에 쌓인다.
+ * 0건이어도 섹션을 감추지 않는다. 감추면 첫 하위작업을 만들 자리가 사라진다.
+ */
+export function SubtaskList({
+  request,
+  canCreate,
+  createBlockedReason,
+  onCreate,
+}: SubtaskListProps) {
   const { done, total } = getSubtaskProgress(request)
 
-  // Jira와 동일하게 하위작업이 없으면 섹션 자체를 그리지 않는다 (생성 진입점은 상단 버튼)
-  if (total === 0) return null
+  // 만들 수도 없고 만들어진 것도 없으면 빈 섹션만 남는다 — 그럴 땐 그리지 않는다
+  if (total === 0 && !canCreate) return null
 
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2.5">
         <span className="text-sm font-semibold">하위작업</span>
-        <Progress
-          value={(done / total) * 100}
-          className="h-1.5 flex-1"
-        />
-        <span className="text-muted-foreground text-[11px]">
-          {done}/{total} 완료
-        </span>
+        {total > 0 && (
+          <>
+            <Progress
+              value={(done / total) * 100}
+              className="h-1.5 flex-1"
+            />
+            <span className="text-muted-foreground text-[11px]">
+              {done}/{total} 완료
+            </span>
+          </>
+        )}
+
+        {canCreate && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className={total > 0 ? 'inline-block' : 'ml-auto inline-block'}>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label="하위작업 만들기"
+                  disabled={Boolean(createBlockedReason)}
+                  onClick={onCreate}
+                >
+                  <PlusIcon />
+                </Button>
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>{createBlockedReason ?? '하위작업 만들기'}</TooltipContent>
+          </Tooltip>
+        )}
       </div>
 
-      <Card className="divide-border gap-0 divide-y overflow-hidden py-0">
-        {request.subtasks.map((subtask) => (
-          <Link
-            key={subtask.issueNo}
-            to={paths.app.issues.subtask.getHref(request.issueNo, subtask.issueNo)}
-            className="hover:bg-muted/50 flex items-center gap-2.5 px-3 py-2 text-[13px] transition-colors"
-          >
-            <SquareCheckIcon className="size-3.5 shrink-0 text-blue-700 dark:text-blue-400" />
-            <span className="shrink-0 font-medium text-blue-700 dark:text-blue-400">
-              {subtask.issueNo.slice(request.issueNo.length)}
-            </span>
-            <span className="flex-1 truncate">{subtask.title}</span>
-            <NameAvatar name={subtask.assignee.name} />
-            <SubtaskStatusLozenge status={subtask.status} />
-          </Link>
-        ))}
-      </Card>
+      {total === 0 ? (
+        <p className="text-muted-foreground rounded-lg border border-dashed px-3 py-4 text-center text-[13px]">
+          아직 하위작업이 없습니다.
+        </p>
+      ) : (
+        <Card className="divide-border gap-0 divide-y overflow-hidden py-0">
+          {request.subtasks.map((subtask) => (
+            <Link
+              key={subtask.issueNo}
+              to={paths.app.issues.subtask.getHref(request.issueNo, subtask.issueNo)}
+              className="hover:bg-muted/50 flex items-center gap-2.5 px-3 py-2 text-[13px] transition-colors"
+            >
+              <SquareCheckIcon className="size-3.5 shrink-0 text-blue-700 dark:text-blue-400" />
+              <span className="shrink-0 font-medium text-blue-700 dark:text-blue-400">
+                {subtask.issueNo.slice(request.issueNo.length)}
+              </span>
+              <span className="flex-1 truncate">{subtask.title}</span>
+              <NameAvatar name={subtask.assignee.name} />
+              <SubtaskStatusLozenge status={subtask.status} />
+            </Link>
+          ))}
+        </Card>
+      )}
     </div>
   )
 }

@@ -164,15 +164,24 @@ export function canSubmitRequest(request: Request, user: User) {
   )
 }
 
-/**
- * 이슈 내용 수정 — 제출 전(요청대기중·반려)의 등록자 본인만 (스펙 §3.4, §11.2).
- * 검토 중에는 회수해야 고칠 수 있고, 승인 이후에는 아예 잠긴다. 첨부와 같은 규칙이다.
- */
+/** 이슈 수정 주체 — 등록자 본인만. 주체가 아니면 화면에서 아예 감춘다 (스펙 §3.4) */
 export function canEditRequest(request: Request, user: User) {
-  return (
-    (request.status === 'DRAFT' || request.status === 'REJECTED') &&
-    request.requester.id === user.id
-  )
+  return request.requester.id === user.id
+}
+
+/**
+ * 이슈 내용을 지금 고칠 수 있는지 — 제출 전(요청대기중·반려)까지만 (스펙 §3.4, §11.2).
+ * 주체는 맞는데 때가 아닌 경우라 감추지 않고 이유를 알려준다.
+ * 첨부도 이 규칙을 함께 탄다 — 첨부 입력이 수정 모달 안에 있어 규칙이 갈라질 자리가 없다.
+ */
+export function getRequestEditState(request: Request) {
+  if (request.status === 'PENDING_APPROVAL') {
+    return { enabled: false, reason: '검토 중에는 수정할 수 없어요. 회수 후 수정하세요' }
+  }
+  if (request.status !== 'DRAFT' && request.status !== 'REJECTED') {
+    return { enabled: false, reason: '승인 이후에는 수정할 수 없어요' }
+  }
+  return { enabled: true, reason: null }
 }
 
 /** 인수 확인은 등록자 본인만 한다 — 리드도 대행할 수 없다 (시나리오 14) */

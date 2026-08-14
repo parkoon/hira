@@ -17,6 +17,8 @@ export const requestFormSchema = z.object({
   description: z.string().trim().min(1, '상세내용을 입력해 주세요'),
   // 용량·확장자 제한은 고를 때 `validateAttachment`가 막으므로 여기선 담아만 둔다 (스펙 §4.2)
   attachments: z.array(z.instanceof(File)),
+  // 이미 붙어 있던 첨부 중 뗄 것들(attachments.id) — 저장을 눌러야 실제로 지워진다
+  removedAttachmentIds: z.array(z.number()),
   // Step 2 — 컴플라이언스 확인. 미응답 시 제출 불가 (스펙 §4.1)
   handlesPersonalData: z.enum(['YES', 'NO'], { message: '개인정보 취급 여부를 선택해 주세요' }),
   consumerProtectionTarget: z.enum(['YES', 'NO'], {

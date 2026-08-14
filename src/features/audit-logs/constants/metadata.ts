@@ -15,6 +15,7 @@ export const AUDIT_EVENT_META = {
   SUBTASK_TRANSITION: { label: '상태 전이', order: 90, tone: 'info' },
   ROLE_CHANGE: { label: '역할 변경', order: 100, tone: 'danger' },
   ATTACHMENT_UPLOAD: { label: '첨부 업로드', order: 110, tone: 'warning' },
+  ATTACHMENT_DELETE: { label: '첨부 삭제', order: 115, tone: 'danger' },
   ATTACHMENT_DOWNLOAD: { label: '첨부 다운로드', order: 120, tone: 'warning' },
 } satisfies Record<AuditEventType, EnumMetadata>
 

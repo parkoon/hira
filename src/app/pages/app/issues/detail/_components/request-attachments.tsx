@@ -43,8 +43,9 @@ export function RequestAttachments({ request }: { request: Request }) {
     <section className="space-y-2">
       <h2 className="text-sm font-semibold">첨부</h2>
       <ul className="flex flex-wrap gap-3">
+        {/* 키는 id다 — 같은 이름이 여러 번 붙을 수 있어 이름은 키가 되지 못한다 */}
         {request.attachments.map((attachment) => (
-          <li key={attachment.fileName}>
+          <li key={attachment.id}>
             <AttachmentTile attachment={attachment} />
           </li>
         ))}

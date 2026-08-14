@@ -3,6 +3,7 @@ import { ArrowLeftIcon, ArrowRightIcon } from 'lucide-react'
 import { useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 
+import type { Attachment } from '@/features/issues/api/types'
 import {
   REQUEST_CONTENT_FIELDS,
   requestFormSchema,
@@ -23,10 +24,12 @@ type RequestFormModalProps = {
   /** 수정처럼 기존 값에서 시작할 때 */
   defaultValues?: Partial<RequestFormValues>
   /**
-   * 첨부 입력 노출 여부. 등록에서만 켠다 — 이미 등록된 이슈의 첨부는
-   * 상세 화면의 첨부 버튼이 맡는다 (같은 값을 두 경로로 고치지 않게)
+   * 첨부 입력 노출 여부. 등록·수정 모두 켠다 —
+   * 첨부 가능 조건이 수정 가능 조건과 같아 한 폼에 두면 규칙이 갈라질 자리가 없다.
    */
   withAttachments?: boolean
+  /** 이미 붙어 있는 첨부 — 목록으로만 보여준다. 본문을 보관하지 않아 폼 값으로 되살릴 수 없다 */
+  existingAttachments?: Attachment[]
   /** 저장 진행 중 — 재클릭을 막는다 */
   pending?: boolean
   /**
@@ -44,6 +47,7 @@ export function RequestFormModal({
   submitLabel,
   defaultValues,
   withAttachments = false,
+  existingAttachments,
   pending = false,
   onSubmit,
 }: RequestFormModalProps) {
@@ -60,6 +64,7 @@ export function RequestFormModal({
       consumerProtectionTarget: defaultValues?.consumerProtectionTarget,
       // File은 다시 만들어낼 수 없으므로 시작값으로 받지 않는다
       attachments: [],
+      removedAttachmentIds: [],
       darkPatternChecked: defaultValues?.darkPatternChecked ?? false,
     },
   })
@@ -123,7 +128,10 @@ export function RequestFormModal({
 
         {/* 스텝 1은 hidden으로 유지해 리치 텍스트·첨부 입력 상태를 잃지 않는다 */}
         <div hidden={step !== 1}>
-          <RequestContentStep withAttachments={withAttachments} />
+          <RequestContentStep
+            withAttachments={withAttachments}
+            existingAttachments={existingAttachments}
+          />
         </div>
         {step === 2 && <ComplianceStep />}
       </Modal>

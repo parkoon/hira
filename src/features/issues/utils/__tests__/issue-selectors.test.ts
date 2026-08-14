@@ -8,6 +8,7 @@ import {
   getDeploymentUrl,
   getRequestAdvanceState,
   getRequestApproveState,
+  getRequestEditState,
   getRequiredApprovals,
   getStepEvidence,
   getSubtaskApprovalState,
@@ -196,23 +197,29 @@ describe('canSubmitRequest / canConfirmAcceptance', () => {
   })
 })
 
-describe('canEditRequest', () => {
+describe('canEditRequest / getRequestEditState', () => {
   const requester = makeUser({ id: 'user-kim', name: '김현주', role: 'REQUESTER' })
 
-  it('요청대기중·반려 상태의 등록자만 내용을 수정할 수 있다', () => {
-    expect(canEditRequest(makeRequest({ status: 'DRAFT' }), requester)).toBe(true)
-    expect(canEditRequest(makeRequest({ status: 'REJECTED' }), requester)).toBe(true)
+  it('수정 주체는 등록자 본인뿐이고, 리드여도 남의 이슈는 손댈 수 없다', () => {
+    expect(canEditRequest(makeRequest(), requester)).toBe(true)
+    expect(canEditRequest(makeRequest(), makeUser({ name: '최유진', role: 'LEAD' }))).toBe(false)
   })
 
-  it('제출 후에는 등록자도 수정할 수 없다', () => {
-    expect(canEditRequest(makeRequest({ status: 'PENDING_APPROVAL' }), requester)).toBe(false)
-    expect(canEditRequest(makeRequest({ status: 'IN_PROGRESS' }), requester)).toBe(false)
+  it('요청대기중·반려에서만 고칠 수 있다', () => {
+    expect(getRequestEditState(makeRequest({ status: 'DRAFT' })).enabled).toBe(true)
+    expect(getRequestEditState(makeRequest({ status: 'REJECTED' })).enabled).toBe(true)
   })
 
-  it('등록자가 아니면 리드여도 수정할 수 없다', () => {
-    const lead = makeUser({ name: '최유진', role: 'LEAD' })
+  it('검토 중에는 회수하라고 알려준다', () => {
+    const state = getRequestEditState(makeRequest({ status: 'PENDING_APPROVAL' }))
 
-    expect(canEditRequest(makeRequest({ status: 'DRAFT' }), lead)).toBe(false)
+    expect(state.enabled).toBe(false)
+    expect(state.reason).toContain('회수')
+  })
+
+  it('승인 이후에는 잠긴다', () => {
+    expect(getRequestEditState(makeRequest({ status: 'IN_PROGRESS' })).enabled).toBe(false)
+    expect(getRequestEditState(makeRequest({ status: 'DONE' })).enabled).toBe(false)
   })
 })
 

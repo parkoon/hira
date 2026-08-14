@@ -47,7 +47,8 @@ export type SubtaskStatus =
  */
 export type EvidenceContent = {
   links: ReferenceLink[]
-  attachments: Attachment[]
+  /** 증적 첨부는 개별로 떼는 경로가 없어 id를 들고 다니지 않는다 */
+  attachments: AttachmentDraft[]
   memo: string
 }
 
@@ -87,9 +88,15 @@ export type IssueActor = {
   dept: string
 }
 
-export type Attachment = {
+/** 화면에서 막 고른 첨부 — 아직 저장 전이라 id가 없다 */
+export type AttachmentDraft = {
   fileName: string
   size: number
+}
+
+/** 저장된 첨부. id로 지목해 뗄 수 있다 (같은 이름이 여러 번 붙을 수 있다) */
+export type Attachment = AttachmentDraft & {
+  id: number
 }
 
 export type ReferenceLink = {

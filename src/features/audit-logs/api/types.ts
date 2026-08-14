@@ -18,6 +18,7 @@ export type AuditEventType =
   | 'SUBTASK_TRANSITION'
   | 'ROLE_CHANGE'
   | 'ATTACHMENT_UPLOAD'
+  | 'ATTACHMENT_DELETE'
   | 'ATTACHMENT_DOWNLOAD'
 
 export type AuditLog = {

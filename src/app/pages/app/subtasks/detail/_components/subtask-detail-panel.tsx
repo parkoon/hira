@@ -13,7 +13,7 @@ import { NameAvatar } from '@/shared/components/ui/name-avatar'
 import { paths } from '@/shared/config/paths'
 
 import { CreateBranchDialog } from './create-branch-dialog'
-import { SubtaskStatusControl } from './subtask-status-control'
+import { SubtaskProgressCard } from './subtask-progress-card'
 
 type SubtaskDetailPanelProps = {
   subtask: Subtask
@@ -22,7 +22,7 @@ type SubtaskDetailPanelProps = {
   canTransition: boolean
 }
 
-/** 우측 컬럼 — 상태 칩이 워크플로와 다음 단계 진행을 함께 연다 */
+/** 우측 컬럼 — DBA 결재 + 진행 상태(전이) 카드 + 세부 사항 + 개발(브랜치) */
 export function SubtaskDetailPanel({ subtask, request, canTransition }: SubtaskDetailPanelProps) {
   const { user } = useCurrentUser()
   const approveSubtask = useApproveSubtaskMutation()
@@ -52,15 +52,13 @@ export function SubtaskDetailPanel({ subtask, request, canTransition }: SubtaskD
         </PanelCard>
       )}
 
-      <PanelCard title="세부 사항">
-        <PanelCardField label="상태">
-          <SubtaskStatusControl
-            subtask={subtask}
-            request={request}
-            canTransition={canTransition}
-          />
-        </PanelCardField>
+      <SubtaskProgressCard
+        subtask={subtask}
+        request={request}
+        canTransition={canTransition}
+      />
 
+      <PanelCard title="세부 사항">
         <PanelCardField label="상위 이슈">
           <IssueKeyLink to={paths.app.issues.detail.getHref(subtask.parentIssueNo)}>
             {subtask.parentIssueNo}
@@ -99,10 +97,7 @@ export function SubtaskDetailPanel({ subtask, request, canTransition }: SubtaskD
 
       {/* Jira Development 패널처럼 — 브랜치가 없으면 생성 액션, 생기면 링크로 대체된다 (1:1) */}
       {subtask.type === 'DEPLOY' && (
-        <PanelCard
-          title="개발"
-          summary={subtask.branch?.branchName}
-        >
+        <PanelCard title="개발">
           {subtask.branch ? (
             <a
               href={subtask.branch.branchUrl}

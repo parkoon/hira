@@ -13,6 +13,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu'
 import { paths } from '@/shared/config/paths'
@@ -60,6 +61,9 @@ export function SubtaskActionsMenu({
     )
   }
 
+  // 주체가 아니면 항목을 감춘다. 둘 다 감추면 열 게 없으니 트리거도 두지 않는다
+  if (!canEdit && !canDelete) return null
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -75,31 +79,40 @@ export function SubtaskActionsMenu({
         align="end"
         className="w-64"
       >
-        <DropdownMenuItem
-          disabled={!canEdit || !edit.enabled}
-          onSelect={onEdit}
-        >
-          <PencilIcon />
-          수정
-        </DropdownMenuItem>
-        {canEdit && edit.reason && (
-          <p className="text-muted-foreground px-1.5 pt-0.5 pb-1 text-[11px] leading-snug">
-            {edit.reason}
-          </p>
+        {canEdit && (
+          <>
+            <DropdownMenuItem
+              disabled={!edit.enabled}
+              onSelect={onEdit}
+            >
+              <PencilIcon />
+              수정
+            </DropdownMenuItem>
+            {edit.reason && (
+              <p className="text-muted-foreground px-1.5 pt-0.5 pb-1 text-[11px] leading-snug">
+                {edit.reason}
+              </p>
+            )}
+          </>
         )}
 
-        <DropdownMenuItem
-          variant="destructive"
-          disabled={!canDelete || !deletion.enabled}
-          onSelect={() => void handleDelete()}
-        >
-          <Trash2Icon />
-          삭제
-        </DropdownMenuItem>
-        {canDelete && deletion.reason && (
-          <p className="text-muted-foreground px-1.5 pt-0.5 pb-1 text-[11px] leading-snug">
-            {deletion.reason}
-          </p>
+        {canDelete && (
+          <>
+            {canEdit && <DropdownMenuSeparator />}
+            <DropdownMenuItem
+              variant="destructive"
+              disabled={!deletion.enabled}
+              onSelect={() => void handleDelete()}
+            >
+              <Trash2Icon />
+              삭제
+            </DropdownMenuItem>
+            {deletion.reason && (
+              <p className="text-muted-foreground px-1.5 pt-0.5 pb-1 text-[11px] leading-snug">
+                {deletion.reason}
+              </p>
+            )}
+          </>
         )}
       </DropdownMenuContent>
     </DropdownMenu>

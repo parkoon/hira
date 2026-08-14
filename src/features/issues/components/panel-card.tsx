@@ -1,44 +1,29 @@
-import { ChevronDownIcon } from 'lucide-react'
+import type { ReactNode } from 'react'
 
 import { Card } from '@/shared/components/ui/card'
-import { useDisclosure } from '@/shared/hooks/use-disclosure'
 import { cn } from '@/shared/utils/cn'
 
 type PanelCardProps = {
   title: string
-  /** 접혔을 때 제목 옆에 보여줄 요약 — Jira 'More fields'의 필드 나열 자리 */
-  summary?: string
-  children: React.ReactNode
+  /** 제목 줄 오른쪽 — 이 카드가 담은 것에 대한 주 동작 하나 */
+  action?: ReactNode
+  children: ReactNode
 }
 
-/** 우측 패널의 접을 수 있는 카드 — Jira 이슈 뷰의 Details 패널 모양 */
-export function PanelCard({ title, summary, children }: PanelCardProps) {
-  const card = useDisclosure(true)
-
+/** 우측 패널의 카드 — Jira 이슈 뷰의 Details 패널 모양 */
+export function PanelCard({ title, action, children }: PanelCardProps) {
   return (
     <Card
       size="sm"
       className="gap-0 py-0"
     >
-      <button
-        type="button"
-        aria-expanded={card.isOpen}
-        className="hover:bg-muted/50 flex w-full items-center gap-2 px-3 py-2.5 text-left transition-colors"
-        onClick={card.toggle}
-      >
+      <div className="flex min-h-11 items-center gap-2 px-3 py-1.5">
         <span className="text-sm font-semibold">{title}</span>
-        {!card.isOpen && summary && (
-          <span className="text-muted-foreground min-w-0 flex-1 truncate text-xs">{summary}</span>
-        )}
-        <ChevronDownIcon
-          className={cn(
-            'text-muted-foreground ml-auto size-4 shrink-0 transition-transform',
-            card.isOpen && 'rotate-180'
-          )}
-        />
-      </button>
+        {/* 액션은 카드 최상단에 고정된다 — 내용이 길어져도 주 동작이 아래로 밀리지 않는다 */}
+        {action && <div className="ml-auto">{action}</div>}
+      </div>
 
-      {card.isOpen && <div className="border-t px-3 py-3">{children}</div>}
+      <div className="border-t px-3 py-3">{children}</div>
     </Card>
   )
 }
@@ -51,7 +36,7 @@ export function PanelCardField({
 }: {
   label: string
   className?: string
-  children: React.ReactNode
+  children: ReactNode
 }) {
   return (
     <div

@@ -3,8 +3,10 @@ import { toast } from 'sonner'
 
 import { useTransitionSubtaskMutation } from '@/features/issues/api/transition-subtask'
 import type { Request, Subtask } from '@/features/issues/api/types'
-import { StatusWorkflowPopover } from '@/features/issues/components/status-workflow-popover'
+import { ActionButton } from '@/features/issues/components/action-button'
+import { PanelCard } from '@/features/issues/components/panel-card'
 import { TransitionEvidenceDialog } from '@/features/issues/components/transition-evidence-dialog'
+import { WorkflowSteps } from '@/features/issues/components/workflow-steps'
 import { SUBTASK_ADVANCE_LABEL, SUBTASK_STATUS_META } from '@/features/issues/constants/metadata'
 import { EVIDENCE_HINT } from '@/features/issues/constants/transition-evidence'
 import {
@@ -14,30 +16,24 @@ import {
 } from '@/features/issues/constants/transitions'
 import { getSubtaskDeployGate } from '@/features/issues/utils/issue-selectors'
 import { useCurrentUser } from '@/features/users/hooks/use-current-user'
-import { Button } from '@/shared/components/ui/button'
 import { Checkbox } from '@/shared/components/ui/checkbox'
 import { Field, FieldLabel } from '@/shared/components/ui/field'
 import { Textarea } from '@/shared/components/ui/textarea'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/components/ui/tooltip'
 import { useConfirm } from '@/shared/hooks/use-confirm'
 
-type SubtaskStatusControlProps = {
+type SubtaskProgressCardProps = {
   subtask: Subtask
+  /** 이행 게이트 판정에 부모 상태가 필요하다 (시나리오 17) */
   request: Request
   /** 전이는 담당자·리드만 가능 (스펙 §5.3) */
   canTransition: boolean
 }
 
 /**
- * 상태 칩 + 워크플로 + 다음 단계 진행. 하위작업은 흐름을 벗어나는 액션이 없어 전이가 전부 여기 있다.
- * 증적 팝업은 팝오버 밖에 둔다 — 안에 두면 팝오버가 닫히며 입력하던 팝업까지 사라진다.
+ * 상태에 관한 전부 — 지금 어디까지 왔는지(레일)와 다음 단계로 미는 액션을 한 카드에 둔다.
+ * 하위작업은 흐름을 벗어나는 경로가 없어 제목 줄의 액션 하나가 전부다.
  */
-export function SubtaskStatusControl({
-  subtask,
-  request,
-  canTransition,
-}: SubtaskStatusControlProps) {
-  const [open, setOpen] = useState(false)
+export function SubtaskProgressCard({ subtask, request, canTransition }: SubtaskProgressCardProps) {
   const [evidenceOpen, setEvidenceOpen] = useState(false)
   const [dbaChecked, setDbaChecked] = useState(false)
   const [dbaRequest, setDbaRequest] = useState('')
@@ -59,8 +55,6 @@ export function SubtaskStatusControl({
     : getNextSubtaskStatus(subtask)
 
   const handleForward = () => {
-    setOpen(false)
-
     if (hint) {
       setEvidenceOpen(true)
       return
@@ -87,37 +81,27 @@ export function SubtaskStatusControl({
 
   return (
     <>
-      <StatusWorkflowPopover
-        open={open}
-        onOpenChange={setOpen}
-        label={SUBTASK_STATUS_META[subtask.status].label}
-        steps={flow.map((status) => SUBTASK_STATUS_META[status].label)}
-        currentIndex={flow.indexOf(subtask.status)}
+      <PanelCard
+        title="진행 상태"
         action={
-          label && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span className="inline-block w-full">
-                  <Button
-                    className="w-full"
-                    disabled={
-                      !canTransition ||
-                      nextStatus === null ||
-                      deployGate.blocked ||
-                      // 전이 중 재클릭하면 두 번째 전이가 증적을 다음 단계에 잘못 귀속시킨다
-                      transitionSubtask.isPending
-                    }
-                    onClick={handleForward}
-                  >
-                    {label}
-                  </Button>
-                </span>
-              </TooltipTrigger>
-              {deployGate.reason && <TooltipContent>{deployGate.reason}</TooltipContent>}
-            </Tooltip>
+          // 전이 권한이 없으면 아예 렌더하지 않는다 — 그 사람에게 존재하지 않는 액션이다
+          label &&
+          canTransition && (
+            <ActionButton
+              label={label}
+              reason={deployGate.reason}
+              pending={transitionSubtask.isPending}
+              variant="default"
+              onClick={handleForward}
+            />
           )
         }
-      />
+      >
+        <WorkflowSteps
+          steps={flow.map((status) => SUBTASK_STATUS_META[status].label)}
+          currentIndex={flow.indexOf(subtask.status)}
+        />
+      </PanelCard>
 
       {/* 열릴 때만 마운트한다 — 취소 후 다시 열면 빈 입력으로 시작해야 한다 */}
       {evidenceOpen && (

@@ -1,11 +1,11 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
-import { PencilIcon, SquarePlusIcon } from 'lucide-react'
 import { useState } from 'react'
 import { useParams } from 'react-router'
 import { toast } from 'sonner'
 
 import { useAttachFilesMutation } from '@/features/issues/api/attach-files'
 import { useCreateSubtaskMutation } from '@/features/issues/api/create-subtask'
+import { useDeleteAttachmentsMutation } from '@/features/issues/api/delete-attachments'
 import { getRequestsQueryOptions } from '@/features/issues/api/get-requests'
 import { useUpdateRequestMutation } from '@/features/issues/api/update-request'
 import { IssueDescription } from '@/features/issues/components/issue-description'
@@ -21,18 +21,15 @@ import {
 import { getUsersQueryOptions } from '@/features/users/api/get-users'
 import { useCurrentUser } from '@/features/users/hooks/use-current-user'
 import { selectAssignableUsers } from '@/features/users/utils/user-selectors'
-import { Button } from '@/shared/components/ui/button'
 import { Empty } from '@/shared/components/ui/empty'
 import { Page } from '@/shared/components/ui/layout/page'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/components/ui/tooltip'
 import { paths } from '@/shared/config/paths'
 
-import { AttachFileButton } from './_components/attach-file-button'
 import { RequestAcceptanceCard } from './_components/request-acceptance-card'
+import { RequestActionsMenu } from './_components/request-actions-menu'
 import { RequestActivity } from './_components/request-activity'
 import { RequestAttachments } from './_components/request-attachments'
 import { RequestDetailPanel } from './_components/request-detail-panel'
-import { RequestStatusActions } from './_components/request-status-actions'
 import { SubtaskList } from './_components/subtask-list'
 
 /** 화면 6 — 이슈 상세 (Jira 신규 이슈 뷰 배치) */
@@ -47,6 +44,7 @@ function RequestDetailPage() {
   const createSubtask = useCreateSubtaskMutation()
   const updateRequest = useUpdateRequestMutation()
   const attachFiles = useAttachFilesMutation()
+  const deleteAttachments = useDeleteAttachmentsMutation()
 
   const request = selectRequestByIssueNo(requestsQuery.data, issueNo)
 
@@ -65,7 +63,6 @@ function RequestDetailPage() {
 
   // 하위작업 생성은 작업자도 가능하다 (스펙 §5.1의 리드 전용 규칙에서 완화)
   const canCreateSubtask = hasRole('WORKER')
-  const subtaskCreateBlocked = request.status !== 'IN_PROGRESS'
 
   return (
     <Page>
@@ -77,67 +74,12 @@ function RequestDetailPage() {
               { label: request.issueNo },
             ]}
             title={request.title}
-            quickActions={
-              <>
-                {/* 정방향 진행은 상태 칩의 워크플로 팝오버가 맡고, 여기는 회수·반려만 */}
-                <RequestStatusActions request={request} />
-
-                {/* 제출 전 등록자만 — 검토 중에는 회수해야 고칠 수 있다 (스펙 §3.4) */}
-                {canEditRequest(request, user) && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        aria-label="이슈 수정"
-                        onClick={() => setEditOpen(true)}
-                      >
-                        <PencilIcon />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>이슈 수정</TooltipContent>
-                  </Tooltip>
-                )}
-
-                <AttachFileButton
-                  request={request}
-                  onAttach={(files) =>
-                    attachFiles.mutate(
-                      {
-                        issueNo: request.issueNo,
-                        files,
-                        actorName: user.name,
-                      },
-                      {
-                        onSuccess: () => toast.success(`${files.length}개 파일을 첨부했습니다.`),
-                      }
-                    )
-                  }
-                />
-
-                {canCreateSubtask && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span className="inline-block">
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          aria-label="하위작업 만들기"
-                          disabled={subtaskCreateBlocked}
-                          onClick={() => setSubtaskCreateOpen(true)}
-                        >
-                          <SquarePlusIcon />
-                        </Button>
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      {subtaskCreateBlocked
-                        ? '작업중 상태에서만 하위작업을 만들 수 있어요'
-                        : '하위작업 만들기'}
-                    </TooltipContent>
-                  </Tooltip>
-                )}
-              </>
+            actions={
+              <RequestActionsMenu
+                request={request}
+                canEdit={canEditRequest(request, user)}
+                onEdit={() => setEditOpen(true)}
+              />
             }
           />
 
@@ -147,7 +89,16 @@ function RequestDetailPage() {
           </section>
 
           <RequestAttachments request={request} />
-          <SubtaskList request={request} />
+          <SubtaskList
+            request={request}
+            canCreate={canCreateSubtask}
+            createBlockedReason={
+              request.status === 'IN_PROGRESS'
+                ? null
+                : '작업중 상태에서만 하위작업을 만들 수 있어요'
+            }
+            onCreate={() => setSubtaskCreateOpen(true)}
+          />
           {/* 정정 권한은 기록 권한과 같다 — 등록자가 남긴 증적을 등록자가 못 고치면 안 된다 */}
           <RequestAcceptanceCard
             request={request}
@@ -173,6 +124,9 @@ function RequestDetailPage() {
           onOpenChange={setEditOpen}
           title={`${request.issueNo} 수정`}
           submitLabel="저장"
+          // 첨부 가능 조건이 수정 가능 조건과 같아 한 폼에 둔다 — 규칙이 갈라질 자리를 없앤다
+          withAttachments
+          existingAttachments={request.attachments}
           defaultValues={{
             title: request.title,
             description: request.description,
@@ -201,6 +155,31 @@ function RequestDetailPage() {
               {
                 onSuccess: (changed) => {
                   setEditOpen(false)
+                  // 첨부는 이력을 따로 남기는 별개 동작이라 내용 수정과 나눠 부른다
+                  const removed = request.attachments.filter((attachment) =>
+                    values.removedAttachmentIds.includes(attachment.id)
+                  )
+                  if (removed.length > 0) {
+                    deleteAttachments.mutate(
+                      { issueNo: request.issueNo, attachments: removed, actorName: user.name },
+                      {
+                        onSuccess: () => toast.success(`첨부 ${removed.length}개를 뗐습니다.`),
+                      }
+                    )
+                  }
+                  if (values.attachments.length > 0) {
+                    attachFiles.mutate(
+                      {
+                        issueNo: request.issueNo,
+                        files: values.attachments,
+                        actorName: user.name,
+                      },
+                      {
+                        onSuccess: () =>
+                          toast.success(`${values.attachments.length}개 파일을 첨부했습니다.`),
+                      }
+                    )
+                  }
                   // 값이 그대로면 아무것도 기록되지 않으므로 수정했다고 알리지 않는다
                   if (changed) toast.success(`${request.issueNo} 이슈를 수정했습니다.`)
                 },

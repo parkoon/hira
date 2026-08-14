@@ -13,9 +13,12 @@ import { useCurrentUser } from '@/features/users/hooks/use-current-user'
 import { Lozenge } from '@/shared/components/ui/lozenge'
 import { NameAvatar } from '@/shared/components/ui/name-avatar'
 
-import { RequestStatusControl } from './request-status-control'
+import { RequestProgressCard } from './request-progress-card'
 
-/** 우측 컬럼 — 정보만 담는다. 상태 전이는 본문 제목 아래 액션 줄이 맡는다 */
+/**
+ * 우측 컬럼 — 진행 상태(전이) 카드 + 결재 + 세부 사항.
+ * 상태에 관한 것은 전부 진행 상태 카드가 맡고, 레코드 수정은 브레드크럼의 '...' 메뉴가 맡는다.
+ */
 export function RequestDetailPanel({ request }: { request: Request }) {
   const { user } = useCurrentUser()
   const approveRequest = useApproveRequestMutation()
@@ -25,6 +28,8 @@ export function RequestDetailPanel({ request }: { request: Request }) {
 
   return (
     <div className="space-y-3">
+      <RequestProgressCard request={request} />
+
       {/* 승인 전에만 결재를 받는다 — 승인 이후엔 결재 이력을 활동 로그에서 본다 (시나리오 3) */}
       {request.status === 'PENDING_APPROVAL' && requiredApprovals.length > 0 && (
         <PanelCard title="요청 승인 결재">
@@ -45,10 +50,6 @@ export function RequestDetailPanel({ request }: { request: Request }) {
       )}
 
       <PanelCard title="세부 사항">
-        <PanelCardField label="상태">
-          <RequestStatusControl request={request} />
-        </PanelCardField>
-
         <PanelCardField label="요청자">
           <span className="flex items-center gap-1.5">
             <NameAvatar name={request.requester.name} />
