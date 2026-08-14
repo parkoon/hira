@@ -128,7 +128,7 @@ export function ComplianceStep() {
       </Field>
 
       <p className="text-muted-foreground border-t pt-3 text-[11px]">
-        제출 후에는 수정할 수 없어요. 수정이 필요하면 회수 후 재제출하세요
+        승인을 요청한 뒤에는 수정할 수 없어요. 수정이 필요하면 회수 후 다시 요청하세요
       </p>
     </div>
   )

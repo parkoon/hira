@@ -9,7 +9,7 @@ import { paths } from '@/shared/config/paths'
 
 import { RequestFormModal } from './request-form-modal'
 
-/** 헤더의 '새 이슈' — 등록은 요청대기중까지만 만든다. 제출은 상세에서 한다 (시나리오 1·2) */
+/** 헤더의 '새 이슈' — 등록은 요청대기중까지만 만든다. 승인 요청은 상세에서 한다 (시나리오 1·2) */
 export function RequestCreateModal() {
   const [open, setOpen] = useState(false)
   const navigate = useNavigate()
@@ -50,7 +50,9 @@ export function RequestCreateModal() {
                 onSuccess: ({ issueNo, complete }) => {
                   setOpen(false)
                   if (complete) {
-                    toast.success(`${issueNo} 이슈를 등록했습니다. 내용을 확인하고 제출해 주세요.`)
+                    toast.success(
+                      `${issueNo} 이슈를 등록했습니다. 내용을 확인하고 승인을 요청해 주세요.`
+                    )
                   } else {
                     toast.warning(
                       `${issueNo} 이슈는 등록됐지만 일부 정보 저장에 실패했습니다. 상세 화면에서 내용을 확인해 주세요.`

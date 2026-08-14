@@ -5,7 +5,8 @@ export const AUDIT_EVENT_META = {
   LOGIN_SUCCESS: { label: '로그인 성공', order: 10, tone: 'neutral' },
   LOGIN_FAILURE: { label: '로그인 실패', order: 20, tone: 'danger' },
   LOGOUT: { label: '로그아웃', order: 30, tone: 'neutral' },
-  ISSUE_SUBMIT: { label: '이슈 제출', order: 40, tone: 'info' },
+  // 화면 어휘는 '승인 요청'이다. enum 이름(ISSUE_SUBMIT)과 DB 컬럼(submitted_at)은 그대로다
+  ISSUE_SUBMIT: { label: '승인 요청', order: 40, tone: 'info' },
   ISSUE_UPDATE: { label: '이슈 수정', order: 45, tone: 'warning' },
   ISSUE_APPROVE: { label: '이슈 승인', order: 50, tone: 'success' },
   ISSUE_REJECT: { label: '이슈 반려', order: 60, tone: 'danger' },

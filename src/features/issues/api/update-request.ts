@@ -83,7 +83,7 @@ export const updateRequestService = async ({
     .select('issue_no')
   if (error) throw error
   if (updated.length === 0) {
-    throw new AppError('제출된 이슈는 수정할 수 없습니다. 화면을 새로고침해 주세요.')
+    throw new AppError('승인을 요청한 이슈는 수정할 수 없습니다. 화면을 새로고침해 주세요.')
   }
 
   const summary = changes.join(' · ')

@@ -156,7 +156,10 @@ export function getRequestApproveState(request: Request, user: User) {
   return { enabled: true, reason: null }
 }
 
-/** 요청 제출은 등록자 본인이 한다 (시나리오 2) */
+/**
+ * 요청 제출은 등록자 본인이 한다 (시나리오 2).
+ * 화면 어휘는 '승인 요청'이다 — 코드·DB는 스펙 용어(submit)를 그대로 쓴다.
+ */
 export function canSubmitRequest(request: Request, user: User) {
   return (
     (request.status === 'DRAFT' || request.status === 'REJECTED') &&

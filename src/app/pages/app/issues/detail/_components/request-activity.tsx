@@ -6,7 +6,7 @@ import { getSubjectParticle } from '@/shared/utils/korean'
 
 function describeEntry(entry: StatusHistoryEntry) {
   if (entry.fromStatus === null) return '이슈를 생성함 (임시저장)'
-  if (entry.toStatus === 'PENDING_APPROVAL' && entry.fromStatus === 'DRAFT') return '이슈를 제출함'
+  if (entry.toStatus === 'PENDING_APPROVAL' && entry.fromStatus === 'DRAFT') return '승인을 요청함'
   // 하위작업 생성·결재 승인은 상태를 그대로 두고 사유만 남긴다
   if (entry.fromStatus === entry.toStatus) return '기록을 남김'
 

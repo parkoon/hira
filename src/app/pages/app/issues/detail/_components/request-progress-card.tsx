@@ -68,17 +68,17 @@ export function RequestProgressCard({ request }: { request: Request }) {
   }
 
   const resolveForwardAction = (): ForwardAction | null => {
-    // 제출 — 요청대기중·반려 상태의 등록자 (시나리오 2)
+    // 승인 요청 — 요청대기중·반려 상태의 등록자 (시나리오 2)
     if (canSubmitRequest(request, user)) {
       return {
-        label: '제출',
+        label: '승인 요청',
         onClick: () =>
           confirmTransition({
-            action: '제출',
+            action: '승인 요청',
             description:
-              '제출하면 리드가 검토·승인할 수 있게 되고, 그때까지 내용을 수정할 수 없습니다.',
+              '승인을 요청하면 리드가 검토·승인할 수 있게 되고, 그때까지 내용을 수정할 수 없습니다.',
             toStatus: 'PENDING_APPROVAL',
-            successMessage: `${request.issueNo} 이슈를 제출했습니다.`,
+            successMessage: `${request.issueNo} 이슈의 승인을 요청했습니다.`,
           }),
       }
     }
@@ -157,7 +157,7 @@ export function RequestProgressCard({ request }: { request: Request }) {
           currentIndex={REQUEST_FLOW.indexOf(request.status)}
           note={
             request.status === 'REJECTED'
-              ? '반려는 이 흐름 밖입니다. 다시 제출하면 요청승인대기중으로 돌아갑니다.'
+              ? '반려는 이 흐름 밖입니다. 승인을 다시 요청하면 요청승인대기중으로 돌아갑니다.'
               : undefined
           }
         />
