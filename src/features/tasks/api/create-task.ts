@@ -54,6 +54,7 @@ export const createTaskService = async ({
     status: 'DRAFT',
     priority: draft.priority,
     requester_id: requesterId,
+    consultant_id: draft.consultantId,
     due_date: draft.dueDate,
     created_at: format(new Date(), 'yyyy-MM-dd'),
     handles_personal_data: draft.handlesPersonalData,

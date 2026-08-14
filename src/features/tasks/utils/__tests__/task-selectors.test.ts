@@ -57,6 +57,7 @@ const makeTask = (overrides: Partial<Task> = {}): Task => ({
   status: 'IN_PROGRESS',
   priority: 'NORMAL',
   requester: { id: 'user-kim', name: '김현주', dept: '보험운영팀', contact: '02-1234-5678' },
+  consultant: { id: 'user-1', name: '임도윤', dept: '서비스개발실' },
   dueDate: '2026-12-31',
   createdAt: '2026-08-01',
   submittedAt: '2026-08-01',

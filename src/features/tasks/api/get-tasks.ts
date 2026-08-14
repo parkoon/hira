@@ -24,6 +24,7 @@ type Tables = Database['public']['Tables']
 const TASK_TREE_SELECT = `
   *,
   requester:profiles!tasks_requester_id_fkey(id, name, dept, contact),
+  consultant:profiles!tasks_consultant_id_fkey(id, name, dept),
   attachments(*),
   approvals(*),
   evidences(*, reference_links(*), attachments(*)),
@@ -63,6 +64,7 @@ type SubtaskRow = Tables['subtasks']['Row'] & {
 
 type TaskRow = Tables['tasks']['Row'] & {
   requester: Pick<Tables['profiles']['Row'], 'id' | 'name' | 'dept' | 'contact'> | null
+  consultant: Pick<Tables['profiles']['Row'], 'id' | 'name' | 'dept'> | null
   attachments: Tables['attachments']['Row'][]
   approvals: Tables['approvals']['Row'][]
   evidences: EvidenceRow[]
@@ -160,6 +162,7 @@ function toTask(row: TaskRow): Task {
       dept: row.requester?.dept ?? '',
       contact: row.requester?.contact ?? '',
     },
+    consultant: row.consultant,
     dueDate: row.due_date,
     createdAt: row.created_at,
     submittedAt: row.submitted_at === null ? null : toDate(row.submitted_at),

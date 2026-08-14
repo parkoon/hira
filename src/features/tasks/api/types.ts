@@ -150,6 +150,8 @@ export type TaskDraft = {
   description: string
   priority: Priority
   dueDate: string
+  /** 사전협의자 profiles.id — 폼에서 필수라 항상 채워진다 */
+  consultantId: string
   handlesPersonalData: boolean
   consumerProtectionTarget: boolean
   darkPatternChecked: boolean
@@ -170,6 +172,11 @@ export type Task = {
   status: TaskStatus
   priority: Priority
   requester: TaskActor & { contact: string }
+  /**
+   * 등록 전에 협의한 상대 (등록 폼 필수).
+   * 이 필드가 생기기 전에 등록된 건은 `null`이다 — 없는 값을 지어내지 않는다.
+   */
+  consultant: TaskActor | null
   dueDate: string
   createdAt: string
   submittedAt: string | null

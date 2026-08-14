@@ -380,6 +380,7 @@ export type Database = {
       }
       tasks: {
         Row: {
+          consultant_id: string | null
           consumer_protection_target: boolean
           created_at: string
           dark_pattern_checked: boolean
@@ -394,6 +395,7 @@ export type Database = {
           title: string
         }
         Insert: {
+          consultant_id?: string | null
           consumer_protection_target?: boolean
           created_at?: string
           dark_pattern_checked?: boolean
@@ -408,6 +410,7 @@ export type Database = {
           title: string
         }
         Update: {
+          consultant_id?: string | null
           consumer_protection_target?: boolean
           created_at?: string
           dark_pattern_checked?: boolean
@@ -422,6 +425,13 @@ export type Database = {
           title?: string
         }
         Relationships: [
+          {
+            foreignKeyName: 'tasks_consultant_id_fkey'
+            columns: ['consultant_id']
+            isOneToOne: false
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
           {
             foreignKeyName: 'tasks_requester_id_fkey'
             columns: ['requester_id']

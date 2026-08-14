@@ -14,6 +14,8 @@ export const taskFormSchema = z.object({
       '오늘 이전 날짜는 선택할 수 없어요'
     ),
   priority: z.enum(PRIORITIES),
+  // 등록 전에 누구와 협의했는지 — 이름이 아니라 profiles.id로 받는다
+  consultantId: z.string().min(1, '사전협의자를 선택해 주세요'),
   description: z.string().trim().min(1, '상세내용을 입력해 주세요'),
   // 용량·확장자 제한은 고를 때 `validateAttachment`가 막으므로 여기선 담아만 둔다 (스펙 §4.2)
   attachments: z.array(z.instanceof(File)),
@@ -33,5 +35,6 @@ export const TASK_CONTENT_FIELDS = [
   'title',
   'dueDate',
   'priority',
+  'consultantId',
   'description',
 ] as const satisfies readonly (keyof TaskFormValues)[]

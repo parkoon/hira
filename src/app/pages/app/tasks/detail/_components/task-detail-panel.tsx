@@ -57,6 +57,18 @@ export function TaskDetailPanel({ task }: { task: Task }) {
           </span>
         </PanelCardField>
 
+        <PanelCardField label="사전협의자">
+          {/* 이 필드가 생기기 전에 등록된 건은 값이 없다 */}
+          {task.consultant ? (
+            <span className="flex items-center gap-1.5">
+              <NameAvatar name={task.consultant.name} />
+              {task.consultant.name} · {task.consultant.dept}
+            </span>
+          ) : (
+            <span className="text-muted-foreground">없음</span>
+          )}
+        </PanelCardField>
+
         <PanelCardField label="완료요청일">
           <span className="flex items-center gap-1.5">
             {task.dueDate}

@@ -3,7 +3,7 @@ import { ArrowLeftIcon, ArrowRightIcon } from 'lucide-react'
 import { useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 
-import type { Attachment } from '@/features/tasks/api/types'
+import type { Attachment, TaskActor } from '@/features/tasks/api/types'
 import {
   TASK_CONTENT_FIELDS,
   taskFormSchema,
@@ -21,6 +21,8 @@ type TaskFormModalProps = {
   onOpenChange: (open: boolean) => void
   title: string
   submitLabel: string
+  /** 사전협의자 후보 — 호출 측이 조회해서 넘긴다 (모달을 열 때 화면이 서스펜드되지 않게) */
+  consultableUsers: TaskActor[]
   /** 수정처럼 기존 값에서 시작할 때 */
   defaultValues?: Partial<TaskFormValues>
   /**
@@ -45,6 +47,7 @@ export function TaskFormModal({
   onOpenChange,
   title,
   submitLabel,
+  consultableUsers,
   defaultValues,
   withAttachments = false,
   existingAttachments,
@@ -59,6 +62,7 @@ export function TaskFormModal({
       title: defaultValues?.title ?? '',
       dueDate: defaultValues?.dueDate ?? '',
       priority: defaultValues?.priority ?? 'NORMAL',
+      consultantId: defaultValues?.consultantId ?? '',
       description: defaultValues?.description ?? '',
       handlesPersonalData: defaultValues?.handlesPersonalData,
       consumerProtectionTarget: defaultValues?.consumerProtectionTarget,
@@ -92,7 +96,7 @@ export function TaskFormModal({
         onOpenChange={handleOpenChange}
         title={title}
         className="sm:max-w-4xl"
-        aside={<TaskMetaAside />}
+        aside={<TaskMetaAside consultableUsers={consultableUsers} />}
         secondaryAction={
           step === 2
             ? {

@@ -29,8 +29,9 @@ export const updateTaskService = async ({
   const { data: current, error: readError } = await supabase
     .from('tasks')
     .select(
-      `status, title, description, priority, due_date,
-       handles_personal_data, consumer_protection_target, dark_pattern_checked`
+      `status, title, description, priority, due_date, consultant_id,
+       handles_personal_data, consumer_protection_target, dark_pattern_checked,
+       consultant:profiles!tasks_consultant_id_fkey(name)`
     )
     .eq('task_no', taskNo)
     .single()
@@ -47,6 +48,17 @@ export const updateTaskService = async ({
   }
   if (draft.dueDate !== current.due_date) {
     changes.push(`완료요청일 ${current.due_date} → ${draft.dueDate}`)
+  }
+  if (draft.consultantId !== current.consultant_id) {
+    // 이력은 사람이 읽는다 — id만 남기면 누구로 바뀌었는지 알 수 없어 이름을 찾아온다.
+    // 이 필드가 생기기 전 건은 이전 값이 없어 '없음'으로 적는다
+    const { data: next, error: consultantError } = await supabase
+      .from('profiles')
+      .select('name')
+      .eq('id', draft.consultantId)
+      .single()
+    if (consultantError) throw consultantError
+    changes.push(`사전협의자 ${current.consultant?.name ?? '없음'} → ${next.name}`)
   }
   if (draft.handlesPersonalData !== current.handles_personal_data) {
     changes.push(
@@ -73,6 +85,7 @@ export const updateTaskService = async ({
       description: draft.description,
       priority: draft.priority,
       due_date: draft.dueDate,
+      consultant_id: draft.consultantId,
       handles_personal_data: draft.handlesPersonalData,
       consumer_protection_target: draft.consumerProtectionTarget,
       dark_pattern_checked: draft.darkPatternChecked,
@@ -90,7 +103,7 @@ export const updateTaskService = async ({
 
   // 상태는 그대로 두고 수정 내용만 남긴다 (하위작업 생성 기록과 같은 방식)
   await insertHistory(
-    { taskNo: taskNo },
+    { taskNo },
     {
       actorName,
       fromStatus: current.status,

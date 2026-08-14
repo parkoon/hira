@@ -122,6 +122,7 @@ function TaskDetailPage() {
           onOpenChange={setEditOpen}
           title={`${task.taskNo} 수정`}
           submitLabel="저장"
+          consultableUsers={selectAssignableUsers(usersQuery.data)}
           // 첨부 가능 조건이 수정 가능 조건과 같아 한 폼에 둔다 — 규칙이 갈라질 자리를 없앤다
           withAttachments
           existingAttachments={task.attachments}
@@ -130,6 +131,7 @@ function TaskDetailPage() {
             description: task.description,
             priority: task.priority,
             dueDate: task.dueDate,
+            consultantId: task.consultant?.id ?? '',
             handlesPersonalData: task.handlesPersonalData ? 'YES' : 'NO',
             consumerProtectionTarget: task.consumerProtectionTarget ? 'YES' : 'NO',
             darkPatternChecked: task.darkPatternChecked,
@@ -144,6 +146,7 @@ function TaskDetailPage() {
                   description: values.description,
                   priority: values.priority,
                   dueDate: values.dueDate,
+                  consultantId: values.consultantId,
                   handlesPersonalData: values.handlesPersonalData === 'YES',
                   consumerProtectionTarget: values.consumerProtectionTarget === 'YES',
                   darkPatternChecked: values.darkPatternChecked,
