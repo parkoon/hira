@@ -142,26 +142,34 @@ export function SubtaskProgressCard({ subtask, task, canTransition }: SubtaskPro
             )
           }}
         >
+          {/* 링크·첨부·메모와 같은 Field 리듬을 탄다 — 이 단계에만 있는 입력이라고 상자로 가르지 않는다 */}
           {isDevelopmentStep && (
-            <div className="bg-muted space-y-3 rounded-md px-3 py-2.5">
-              <label className="flex items-start gap-2 text-[13px]">
-                <Checkbox
-                  checked={dbaChecked}
-                  onCheckedChange={(checked) => setDbaChecked(checked === true)}
-                />
-                <span>
-                  DBA 검증을 받습니다
-                  <span className="text-muted-foreground block text-xs">
-                    체크하면 제3자검증 전에 DBA 검증중 단계를 거칩니다.
+            <>
+              <Field>
+                <FieldLabel
+                  htmlFor="dba-checked"
+                  className="items-start text-[13px] font-normal"
+                >
+                  <Checkbox
+                    id="dba-checked"
+                    className="mt-0.5"
+                    checked={dbaChecked}
+                    onCheckedChange={(checked) => setDbaChecked(checked === true)}
+                  />
+                  <span className="flex flex-col gap-0.5">
+                    DBA 검증을 받습니다
+                    <span className="text-muted-foreground text-[11px]">
+                      체크하면 제3자검증 전에 DBA 검증중 단계를 거칩니다.
+                    </span>
                   </span>
-                </span>
-              </label>
+                </FieldLabel>
+              </Field>
 
               {dbaChecked && (
                 <Field>
-                  <FieldLabel htmlFor="dba-task">검증받을 내용</FieldLabel>
+                  <FieldLabel htmlFor="dba-request">검증받을 내용</FieldLabel>
                   <Textarea
-                    id="dba-task"
+                    id="dba-request"
                     rows={3}
                     value={dbaRequest}
                     placeholder="예: 납입내역 조회 쿼리 인덱스 설계와 5년치 조회 성능"
@@ -169,7 +177,7 @@ export function SubtaskProgressCard({ subtask, task, canTransition }: SubtaskPro
                   />
                 </Field>
               )}
-            </div>
+            </>
           )}
         </TransitionEvidenceDialog>
       )}
