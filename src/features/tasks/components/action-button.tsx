@@ -8,7 +8,7 @@ type ActionButtonProps = {
   reason?: string | null
   /** 전이 진행 중 — 재클릭하면 이력·감사 로그가 중복으로 쌓인다 */
   pending?: boolean
-  variant?: 'default' | 'outline' | 'destructive' | 'link'
+  variant?: 'default' | 'outline' | 'outline-primary' | 'destructive' | 'link'
   size?: 'default' | 'sm'
   className?: string
   onClick: () => void

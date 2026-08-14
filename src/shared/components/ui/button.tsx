@@ -12,6 +12,10 @@ const buttonVariants = cva(
         default: 'bg-primary text-primary-foreground hover:bg-primary/80',
         outline:
           'border-border bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50',
+        // 솔리드(default)만큼 무겁지 않게 주 동작을 가리킬 때. 다크에서는 --primary가
+        // 카드 배경보다 겨우 밝아 그대로 쓰면 글자가 묻는다 — foreground를 섞어 띄운다
+        'outline-primary':
+          'border-primary/40 text-primary hover:bg-primary/10 focus-visible:border-primary focus-visible:ring-primary/20 dark:border-primary/60 dark:bg-primary/10 dark:hover:bg-primary/20 dark:text-[color-mix(in_oklch,var(--primary),var(--foreground)_45%)]',
         secondary:
           'bg-secondary text-secondary-foreground aria-expanded:bg-secondary aria-expanded:text-secondary-foreground hover:bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_5%)]',
         ghost:
