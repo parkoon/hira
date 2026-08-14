@@ -6,10 +6,9 @@ import type { Request, Subtask } from '@/features/issues/api/types'
 import { ApprovalGate } from '@/features/issues/components/approval-gate'
 import { IssueKeyLink } from '@/features/issues/components/issue-key-link'
 import { PanelCard, PanelCardField } from '@/features/issues/components/panel-card'
-import { SUBTASK_TYPE_META } from '@/features/issues/constants/metadata'
+import { SubtaskTypeLabel } from '@/features/issues/components/subtask-type-label'
 import { getDeploymentUrl, getSubtaskApprovalState } from '@/features/issues/utils/issue-selectors'
 import { useCurrentUser } from '@/features/users/hooks/use-current-user'
-import { Lozenge } from '@/shared/components/ui/lozenge'
 import { NameAvatar } from '@/shared/components/ui/name-avatar'
 import { paths } from '@/shared/config/paths'
 
@@ -76,9 +75,7 @@ export function SubtaskDetailPanel({ subtask, request, canTransition }: SubtaskD
         </PanelCardField>
 
         <PanelCardField label="이슈유형">
-          <Lozenge tone={SUBTASK_TYPE_META[subtask.type].tone}>
-            {SUBTASK_TYPE_META[subtask.type].label}
-          </Lozenge>
+          <SubtaskTypeLabel type={subtask.type} />
         </PanelCardField>
 
         <PanelCardField label="목표일">{subtask.dueDate ?? '—'}</PanelCardField>

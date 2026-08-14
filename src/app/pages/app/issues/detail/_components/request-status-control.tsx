@@ -137,7 +137,6 @@ export function RequestStatusControl({ request }: { request: Request }) {
         open={open}
         onOpenChange={setOpen}
         label={REQUEST_STATUS_META[request.status].label}
-        tone={REQUEST_STATUS_META[request.status].tone}
         steps={REQUEST_FLOW.map((status) => REQUEST_STATUS_META[status].label)}
         currentIndex={REQUEST_FLOW.indexOf(request.status)}
         note={

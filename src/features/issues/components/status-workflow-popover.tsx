@@ -2,16 +2,13 @@ import { ChevronDownIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/components/ui/popover'
-import { TONE_CLASS } from '@/shared/components/ui/tone'
 import { cn } from '@/shared/utils/cn'
-import type { EnumTone } from '@/shared/utils/enum'
 
 type StatusWorkflowPopoverProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
-  /** 현재 상태 — 트리거 버튼이 곧 상태다 */
+  /** 현재 상태 — 트리거가 곧 상태다 */
   label: string
-  tone: EnumTone
   /** 흐름 순서대로의 단계 라벨 — 상태 enum은 화면마다 달라 라벨만 받는다 */
   steps: string[]
   /** 현재 단계 인덱스. 흐름 밖 상태(반려 등)면 -1 */
@@ -28,9 +25,9 @@ type StatusWorkflowPopoverProps = {
 /**
  * 상태 버튼을 눌러 여는 워크플로 팝오버 — 점과 선으로 잇는 세로 레일.
  *
- * 트리거는 배지가 아니라 버튼이다. 배지는 목록에서 여러 행을 색으로 훑기 위한 것이고,
- * 상세에는 상태가 하나뿐이라 훑을 일이 없다. 배지를 버튼으로 감싸면 한 줄에
- * 배지·버튼·chevron이 겹쳐 무엇을 누르는 것인지 흐려진다 — 색만 물려받고 모양은 컨트롤로 둔다.
+ * 트리거는 배지가 아니라 텍스트다. 배지도, 배지의 색도 목록에서 여러 행을 훑기 위한 장치인데
+ * 상세에는 상태가 하나뿐이고 바로 옆에 '상태' 라벨이 붙어 있어 훑을 일도 알려줄 일도 없다.
+ * 같은 열의 다른 값들이 전부 평범한 텍스트라 여기만 색 블록이면 시선을 과하게 가져간다.
  *
  * 단계 번호는 두지 않는다. 고정 워크플로라 "몇 단계"로 부를 일이 없고, 번호가 빠지면
  * 점이 작아져 라벨이 주인공이 된다. 세로로 두는 이유는 단계가 늘어도 선형이 유지되기 때문이다 —
@@ -42,7 +39,6 @@ export function StatusWorkflowPopover({
   open,
   onOpenChange,
   label,
-  tone,
   steps,
   currentIndex,
   note,
@@ -54,23 +50,18 @@ export function StatusWorkflowPopover({
       onOpenChange={onOpenChange}
     >
       <PopoverTrigger asChild>
-        {/*
-          -ml-2로 버튼 안쪽 여백만큼 되밀어, 라벨 글자가 아래 필드 값들과 같은 세로선에서 시작한다.
-          hover는 색을 새로 정하지 않고 밝기만 조절해 tone 팔레트와 자동으로 맞물린다
-        */}
+        {/* -ml-2로 안쪽 여백만큼 되밀어, 라벨 글자가 아래 필드 값들과 같은 세로선에서 시작한다 */}
         <button
           type="button"
-          className={cn(
-            'focus-visible:ring-ring/50 -ml-2 flex h-7 items-center gap-1 rounded-md px-2 text-[13px] font-medium transition-[filter] outline-none focus-visible:ring-3',
-            'hover:brightness-95 dark:hover:brightness-125',
-            TONE_CLASS[tone]
-          )}
+          className="hover:bg-muted focus-visible:ring-ring/50 data-[state=open]:bg-muted -ml-2 flex h-7 items-center gap-1 rounded-md px-2 text-[13px] font-medium transition-colors outline-none focus-visible:ring-3"
         >
           {label}
-          {/* 상태색을 물려받아 회색 아이콘이 겉돌지 않게 한다 */}
           <ChevronDownIcon
             aria-hidden
-            className={cn('size-3.5 opacity-70 transition-transform', open && 'rotate-180')}
+            className={cn(
+              'text-muted-foreground size-3.5 transition-transform',
+              open && 'rotate-180'
+            )}
           />
         </button>
       </PopoverTrigger>

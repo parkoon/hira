@@ -91,7 +91,6 @@ export function SubtaskStatusControl({
         open={open}
         onOpenChange={setOpen}
         label={SUBTASK_STATUS_META[subtask.status].label}
-        tone={SUBTASK_STATUS_META[subtask.status].tone}
         steps={flow.map((status) => SUBTASK_STATUS_META[status].label)}
         currentIndex={flow.indexOf(subtask.status)}
         action={
