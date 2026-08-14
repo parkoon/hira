@@ -2,14 +2,11 @@ import { ExternalLinkIcon, GitBranchIcon } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { useApproveSubtaskMutation } from '@/features/issues/api/approve-subtask'
-import type { Subtask } from '@/features/issues/api/types'
+import type { Request, Subtask } from '@/features/issues/api/types'
 import { ApprovalGate } from '@/features/issues/components/approval-gate'
 import { IssueKeyLink } from '@/features/issues/components/issue-key-link'
 import { PanelCard, PanelCardField } from '@/features/issues/components/panel-card'
-import { SubtaskStatusLozenge } from '@/features/issues/components/subtask-status-lozenge'
-import { WorkflowStepsPopover } from '@/features/issues/components/workflow-steps-popover'
-import { SUBTASK_STATUS_META, SUBTASK_TYPE_META } from '@/features/issues/constants/metadata'
-import { getSubtaskFlow } from '@/features/issues/constants/transitions'
+import { SUBTASK_TYPE_META } from '@/features/issues/constants/metadata'
 import { getDeploymentUrl, getSubtaskApprovalState } from '@/features/issues/utils/issue-selectors'
 import { useCurrentUser } from '@/features/users/hooks/use-current-user'
 import { Lozenge } from '@/shared/components/ui/lozenge'
@@ -17,18 +14,21 @@ import { NameAvatar } from '@/shared/components/ui/name-avatar'
 import { paths } from '@/shared/config/paths'
 
 import { CreateBranchDialog } from './create-branch-dialog'
+import { SubtaskStatusControl } from './subtask-status-control'
 
 type SubtaskDetailPanelProps = {
   subtask: Subtask
+  /** 이행 게이트 판정에 부모 상태가 필요하다 (시나리오 17) */
+  request: Request
+  canTransition: boolean
 }
 
-/** 우측 컬럼 — 정보만 담는다. 상태 전이는 본문 제목 아래 액션 줄이 맡는다 */
-export function SubtaskDetailPanel({ subtask }: SubtaskDetailPanelProps) {
+/** 우측 컬럼 — 상태 칩이 워크플로와 다음 단계 진행을 함께 연다 */
+export function SubtaskDetailPanel({ subtask, request, canTransition }: SubtaskDetailPanelProps) {
   const { user } = useCurrentUser()
   const approveSubtask = useApproveSubtaskMutation()
 
   const deploymentUrl = getDeploymentUrl(subtask)
-  const flow = getSubtaskFlow(subtask)
   const requiredApprovals = getSubtaskApprovalState(subtask).required
 
   return (
@@ -55,13 +55,11 @@ export function SubtaskDetailPanel({ subtask }: SubtaskDetailPanelProps) {
 
       <PanelCard title="세부 사항">
         <PanelCardField label="상태">
-          <span className="flex items-center gap-1.5">
-            <SubtaskStatusLozenge status={subtask.status} />
-            <WorkflowStepsPopover
-              steps={flow.map((status) => SUBTASK_STATUS_META[status].label)}
-              currentIndex={flow.indexOf(subtask.status)}
-            />
-          </span>
+          <SubtaskStatusControl
+            subtask={subtask}
+            request={request}
+            canTransition={canTransition}
+          />
         </PanelCardField>
 
         <PanelCardField label="상위 이슈">

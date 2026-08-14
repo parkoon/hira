@@ -6,15 +6,14 @@ import { ApprovalGate } from '@/features/issues/components/approval-gate'
 import { PanelCard, PanelCardField } from '@/features/issues/components/panel-card'
 import { PersonalDataLozenge } from '@/features/issues/components/personal-data-lozenge'
 import { PriorityLabel } from '@/features/issues/components/priority-label'
-import { RequestStatusLozenge } from '@/features/issues/components/request-status-lozenge'
-import { WorkflowStepsPopover } from '@/features/issues/components/workflow-steps-popover'
-import { APPROVAL_KIND_META, REQUEST_STATUS_META } from '@/features/issues/constants/metadata'
-import { REQUEST_FLOW } from '@/features/issues/constants/transitions'
+import { APPROVAL_KIND_META } from '@/features/issues/constants/metadata'
 import { getDueDateStatus } from '@/features/issues/utils/due-date'
 import { getRequiredApprovals } from '@/features/issues/utils/issue-selectors'
 import { useCurrentUser } from '@/features/users/hooks/use-current-user'
 import { Lozenge } from '@/shared/components/ui/lozenge'
 import { NameAvatar } from '@/shared/components/ui/name-avatar'
+
+import { RequestStatusControl } from './request-status-control'
 
 /** 우측 컬럼 — 정보만 담는다. 상태 전이는 본문 제목 아래 액션 줄이 맡는다 */
 export function RequestDetailPanel({ request }: { request: Request }) {
@@ -47,18 +46,7 @@ export function RequestDetailPanel({ request }: { request: Request }) {
 
       <PanelCard title="세부 사항">
         <PanelCardField label="상태">
-          <span className="flex items-center gap-1.5">
-            <RequestStatusLozenge status={request.status} />
-            <WorkflowStepsPopover
-              steps={REQUEST_FLOW.map((status) => REQUEST_STATUS_META[status].label)}
-              currentIndex={REQUEST_FLOW.indexOf(request.status)}
-              note={
-                request.status === 'REJECTED'
-                  ? '반려는 이 흐름 밖입니다. 다시 제출하면 요청승인대기중으로 돌아갑니다.'
-                  : undefined
-              }
-            />
-          </span>
+          <RequestStatusControl request={request} />
         </PanelCardField>
 
         <PanelCardField label="요청자">

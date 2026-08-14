@@ -3,12 +3,14 @@ import { toast } from 'sonner'
 
 import { useTransitionSubtaskMutation } from '@/features/issues/api/transition-subtask'
 import type { Request, Subtask } from '@/features/issues/api/types'
+import { StatusWorkflowPopover } from '@/features/issues/components/status-workflow-popover'
 import { TransitionEvidenceDialog } from '@/features/issues/components/transition-evidence-dialog'
 import { SUBTASK_ADVANCE_LABEL, SUBTASK_STATUS_META } from '@/features/issues/constants/metadata'
 import { EVIDENCE_HINT } from '@/features/issues/constants/transition-evidence'
 import {
   getNextSubtaskStatus,
   getPostDevelopmentStatus,
+  getSubtaskFlow,
 } from '@/features/issues/constants/transitions'
 import { getSubtaskDeployGate } from '@/features/issues/utils/issue-selectors'
 import { useCurrentUser } from '@/features/users/hooks/use-current-user'
@@ -19,18 +21,23 @@ import { Textarea } from '@/shared/components/ui/textarea'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/components/ui/tooltip'
 import { useConfirm } from '@/shared/hooks/use-confirm'
 
-type SubtaskTransitionActionsProps = {
+type SubtaskStatusControlProps = {
   subtask: Subtask
   request: Request
   /** 전이는 담당자·리드만 가능 (스펙 §5.3) */
   canTransition: boolean
 }
 
-export function SubtaskTransitionActions({
+/**
+ * 상태 칩 + 워크플로 + 다음 단계 진행. 하위작업은 흐름을 벗어나는 액션이 없어 전이가 전부 여기 있다.
+ * 증적 팝업은 팝오버 밖에 둔다 — 안에 두면 팝오버가 닫히며 입력하던 팝업까지 사라진다.
+ */
+export function SubtaskStatusControl({
   subtask,
   request,
   canTransition,
-}: SubtaskTransitionActionsProps) {
+}: SubtaskStatusControlProps) {
+  const [open, setOpen] = useState(false)
   const [evidenceOpen, setEvidenceOpen] = useState(false)
   const [dbaChecked, setDbaChecked] = useState(false)
   const [dbaRequest, setDbaRequest] = useState('')
@@ -38,13 +45,12 @@ export function SubtaskTransitionActions({
   const confirm = useConfirm()
   const transitionSubtask = useTransitionSubtaskMutation()
 
+  const flow = getSubtaskFlow(subtask)
+  // DBA 검증중은 결재가 떨어지면 자동으로 넘어가고, 완료는 더 갈 곳이 없다
   const label = SUBTASK_ADVANCE_LABEL[subtask.status]
   // 이행은 부모 인수 확인이 끝나야 가능하다 (시나리오 17)
   const deployGate = getSubtaskDeployGate(request, subtask)
   const hint = EVIDENCE_HINT[subtask.status]
-
-  // DBA 검증중은 결재가 떨어지면 자동으로 넘어가고, 완료는 더 갈 곳이 없다
-  if (!label) return null
 
   const isDevelopmentStep = subtask.status === 'DEVELOPMENT'
   // 개발 완료만 다음 단계가 체크 여부로 갈린다 (시나리오 8)
@@ -53,6 +59,8 @@ export function SubtaskTransitionActions({
     : getNextSubtaskStatus(subtask)
 
   const handleForward = () => {
+    setOpen(false)
+
     if (hint) {
       setEvidenceOpen(true)
       return
@@ -78,45 +86,56 @@ export function SubtaskTransitionActions({
   }
 
   return (
-    // 감싸는 행은 패널이 갖는다 — 버튼이 상태 칩과 같은 flex 줄에 놓여야 한다
     <>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <span className="inline-block">
-            <Button
-              disabled={
-                !canTransition ||
-                nextStatus === null ||
-                deployGate.blocked ||
-                // 전이 중 재클릭하면 두 번째 전이가 증적을 다음 단계에 잘못 귀속시킨다
-                transitionSubtask.isPending
-              }
-              onClick={handleForward}
-              variant="outline"
-            >
-              {label}
-            </Button>
-          </span>
-        </TooltipTrigger>
-        {deployGate.reason && <TooltipContent>{deployGate.reason}</TooltipContent>}
-      </Tooltip>
+      <StatusWorkflowPopover
+        open={open}
+        onOpenChange={setOpen}
+        label={SUBTASK_STATUS_META[subtask.status].label}
+        tone={SUBTASK_STATUS_META[subtask.status].tone}
+        steps={flow.map((status) => SUBTASK_STATUS_META[status].label)}
+        currentIndex={flow.indexOf(subtask.status)}
+        action={
+          label && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="inline-block w-full">
+                  <Button
+                    className="w-full"
+                    disabled={
+                      !canTransition ||
+                      nextStatus === null ||
+                      deployGate.blocked ||
+                      // 전이 중 재클릭하면 두 번째 전이가 증적을 다음 단계에 잘못 귀속시킨다
+                      transitionSubtask.isPending
+                    }
+                    onClick={handleForward}
+                  >
+                    {label}
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              {deployGate.reason && <TooltipContent>{deployGate.reason}</TooltipContent>}
+            </Tooltip>
+          )
+        }
+      />
 
       {/* 열릴 때만 마운트한다 — 취소 후 다시 열면 빈 입력으로 시작해야 한다 */}
       {evidenceOpen && (
         <TransitionEvidenceDialog
           open
-          title={label}
+          title={label ?? ''}
           hint={hint ?? ''}
           outcome={nextStatus ? SUBTASK_STATUS_META[nextStatus].label : undefined}
-          confirmLabel={label}
+          confirmLabel={label ?? ''}
           confirmDisabled={
             (isDevelopmentStep && dbaChecked && dbaRequest.trim().length === 0) ||
             transitionSubtask.isPending
           }
-          onOpenChange={(open) => {
-            setEvidenceOpen(open)
+          onOpenChange={(next) => {
+            setEvidenceOpen(next)
             // 팝업은 언마운트로 리셋되지만 DBA 입력은 밖에 있어 직접 비운다
-            if (!open) {
+            if (!next) {
               setDbaChecked(false)
               setDbaRequest('')
             }

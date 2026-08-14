@@ -79,7 +79,7 @@ function RequestDetailPage() {
             title={request.title}
             quickActions={
               <>
-                {/* 상태 전이가 이 화면의 주 액션이라 맨 앞에 둔다 */}
+                {/* 정방향 진행은 상태 칩의 워크플로 팝오버가 맡고, 여기는 회수·반려만 */}
                 <RequestStatusActions request={request} />
 
                 {/* 제출 전 등록자만 — 검토 중에는 회수해야 고칠 수 있다 (스펙 §3.4) */}

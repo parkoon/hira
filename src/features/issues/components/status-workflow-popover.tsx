@@ -1,18 +1,36 @@
-import { Button } from '@/shared/components/ui/button'
-import { Popover, PopoverContent, PopoverTrigger } from '@/shared/components/ui/popover'
-import { cn } from '@/shared/utils/cn'
+import { ChevronDownIcon } from 'lucide-react'
+import type { ReactNode } from 'react'
 
-type WorkflowStepsPopoverProps = {
+import { Popover, PopoverContent, PopoverTrigger } from '@/shared/components/ui/popover'
+import { TONE_CLASS } from '@/shared/components/ui/tone'
+import { cn } from '@/shared/utils/cn'
+import type { EnumTone } from '@/shared/utils/enum'
+
+type StatusWorkflowPopoverProps = {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  /** 현재 상태 — 트리거 버튼이 곧 상태다 */
+  label: string
+  tone: EnumTone
   /** 흐름 순서대로의 단계 라벨 — 상태 enum은 화면마다 달라 라벨만 받는다 */
   steps: string[]
   /** 현재 단계 인덱스. 흐름 밖 상태(반려 등)면 -1 */
   currentIndex: number
   /** 흐름을 벗어난 현재 상태 안내 — 반려처럼 선형 경로에 없는 경우 (선택) */
   note?: string
+  /**
+   * 현재 단계에서 앞으로 나아가는 액션 하나. "여기까지 왔고 다음은 저기"를 한 번에 읽히게 한다.
+   * 회수·반려처럼 흐름을 벗어나는 경로는 여기 넣지 않는다 — 되돌리기 어려운 액션이 숨으면 안 된다.
+   */
+  action?: ReactNode
 }
 
 /**
- * 전체 워크플로를 보여주는 팝오버 — 점과 선으로 잇는 세로 레일.
+ * 상태 버튼을 눌러 여는 워크플로 팝오버 — 점과 선으로 잇는 세로 레일.
+ *
+ * 트리거는 배지가 아니라 버튼이다. 배지는 목록에서 여러 행을 색으로 훑기 위한 것이고,
+ * 상세에는 상태가 하나뿐이라 훑을 일이 없다. 배지를 버튼으로 감싸면 한 줄에
+ * 배지·버튼·chevron이 겹쳐 무엇을 누르는 것인지 흐려진다 — 색만 물려받고 모양은 컨트롤로 둔다.
  *
  * 단계 번호는 두지 않는다. 고정 워크플로라 "몇 단계"로 부를 일이 없고, 번호가 빠지면
  * 점이 작아져 라벨이 주인공이 된다. 세로로 두는 이유는 단계가 늘어도 선형이 유지되기 때문이다 —
@@ -20,22 +38,47 @@ type WorkflowStepsPopoverProps = {
  *
  * 지나온 단계는 채운 점, 현재는 테를 두른 점, 남은 단계는 빈 점 — 색 말고 모양으로도 구분된다.
  */
-export function WorkflowStepsPopover({ steps, currentIndex, note }: WorkflowStepsPopoverProps) {
+export function StatusWorkflowPopover({
+  open,
+  onOpenChange,
+  label,
+  tone,
+  steps,
+  currentIndex,
+  note,
+  action,
+}: StatusWorkflowPopoverProps) {
   return (
-    <Popover>
+    <Popover
+      open={open}
+      onOpenChange={onOpenChange}
+    >
       <PopoverTrigger asChild>
-        <Button
-          variant="link"
-          size="xs"
-          className="text-blue-700 dark:text-blue-400"
+        {/*
+          -ml-2로 버튼 안쪽 여백만큼 되밀어, 라벨 글자가 아래 필드 값들과 같은 세로선에서 시작한다.
+          hover는 색을 새로 정하지 않고 밝기만 조절해 tone 팔레트와 자동으로 맞물린다
+        */}
+        <button
+          type="button"
+          className={cn(
+            'focus-visible:ring-ring/50 -ml-2 flex h-7 items-center gap-1 rounded-md px-2 text-[13px] font-medium transition-[filter] outline-none focus-visible:ring-3',
+            'hover:brightness-95 dark:hover:brightness-125',
+            TONE_CLASS[tone]
+          )}
         >
-          (워크플로우 보기)
-        </Button>
+          {label}
+          {/* 상태색을 물려받아 회색 아이콘이 겉돌지 않게 한다 */}
+          <ChevronDownIcon
+            aria-hidden
+            className={cn('size-3.5 opacity-70 transition-transform', open && 'rotate-180')}
+          />
+        </button>
       </PopoverTrigger>
 
       <PopoverContent
         align="end"
-        className="w-auto max-w-[calc(100vw-2rem)]"
+        // 내용 폭을 따르되(단계 라벨 길이가 화면마다 다르다) 너무 좁아지지 않게 바닥을 둔다
+        className="w-auto max-w-[calc(100vw-2rem)] min-w-60 p-3"
       >
         <ol>
           {steps.map((label, index) => {
@@ -98,6 +141,8 @@ export function WorkflowStepsPopover({ steps, currentIndex, note }: WorkflowStep
         </ol>
 
         {note && <p className="text-muted-foreground text-xs">{note}</p>}
+
+        {action && <div className="border-t pt-2.5">{action}</div>}
       </PopoverContent>
     </Popover>
   )
