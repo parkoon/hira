@@ -4,12 +4,12 @@ import { toast } from 'sonner'
 
 import { useDeleteSubtaskMutation } from '@/features/tasks/api/delete-subtask'
 import type { Subtask } from '@/features/tasks/api/types'
+import { ActionMenuItem } from '@/features/tasks/components/action-menu-item'
 import { getSubtaskDeletionState, getSubtaskEditState } from '@/features/tasks/utils/task-selectors'
 import { Button } from '@/shared/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu'
@@ -67,7 +67,7 @@ export function SubtaskActionsMenu({
         <Button
           variant="ghost"
           size="icon-sm"
-          aria-label="하위작업 작업 메뉴"
+          aria-label="하위작업 메뉴"
         >
           <MoreHorizontalIcon />
         </Button>
@@ -77,38 +77,26 @@ export function SubtaskActionsMenu({
         className="w-64"
       >
         {canEdit && (
-          <>
-            <DropdownMenuItem
-              disabled={!edit.enabled}
-              onSelect={onEdit}
-            >
-              <PencilIcon />
-              수정
-            </DropdownMenuItem>
-            {edit.reason && (
-              <p className="text-muted-foreground px-1.5 pt-0.5 pb-1 text-[11px] leading-snug">
-                {edit.reason}
-              </p>
-            )}
-          </>
+          <ActionMenuItem
+            reason={edit.reason}
+            onSelect={onEdit}
+          >
+            <PencilIcon />
+            하위작업 수정
+          </ActionMenuItem>
         )}
 
         {canDelete && (
           <>
             {canEdit && <DropdownMenuSeparator />}
-            <DropdownMenuItem
+            <ActionMenuItem
               variant="destructive"
-              disabled={!deletion.enabled}
+              reason={deletion.reason}
               onSelect={() => void handleDelete()}
             >
               <Trash2Icon />
-              삭제
-            </DropdownMenuItem>
-            {deletion.reason && (
-              <p className="text-muted-foreground px-1.5 pt-0.5 pb-1 text-[11px] leading-snug">
-                {deletion.reason}
-              </p>
-            )}
+              하위작업 삭제
+            </ActionMenuItem>
           </>
         )}
       </DropdownMenuContent>

@@ -1,12 +1,12 @@
 import { MoreHorizontalIcon, PencilIcon } from 'lucide-react'
 
 import type { Task } from '@/features/tasks/api/types'
+import { ActionMenuItem } from '@/features/tasks/components/action-menu-item'
 import { getTaskEditState } from '@/features/tasks/utils/task-selectors'
 import { Button } from '@/shared/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu'
 
@@ -37,20 +37,15 @@ export function TaskActionsMenu({ task, canEdit, onEdit }: TaskActionsMenuProps)
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="w-64"
+        className="w-48"
       >
-        <DropdownMenuItem
-          disabled={!edit.enabled}
+        <ActionMenuItem
+          reason={edit.reason}
           onSelect={onEdit}
         >
           <PencilIcon />
           작업 수정
-        </DropdownMenuItem>
-        {edit.reason && (
-          <p className="text-muted-foreground px-1.5 pt-0.5 pb-1 text-[11px] leading-snug">
-            {edit.reason}
-          </p>
-        )}
+        </ActionMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )
