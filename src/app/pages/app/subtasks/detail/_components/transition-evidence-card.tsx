@@ -3,27 +3,32 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 
 import { useRecordEvidenceMutation } from '@/features/tasks/api/record-evidence'
-import type { Subtask, SubtaskStatus } from '@/features/tasks/api/types'
+import type { Subtask, SubtaskStatus, Task } from '@/features/tasks/api/types'
 import { EvidenceContentView } from '@/features/tasks/components/evidence-content-view'
 import { TransitionEvidenceDialog } from '@/features/tasks/components/transition-evidence-dialog'
 import { SUBTASK_ADVANCE_LABEL } from '@/features/tasks/constants/metadata'
-import { getEvidenceSteps, getStepEvidence } from '@/features/tasks/utils/task-selectors'
+import {
+  canActOnSubtaskStep,
+  getEvidenceSteps,
+  getStepEvidence,
+} from '@/features/tasks/utils/task-selectors'
 import { useCurrentUser } from '@/features/users/hooks/use-current-user'
 import { Button } from '@/shared/components/ui/button'
 import { Lozenge } from '@/shared/components/ui/lozenge'
 import { cn } from '@/shared/utils/cn'
 
 type TransitionEvidenceCardProps = {
+  /** 정정 주체 판정에 부모가 필요하다 — 인수 증적은 등록자만 고친다 */
+  task: Task
   subtask: Subtask
-  /** 정정은 전이와 같은 권한 (담당자·리드) */
-  canEdit: boolean
 }
 
 /**
  * 단계별로 남긴 증적. 전이 후에는 여기서 확인하고 정정한다 (시나리오 각주 3).
+ * 정정은 그 단계의 전이 주체와 같은 권한이라 단계마다 따로 판정한다.
  * 지나온 단계의 기록이라 왼쪽 레일로 잇는다 — 도트 열 너비는 활동 섹션의 아바타와 맞춘다.
  */
-export function TransitionEvidenceCard({ subtask, canEdit }: TransitionEvidenceCardProps) {
+export function TransitionEvidenceCard({ task, subtask }: TransitionEvidenceCardProps) {
   const [editTarget, setEditTarget] = useState<SubtaskStatus | null>(null)
   const { user } = useCurrentUser()
   const recordEvidence = useRecordEvidenceMutation()
@@ -47,6 +52,7 @@ export function TransitionEvidenceCard({ subtask, canEdit }: TransitionEvidenceC
             if (!latest) return null
 
             const last = index === steps.length - 1
+            const canEdit = canActOnSubtaskStep(task, subtask, user, status)
 
             return (
               <li

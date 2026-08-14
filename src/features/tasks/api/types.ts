@@ -5,27 +5,21 @@
  */
 
 /**
- * 작업(부모) 상태 — 시나리오 1~19.
- * 인수테스트는 요청자가 "요청한 것"을 확인하는 릴리스 단위 활동이라 부모가 갖는다.
- * 인수 확인을 마치면 이행대기중이 되고, 그때부터 하위작업이 운영배포를 시작한다 (시나리오 16·17).
+ * 작업(부모) 상태.
+ * 부모는 하위작업의 집계다 — 인수 테스트가 배포형 하위작업의 단계로 내려가면서
+ * 부모가 중간에 멈춰 설 자리가 없어졌고, 작업중에서 하위작업 전건 완료 후 바로 완료로 간다.
  */
-export type TaskStatus =
-  | 'DRAFT'
-  | 'PENDING_APPROVAL'
-  | 'IN_PROGRESS'
-  | 'ACCEPTANCE'
-  | 'DEPLOY_WAITING'
-  | 'DONE'
-  | 'REJECTED'
+export type TaskStatus = 'DRAFT' | 'PENDING_APPROVAL' | 'IN_PROGRESS' | 'DONE' | 'REJECTED'
 
 /** 하위작업 유형 — 워크플로를 결정한다 (스펙 §5.2) */
 export type SubtaskType = 'DEPLOY' | 'NON_DEPLOY'
 
 /**
- * 하위작업(자식) 상태 — 시나리오 6~18.
+ * 하위작업(자식) 상태.
  * 배포형과 비배포형(4단계)이 서로 다른 상태 집합을 쓴다.
- * 배포형은 DBA 검증 여부에 따라 8·9단계로 갈리므로, 순서는 유형이 아니라
+ * 배포형은 DBA 검증 여부에 따라 9·10단계로 갈리므로, 순서는 유형이 아니라
  * 하위작업 단위로 정해진다 — `constants/transitions.ts`의 `getSubtaskFlow` 참조.
+ * 인수 테스트중은 배포형 전용이며, 이 단계만 전이 주체가 부모 작업의 등록자다.
  */
 export type SubtaskStatus =
   | 'TODO'
@@ -34,6 +28,7 @@ export type SubtaskStatus =
   | 'DBA_VERIFICATION'
   | 'THIRD_PARTY'
   | 'FUNCTIONAL_TEST'
+  | 'ACCEPTANCE'
   | 'DEPLOY_WAITING'
   | 'POST_DEPLOY_CHECK'
   | 'IN_PROGRESS'
@@ -55,9 +50,9 @@ export type EvidenceContent = {
 /**
  * 같은 `status`가 여러 건이면 마지막 건이 유효하고 앞선 건은 정정 이력으로 남는다.
  */
-export type TransitionEvidence<TStatus extends string = SubtaskStatus> = EvidenceContent & {
+export type TransitionEvidence = EvidenceContent & {
   /** 어느 단계를 끝내며 남긴 증적인지 — 전이 직전 상태 */
-  status: TStatus
+  status: SubtaskStatus
   recordedBy: string
   recordedAt: string
 }
@@ -189,7 +184,5 @@ export type Task = {
   subtasks: Subtask[]
   /** 요청 승인 전 받아야 하는 결재 (시나리오 3). 결재선 연동 전까지는 임시 버튼으로 채운다 */
   approvals: Approval[]
-  /** 단계 완료 시 남긴 증적 — 인수 확인이 여기 들어간다 (시나리오 15) */
-  evidences: TransitionEvidence<TaskStatus>[]
   history: StatusHistoryEntry[]
 }

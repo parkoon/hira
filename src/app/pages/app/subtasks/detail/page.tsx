@@ -9,6 +9,7 @@ import { SubtaskFormModal } from '@/features/tasks/components/subtask-form-modal
 import { TaskDescription } from '@/features/tasks/components/task-description'
 import { TaskDetailHeader } from '@/features/tasks/components/task-detail-header'
 import {
+  canActOnSubtaskStep,
   canViewTask,
   selectSubtaskBySubtaskNo,
   selectTaskByTaskNo,
@@ -52,8 +53,8 @@ function SubtaskDetailPage() {
     )
   }
 
-  // 담당자 본인 또는 리드 이상만 전이할 수 있다 (스펙 §5.2)
-  const canTransition = hasRole('LEAD') || subtask.assignee.id === user.id
+  // 담당자 본인 또는 리드 이상만 전이한다 (스펙 §5.2) — 인수 테스트중만 등록자 본인이다
+  const canTransition = canActOnSubtaskStep(task, subtask, user, subtask.status)
   // 하위작업 수정·배정·삭제는 작업자 이상이 수행한다 (스펙 §5.1)
   const canManageSubtask = hasRole('WORKER')
 
@@ -87,8 +88,8 @@ function SubtaskDetailPage() {
           </section>
 
           <TransitionEvidenceCard
+            task={task}
             subtask={subtask}
-            canEdit={canTransition}
           />
 
           <SubtaskActivity subtask={subtask} />
@@ -102,7 +103,6 @@ function SubtaskDetailPage() {
         <div className="w-full shrink-0 lg:sticky lg:top-3 lg:-m-1 lg:max-h-[calc(100dvh-4.5rem)] lg:w-102 lg:self-start lg:overflow-y-auto lg:p-1">
           <SubtaskDetailPanel
             subtask={subtask}
-            task={task}
             canTransition={canTransition}
           />
         </div>

@@ -4,9 +4,8 @@ import type {
   Subtask,
   SubtaskStatus,
   Task,
-  TaskStatus,
 } from '@/features/tasks/api/types'
-import { getSubtaskFlow, SUBTASK_READY_STATUS } from '@/features/tasks/constants/transitions'
+import { getSubtaskFlow } from '@/features/tasks/constants/transitions'
 import type { User } from '@/features/users/api/types'
 import { ROLE_LEVEL } from '@/features/users/constants/metadata'
 
@@ -103,15 +102,6 @@ export function getDeploymentUrl(subtask: Subtask): string | null {
   return getStepEvidence(subtask, 'DEPLOY_WAITING').latest?.links[0]?.url ?? null
 }
 
-/** 부모 단계의 유효한 증적과 정정 횟수 (시나리오 15) */
-export function getTaskStepEvidence(task: Task, status: TaskStatus) {
-  const recorded = task.evidences.filter((evidence) => evidence.status === status)
-  return {
-    latest: recorded.length > 0 ? recorded[recorded.length - 1] : null,
-    revisions: Math.max(recorded.length - 1, 0),
-  }
-}
-
 /**
  * 요청 승인 전에 받아야 하는 결재 (시나리오 3).
  * 요건 속성에 따라 붙으므로, 둘 다 아니면 결재 없이 바로 승인할 수 있다.
@@ -182,54 +172,36 @@ export function getTaskEditState(task: Task) {
   return { enabled: true, reason: null }
 }
 
-/** 인수 확인은 등록자 본인만 한다 — 리드도 대행할 수 없다 (시나리오 14) */
-export function canConfirmAcceptance(task: Task, user: User) {
-  return task.requester.id === user.id
+/**
+ * 하위작업 단계별 수행 주체 — 전이와 그 단계 증적 정정이 같은 규칙을 쓴다.
+ * 기본은 담당자·리드(스펙 §5.3)지만, 인수 테스트중만 부모 작업의 등록자 본인이다 —
+ * 요청한 사람이 요청한 대로인지 확인하는 단계라 리드도 대행할 수 없다.
+ */
+export function canActOnSubtaskStep(
+  task: Task,
+  subtask: Subtask,
+  user: User,
+  status: SubtaskStatus
+): boolean {
+  if (status === 'ACCEPTANCE') return task.requester.id === user.id
+  return ROLE_LEVEL[user.role] >= ROLE_LEVEL.LEAD || subtask.assignee.id === user.id
 }
 
 /**
- * 부모 단계 진행 버튼의 활성화 조건 — 시나리오 13·19.
- * 두 단계 모두 같은 모양(조건 + 미충족 사유)이라 한 함수로 판정한다.
- * 인수 확인(시나리오 14)은 증적 팝업이 강제하는 별도 경로(canConfirmAcceptance)를 탄다.
+ * 최종 완료 버튼의 활성화 조건.
+ * 인수 테스트가 배포형 하위작업의 단계로 내려가 부모가 중간에 멈춰 설 자리가 없다 —
+ * 작업중에서 하위작업 전건 완료를 확인하고 바로 완료로 간다.
  */
 export function getTaskAdvanceState(task: Task) {
-  if (task.status === 'IN_PROGRESS') {
-    if (task.subtasks.length === 0) {
-      return { enabled: false, reason: '하위작업이 1건도 없어 인수테스트를 요청할 수 없어요' }
-    }
-    const notReady = task.subtasks.filter(
-      (subtask) => subtask.status !== SUBTASK_READY_STATUS[subtask.type]
-    )
-    if (notReady.length > 0) {
-      return {
-        enabled: false,
-        reason: `하위작업 ${notReady.length}건이 아직 준비되지 않았어요 (배포형은 이행대기중, 비배포형은 완료)`,
-      }
-    }
-    return { enabled: true, reason: null }
+  if (task.status !== 'IN_PROGRESS') {
+    return { enabled: false, reason: null }
   }
-
-  if (task.status === 'DEPLOY_WAITING') {
-    const { done, total } = getSubtaskProgress(task)
-    if (done < total) {
-      return { enabled: false, reason: `하위작업 ${total - done}건이 진행 중이라 완료할 수 없어요` }
-    }
-    return { enabled: true, reason: null }
+  if (task.subtasks.length === 0) {
+    return { enabled: false, reason: '하위작업이 1건도 없어 완료할 수 없어요' }
   }
-
-  return { enabled: false, reason: null }
-}
-
-/**
- * 하위작업 이행 게이트 — 시나리오 17.
- * 이행은 부모가 인수 확인을 마치고 이행대기중이 된 뒤에만 가능하다.
- */
-export function getSubtaskDeployGate(task: Task, subtask: Subtask) {
-  if (subtask.type !== 'DEPLOY' || subtask.status !== 'DEPLOY_WAITING') {
-    return { blocked: false, reason: null }
+  const { done, total } = getSubtaskProgress(task)
+  if (done < total) {
+    return { enabled: false, reason: `하위작업 ${total - done}건이 진행 중이라 완료할 수 없어요` }
   }
-  if (task.status !== 'DEPLOY_WAITING') {
-    return { blocked: true, reason: '작업의 인수 확인이 끝나야 이행할 수 있어요' }
-  }
-  return { blocked: false, reason: null }
+  return { enabled: true, reason: null }
 }

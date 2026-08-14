@@ -2,7 +2,7 @@ import { ExternalLinkIcon, GitBranchIcon } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { useApproveSubtaskMutation } from '@/features/tasks/api/approve-subtask'
-import type { Subtask, Task } from '@/features/tasks/api/types'
+import type { Subtask } from '@/features/tasks/api/types'
 import { ApprovalGate } from '@/features/tasks/components/approval-gate'
 import { PanelCard, PanelCardField } from '@/features/tasks/components/panel-card'
 import { SUBTASK_TYPE_META } from '@/features/tasks/constants/metadata'
@@ -15,13 +15,11 @@ import { SubtaskProgressCard } from './subtask-progress-card'
 
 type SubtaskDetailPanelProps = {
   subtask: Subtask
-  /** 이행 게이트 판정에 부모 상태가 필요하다 (시나리오 17) */
-  task: Task
   canTransition: boolean
 }
 
 /** 우측 컬럼 — DBA 결재 + 진행 상태(전이) 카드 + 세부 사항 + 개발(브랜치) */
-export function SubtaskDetailPanel({ subtask, task, canTransition }: SubtaskDetailPanelProps) {
+export function SubtaskDetailPanel({ subtask, canTransition }: SubtaskDetailPanelProps) {
   const { user } = useCurrentUser()
   const approveSubtask = useApproveSubtaskMutation()
 
@@ -52,7 +50,6 @@ export function SubtaskDetailPanel({ subtask, task, canTransition }: SubtaskDeta
 
       <SubtaskProgressCard
         subtask={subtask}
-        task={task}
         canTransition={canTransition}
       />
 

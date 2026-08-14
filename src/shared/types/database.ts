@@ -475,20 +475,14 @@ export type Database = {
         | 'DBA_VERIFICATION'
         | 'THIRD_PARTY'
         | 'FUNCTIONAL_TEST'
+        | 'ACCEPTANCE'
         | 'DEPLOY_WAITING'
         | 'POST_DEPLOY_CHECK'
         | 'IN_PROGRESS'
         | 'REVIEW'
         | 'DONE'
       subtask_type: 'DEPLOY' | 'NON_DEPLOY'
-      task_status:
-        | 'DRAFT'
-        | 'PENDING_APPROVAL'
-        | 'IN_PROGRESS'
-        | 'ACCEPTANCE'
-        | 'DEPLOY_WAITING'
-        | 'DONE'
-        | 'REJECTED'
+      task_status: 'DRAFT' | 'PENDING_APPROVAL' | 'IN_PROGRESS' | 'DONE' | 'REJECTED'
       user_role: 'REQUESTER' | 'WORKER' | 'LEAD' | 'ADMIN'
     }
     CompositeTypes: {
@@ -638,6 +632,7 @@ export const Constants = {
         'DBA_VERIFICATION',
         'THIRD_PARTY',
         'FUNCTIONAL_TEST',
+        'ACCEPTANCE',
         'DEPLOY_WAITING',
         'POST_DEPLOY_CHECK',
         'IN_PROGRESS',
@@ -645,15 +640,7 @@ export const Constants = {
         'DONE',
       ],
       subtask_type: ['DEPLOY', 'NON_DEPLOY'],
-      task_status: [
-        'DRAFT',
-        'PENDING_APPROVAL',
-        'IN_PROGRESS',
-        'ACCEPTANCE',
-        'DEPLOY_WAITING',
-        'DONE',
-        'REJECTED',
-      ],
+      task_status: ['DRAFT', 'PENDING_APPROVAL', 'IN_PROGRESS', 'DONE', 'REJECTED'],
       user_role: ['REQUESTER', 'WORKER', 'LEAD', 'ADMIN'],
     },
   },

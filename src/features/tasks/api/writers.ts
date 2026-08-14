@@ -1,12 +1,7 @@
-import type {
-  EvidenceContent,
-  StatusHistoryEntry,
-  SubtaskStatus,
-  TaskStatus,
-} from '@/features/tasks/api/types'
+import type { EvidenceContent, StatusHistoryEntry, SubtaskStatus } from '@/features/tasks/api/types'
 import { supabase } from '@/shared/lib/supabase'
 
-/** 증적·이력은 작업(부모)에도 하위작업(자식)에도 붙는다 */
+/** 이력은 작업(부모)에도 하위작업(자식)에도 붙는다. 증적은 하위작업에만 남는다 */
 export type ActivityOwner = { taskNo: string } | { subtaskNo: string }
 
 const ownerColumns = (owner: ActivityOwner) => ({
@@ -19,19 +14,16 @@ const ownerColumns = (owner: ActivityOwner) => ({
  * 정정은 덮어쓰지 않고 새 건을 쌓아 앞선 기록을 이력으로 남긴다.
  */
 export async function insertEvidence(
-  owner: ActivityOwner,
-  status: TaskStatus | SubtaskStatus,
+  owner: { subtaskNo: string },
+  status: SubtaskStatus,
   evidence: EvidenceContent,
   recordedBy: string
 ) {
-  const isTask = 'taskNo' in owner
-
   const { data, error } = await supabase
     .from('evidences')
     .insert({
-      ...ownerColumns(owner),
-      task_status: isTask ? (status as TaskStatus) : null,
-      subtask_status: isTask ? null : (status as SubtaskStatus),
+      subtask_no: owner.subtaskNo,
+      subtask_status: status,
       memo: evidence.memo,
       recorded_by: recordedBy,
       // 시각은 DB default now()에 맡긴다 — 클라이언트 시계가 어긋나면

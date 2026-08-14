@@ -34,18 +34,24 @@ describe('getSubtaskFlow', () => {
     expect(flow).toEqual(['TODO', 'IN_PROGRESS', 'REVIEW', 'DONE'])
   })
 
-  it('배포형은 DBA 검증을 받지 않으면 8단계를 거친다', () => {
+  it('배포형은 DBA 검증을 받지 않으면 9단계를 거친다', () => {
     const flow = getSubtaskFlow(makeSubtask({ dbaVerificationRequest: null }))
 
-    expect(flow).toHaveLength(8)
+    expect(flow).toHaveLength(9)
     expect(flow).not.toContain('DBA_VERIFICATION')
   })
 
   it('배포형은 DBA 검증 내용이 있으면 개발중과 제3자검증중 사이에 한 단계가 끼어든다', () => {
     const flow = getSubtaskFlow(makeSubtask({ dbaVerificationRequest: '인덱스 검토 요청' }))
 
-    expect(flow).toHaveLength(9)
+    expect(flow).toHaveLength(10)
     expect(flow.slice(2, 5)).toEqual(['DEVELOPMENT', 'DBA_VERIFICATION', 'THIRD_PARTY'])
+  })
+
+  it('배포형은 기능 테스트와 이행 대기 사이에 인수 테스트를 거친다', () => {
+    const flow = getSubtaskFlow(makeSubtask())
+
+    expect(flow.slice(4, 7)).toEqual(['FUNCTIONAL_TEST', 'ACCEPTANCE', 'DEPLOY_WAITING'])
   })
 })
 
@@ -66,7 +72,8 @@ describe('TASK_FLOW', () => {
 describe('getNextSubtaskStatus', () => {
   it('플로우를 한 단계씩만 전진한다', () => {
     expect(getNextSubtaskStatus(makeSubtask({ status: 'TODO' }))).toBe('ANALYSIS')
-    expect(getNextSubtaskStatus(makeSubtask({ status: 'FUNCTIONAL_TEST' }))).toBe('DEPLOY_WAITING')
+    expect(getNextSubtaskStatus(makeSubtask({ status: 'FUNCTIONAL_TEST' }))).toBe('ACCEPTANCE')
+    expect(getNextSubtaskStatus(makeSubtask({ status: 'ACCEPTANCE' }))).toBe('DEPLOY_WAITING')
   })
 
   it('DBA 검증이 붙은 하위작업은 개발중 다음이 DBA검증중이다', () => {

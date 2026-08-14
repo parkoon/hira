@@ -1,4 +1,4 @@
-import type { EvidenceContent, SubtaskStatus, TaskStatus } from '@/features/tasks/api/types'
+import type { EvidenceContent, SubtaskStatus } from '@/features/tasks/api/types'
 
 /**
  * 단계별 증적 안내 문구 (시나리오 각주 3).
@@ -12,15 +12,11 @@ export const EVIDENCE_HINT: Partial<Record<SubtaskStatus, string>> = {
   DEVELOPMENT: '변경사항(MR·커밋) 링크를 남겨 주세요.',
   THIRD_PARTY: '제3자 검증 결과서를 남겨 주세요.',
   FUNCTIONAL_TEST: '기능 테스트 결과를 남겨 주세요.',
+  ACCEPTANCE: '확인한 화면이나 테스트 결과를 남겨 주세요.',
   DEPLOY_WAITING: '배포 완료 URL과 릴리스 정보를 남겨 주세요.',
   POST_DEPLOY_CHECK: '이행 후 점검 결과를 남겨 주세요.',
   IN_PROGRESS: '작업 산출물 링크나 문서를 남겨 주세요.',
   REVIEW: '검토 결과를 남겨 주세요.',
-}
-
-/** 부모 단계 증적 (시나리오 15) */
-export const TASK_EVIDENCE_HINT: Partial<Record<TaskStatus, string>> = {
-  ACCEPTANCE: '확인한 화면이나 테스트 결과를 남겨 주세요.',
 }
 
 /**

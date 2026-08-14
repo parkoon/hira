@@ -7,9 +7,7 @@ import type {
   ReferenceLink,
   StatusHistoryEntry,
   Subtask,
-  SubtaskStatus,
   Task,
-  TaskStatus,
   TransitionEvidence,
 } from '@/features/tasks/api/types'
 import { supabase } from '@/shared/lib/supabase'
@@ -27,7 +25,6 @@ const TASK_TREE_SELECT = `
   consultant:profiles!tasks_consultant_id_fkey(id, name, dept),
   attachments(*),
   approvals(*),
-  evidences(*, reference_links(*), attachments(*)),
   status_history(*),
   subtasks(
     *,
@@ -67,7 +64,6 @@ type TaskRow = Tables['tasks']['Row'] & {
   consultant: Pick<Tables['profiles']['Row'], 'id' | 'name' | 'dept'> | null
   attachments: Tables['attachments']['Row'][]
   approvals: Tables['approvals']['Row'][]
-  evidences: EvidenceRow[]
   status_history: Tables['status_history']['Row'][]
   subtasks: SubtaskRow[]
 }
@@ -131,7 +127,7 @@ function toSubtask(row: SubtaskRow): Subtask {
     completedAt: row.completed_at,
     dbaVerificationRequest: row.dba_verification_request,
     approvals: toApprovals(row.approvals),
-    evidences: sortEvidences(row.evidences).map<TransitionEvidence<SubtaskStatus>>((evidence) => ({
+    evidences: sortEvidences(row.evidences).map<TransitionEvidence>((evidence) => ({
       ...toEvidenceContent(evidence),
       // 하위작업 증적은 CHECK 제약이 subtask_status를 강제한다
       status: evidence.subtask_status!,
@@ -175,13 +171,6 @@ function toTask(row: TaskRow): Task {
       .sort((a, b) => a.subtask_no.localeCompare(b.subtask_no))
       .map(toSubtask),
     approvals: toApprovals(row.approvals),
-    evidences: sortEvidences(row.evidences).map<TransitionEvidence<TaskStatus>>((evidence) => ({
-      ...toEvidenceContent(evidence),
-      // 작업 증적은 CHECK 제약이 task_status를 강제한다
-      status: evidence.task_status!,
-      recordedBy: evidence.recorded_by,
-      recordedAt: toDate(evidence.recorded_at),
-    })),
     history: toHistory(row.status_history),
   }
 }

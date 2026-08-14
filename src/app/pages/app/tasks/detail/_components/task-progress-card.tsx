@@ -6,13 +6,10 @@ import type { Task, TaskStatus } from '@/features/tasks/api/types'
 import { ActionButton } from '@/features/tasks/components/action-button'
 import { PanelCard } from '@/features/tasks/components/panel-card'
 import { RejectReasonDialog } from '@/features/tasks/components/reject-reason-dialog'
-import { TransitionEvidenceDialog } from '@/features/tasks/components/transition-evidence-dialog'
 import { WorkflowSteps } from '@/features/tasks/components/workflow-steps'
 import { TASK_STATUS_META } from '@/features/tasks/constants/metadata'
-import { TASK_EVIDENCE_HINT } from '@/features/tasks/constants/transition-evidence'
 import { TASK_FLOW } from '@/features/tasks/constants/transitions'
 import {
-  canConfirmAcceptance,
   canSubmitTask,
   getTaskAdvanceState,
   getTaskApproveState,
@@ -35,7 +32,6 @@ type ForwardAction = {
  * 앞으로 가는 길은 제목 줄에, 흐름을 벗어나는 길(회수·반려)은 레일 아래에 둬 위계를 자리로 드러낸다.
  */
 export function TaskProgressCard({ task }: { task: Task }) {
-  const [evidenceOpen, setEvidenceOpen] = useState(false)
   const [completeOpen, setCompleteOpen] = useState(false)
   const [rejectOpen, setRejectOpen] = useState(false)
   const { user, hasRole } = useCurrentUser()
@@ -99,28 +95,8 @@ export function TaskProgressCard({ task }: { task: Task }) {
       }
     }
 
-    // 인수테스트 요청 — 작업중의 리드 (시나리오 13)
+    // 최종 완료 — 전 하위작업 완료 후 리드가 (스펙 §4.4). 부모는 집계라 작업중에서 바로 완료다
     if (task.status === 'IN_PROGRESS' && isLead) {
-      return {
-        label: '인수테스트 요청',
-        reason: getTaskAdvanceState(task).reason,
-        onClick: () =>
-          confirmTransition({
-            action: '인수테스트 요청',
-            description: `${task.taskNo} 작업이 ${TASK_STATUS_META.ACCEPTANCE.label}(으)로 바뀌고, 요청자에게 인수 확인 버튼이 뜹니다.`,
-            toStatus: 'ACCEPTANCE',
-            successMessage: '인수테스트를 요청했습니다.',
-          }),
-      }
-    }
-
-    // 인수 확인 — 등록자 본인만 (시나리오 14·15)
-    if (task.status === 'ACCEPTANCE' && canConfirmAcceptance(task, user)) {
-      return { label: '인수 확인', onClick: () => setEvidenceOpen(true) }
-    }
-
-    // 최종 완료 — 전 하위작업 완료 후 리드가 (시나리오 19)
-    if (task.status === 'DEPLOY_WAITING' && isLead) {
       return {
         label: '최종 완료',
         reason: getTaskAdvanceState(task).reason,
@@ -146,7 +122,7 @@ export function TaskProgressCard({ task }: { task: Task }) {
               label={forward.label}
               reason={forward.reason}
               pending={transitionTask.isPending}
-              variant="default"
+              variant="outline-primary"
               onClick={forward.onClick}
             />
           )
@@ -197,32 +173,6 @@ export function TaskProgressCard({ task }: { task: Task }) {
       </PanelCard>
 
       {/* 팝업은 카드 밖 형제로 둔다 — 카드가 다시 그려져도 입력하던 팝업이 살아 있어야 한다 */}
-      {evidenceOpen && (
-        <TransitionEvidenceDialog
-          open
-          title="인수 확인"
-          hint={TASK_EVIDENCE_HINT.ACCEPTANCE ?? ''}
-          outcome={TASK_STATUS_META.DEPLOY_WAITING.label}
-          confirmLabel="인수 확인"
-          confirmDisabled={transitionTask.isPending}
-          onOpenChange={setEvidenceOpen}
-          onConfirm={(evidence) => {
-            transitionTask.mutate(
-              {
-                taskNo: task.taskNo,
-                toStatus: 'DEPLOY_WAITING',
-                actorName: user.name,
-                evidence,
-              },
-              {
-                onSuccess: () =>
-                  toast.success('인수 확인을 마쳤습니다. 이제 하위작업을 이행할 수 있어요.'),
-              }
-            )
-          }}
-        />
-      )}
-
       <CompleteTaskDialog
         task={task}
         open={completeOpen}

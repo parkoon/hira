@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import type { Subtask, Task, TransitionEvidence } from '@/features/tasks/api/types'
 import {
-  canConfirmAcceptance,
+  canActOnSubtaskStep,
   canEditTask,
   canSubmitTask,
   getDeploymentUrl,
@@ -10,7 +10,6 @@ import {
   getStepEvidence,
   getSubtaskApprovalState,
   getSubtaskDeletionState,
-  getSubtaskDeployGate,
   getSubtaskEditState,
   getTaskAdvanceState,
   getTaskApproveState,
@@ -67,14 +66,11 @@ const makeTask = (overrides: Partial<Task> = {}): Task => ({
   attachments: [],
   subtasks: [],
   approvals: [],
-  evidences: [],
   history: [],
   ...overrides,
 })
 
-const makeEvidence = (
-  overrides: Partial<TransitionEvidence> = {}
-): TransitionEvidence<Subtask['status']> => ({
+const makeEvidence = (overrides: Partial<TransitionEvidence> = {}): TransitionEvidence => ({
   status: 'ANALYSIS',
   links: [],
   attachments: [],
@@ -170,7 +166,7 @@ describe('getSubtaskApprovalState', () => {
   })
 })
 
-describe('canSubmitTask / canConfirmAcceptance', () => {
+describe('canSubmitTask', () => {
   const requester = makeUser({ id: 'user-kim', name: '김현주', role: 'REQUESTER' })
 
   it('임시저장·반려 상태의 등록자만 제출할 수 있다', () => {
@@ -184,13 +180,35 @@ describe('canSubmitTask / canConfirmAcceptance', () => {
 
     expect(canSubmitTask(makeTask({ status: 'DRAFT' }), other)).toBe(false)
   })
+})
 
-  it('인수 확인은 등록자 본인만 하고, 리드도 대행할 수 없다', () => {
-    expect(canConfirmAcceptance(makeTask(), requester)).toBe(true)
-    expect(canConfirmAcceptance(makeTask(), makeUser({ name: '윤서진', role: 'LEAD' }))).toBe(false)
-    expect(canConfirmAcceptance(makeTask(), makeUser({ name: '임도윤', role: 'WORKER' }))).toBe(
-      false
-    )
+describe('canActOnSubtaskStep', () => {
+  const requester = makeUser({ id: 'user-kim', name: '김현주', role: 'REQUESTER' })
+  const assignee = makeUser()
+  const lead = makeUser({ id: 'user-yoon', name: '윤서진', role: 'LEAD' })
+
+  it('일반 단계는 담당자 본인과 리드만 수행한다', () => {
+    const subtask = makeSubtask({ status: 'DEVELOPMENT' })
+
+    expect(canActOnSubtaskStep(makeTask(), subtask, assignee, 'DEVELOPMENT')).toBe(true)
+    expect(canActOnSubtaskStep(makeTask(), subtask, lead, 'DEVELOPMENT')).toBe(true)
+    expect(canActOnSubtaskStep(makeTask(), subtask, requester, 'DEVELOPMENT')).toBe(false)
+    expect(
+      canActOnSubtaskStep(
+        makeTask(),
+        subtask,
+        makeUser({ id: 'user-park', name: '박민수' }),
+        'DEVELOPMENT'
+      )
+    ).toBe(false)
+  })
+
+  it('인수 테스트중은 등록자 본인만 수행하고, 리드·담당자도 대행할 수 없다', () => {
+    const subtask = makeSubtask({ status: 'ACCEPTANCE' })
+
+    expect(canActOnSubtaskStep(makeTask(), subtask, requester, 'ACCEPTANCE')).toBe(true)
+    expect(canActOnSubtaskStep(makeTask(), subtask, lead, 'ACCEPTANCE')).toBe(false)
+    expect(canActOnSubtaskStep(makeTask(), subtask, assignee, 'ACCEPTANCE')).toBe(false)
   })
 })
 
@@ -221,30 +239,32 @@ describe('canEditTask / getTaskEditState', () => {
 })
 
 describe('getTaskAdvanceState', () => {
-  it('하위작업이 없으면 인수테스트를 요청할 수 없다', () => {
+  it('하위작업이 없으면 완료할 수 없다', () => {
     const state = getTaskAdvanceState(makeTask({ status: 'IN_PROGRESS', subtasks: [] }))
 
     expect(state.enabled).toBe(false)
     expect(state.reason).toContain('1건도 없어')
   })
 
-  it('준비되지 않은 하위작업이 있으면 인수테스트를 요청할 수 없다', () => {
+  it('진행 중인 하위작업이 있으면 완료할 수 없다', () => {
     const task = makeTask({
       status: 'IN_PROGRESS',
       subtasks: [
-        makeSubtask({ status: 'DEPLOY_WAITING' }),
-        makeSubtask({ subtaskNo: 'WR-2026-0001-02', status: 'DEVELOPMENT' }),
+        makeSubtask({ status: 'DONE' }),
+        makeSubtask({ subtaskNo: 'WR-2026-0001-02', status: 'POST_DEPLOY_CHECK' }),
       ],
     })
+    const state = getTaskAdvanceState(task)
 
-    expect(getTaskAdvanceState(task)).toMatchObject({ enabled: false })
+    expect(state.enabled).toBe(false)
+    expect(state.reason).toContain('1건')
   })
 
-  it('배포형은 이행대기중, 비배포형은 완료면 준비된 것으로 본다', () => {
+  it('하위작업이 모두 완료되면 최종 완료할 수 있다', () => {
     const task = makeTask({
       status: 'IN_PROGRESS',
       subtasks: [
-        makeSubtask({ type: 'DEPLOY', status: 'DEPLOY_WAITING' }),
+        makeSubtask({ status: 'DONE' }),
         makeSubtask({ subtaskNo: 'WR-2026-0001-02', type: 'NON_DEPLOY', status: 'DONE' }),
       ],
     })
@@ -252,43 +272,9 @@ describe('getTaskAdvanceState', () => {
     expect(getTaskAdvanceState(task)).toEqual({ enabled: true, reason: null })
   })
 
-  it('이행대기중에서는 하위작업이 모두 완료돼야 최종 완료할 수 있다', () => {
-    const running = makeTask({
-      status: 'DEPLOY_WAITING',
-      subtasks: [makeSubtask({ status: 'POST_DEPLOY_CHECK' })],
-    })
-    const finished = makeTask({
-      status: 'DEPLOY_WAITING',
-      subtasks: [makeSubtask({ status: 'DONE' })],
-    })
-
-    expect(getTaskAdvanceState(running).enabled).toBe(false)
-    expect(getTaskAdvanceState(finished).enabled).toBe(true)
-  })
-})
-
-describe('getSubtaskDeployGate', () => {
-  const readyToDeploy = makeSubtask({ type: 'DEPLOY', status: 'DEPLOY_WAITING' })
-
-  it('부모의 인수 확인이 끝나기 전에는 이행할 수 없다', () => {
-    const gate = getSubtaskDeployGate(makeTask({ status: 'ACCEPTANCE' }), readyToDeploy)
-
-    expect(gate.blocked).toBe(true)
-  })
-
-  it('부모가 이행대기중이면 이행할 수 있다', () => {
-    const gate = getSubtaskDeployGate(makeTask({ status: 'DEPLOY_WAITING' }), readyToDeploy)
-
-    expect(gate.blocked).toBe(false)
-  })
-
-  it('이행대기중이 아닌 하위작업은 게이트를 타지 않는다', () => {
-    const gate = getSubtaskDeployGate(
-      makeTask({ status: 'IN_PROGRESS' }),
-      makeSubtask({ status: 'DEVELOPMENT' })
-    )
-
-    expect(gate.blocked).toBe(false)
+  it('작업중이 아니면 진행 버튼이 없다', () => {
+    expect(getTaskAdvanceState(makeTask({ status: 'PENDING_APPROVAL' })).enabled).toBe(false)
+    expect(getTaskAdvanceState(makeTask({ status: 'DONE' })).enabled).toBe(false)
   })
 })
 

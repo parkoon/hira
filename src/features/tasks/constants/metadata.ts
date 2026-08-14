@@ -7,15 +7,13 @@ import type {
 } from '@/features/tasks/api/types'
 import type { EnumMetadata } from '@/shared/utils/enum'
 
-/** 작업(부모) 상태 — 시나리오 1~19 */
+/** 작업(부모) 상태 — 부모는 하위작업의 집계라 작업중에서 바로 완료로 간다 */
 export const TASK_STATUS_META = {
   DRAFT: { label: '요청 대기중', order: 10, tone: 'neutral', description: '임시저장' },
   PENDING_APPROVAL: { label: '요청 승인 대기중', order: 20, tone: 'warning' },
   IN_PROGRESS: { label: '작업중', order: 30, tone: 'info' },
-  ACCEPTANCE: { label: '인수 테스트중', order: 40, tone: 'warning' },
-  DEPLOY_WAITING: { label: '이행 대기중', order: 50, tone: 'info' },
-  DONE: { label: '완료', order: 60, tone: 'success' },
-  REJECTED: { label: '반려', order: 70, tone: 'danger' },
+  DONE: { label: '완료', order: 40, tone: 'success' },
+  REJECTED: { label: '반려', order: 50, tone: 'danger' },
 } satisfies Record<TaskStatus, EnumMetadata>
 
 /** 하위작업 유형 — 워크플로를 결정한다 (스펙 §5.2) */
@@ -36,11 +34,12 @@ export const SUBTASK_STATUS_META = {
   DBA_VERIFICATION: { label: 'DBA 검증중', order: 4, tone: 'warning' },
   THIRD_PARTY: { label: '제3자 검증중', order: 5, tone: 'warning' },
   FUNCTIONAL_TEST: { label: '기능 테스트중', order: 6, tone: 'info' },
-  DEPLOY_WAITING: { label: '이행 대기중', order: 7, tone: 'neutral' },
-  POST_DEPLOY_CHECK: { label: '이행 후 점검중', order: 8, tone: 'warning' },
-  IN_PROGRESS: { label: '작업중', order: 9, tone: 'info' },
-  REVIEW: { label: '검토중', order: 10, tone: 'warning' },
-  DONE: { label: '완료', order: 11, tone: 'success' },
+  ACCEPTANCE: { label: '인수 테스트중', order: 7, tone: 'warning' },
+  DEPLOY_WAITING: { label: '이행 대기중', order: 8, tone: 'neutral' },
+  POST_DEPLOY_CHECK: { label: '이행 후 점검중', order: 9, tone: 'warning' },
+  IN_PROGRESS: { label: '작업중', order: 10, tone: 'info' },
+  REVIEW: { label: '검토중', order: 11, tone: 'warning' },
+  DONE: { label: '완료', order: 12, tone: 'success' },
 } satisfies Record<SubtaskStatus, EnumMetadata>
 
 /**
@@ -57,6 +56,8 @@ export const SUBTASK_ADVANCE_LABEL: Partial<Record<SubtaskStatus, string>> = {
   DEVELOPMENT: '개발 완료',
   THIRD_PARTY: '검증 완료',
   FUNCTIONAL_TEST: '테스트 완료',
+  // 이 단계만 전이 주체가 부모 작업의 등록자다 — canActOnSubtaskStep 참조
+  ACCEPTANCE: '인수 확인',
   DEPLOY_WAITING: '이행 완료',
   POST_DEPLOY_CHECK: '점검 완료',
   IN_PROGRESS: '작업 완료',

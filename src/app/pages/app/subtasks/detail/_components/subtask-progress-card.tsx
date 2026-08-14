@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 
 import { useTransitionSubtaskMutation } from '@/features/tasks/api/transition-subtask'
-import type { Subtask, Task } from '@/features/tasks/api/types'
+import type { Subtask } from '@/features/tasks/api/types'
 import { ActionButton } from '@/features/tasks/components/action-button'
 import { PanelCard } from '@/features/tasks/components/panel-card'
 import { TransitionEvidenceDialog } from '@/features/tasks/components/transition-evidence-dialog'
@@ -14,7 +14,6 @@ import {
   getPostDevelopmentStatus,
   getSubtaskFlow,
 } from '@/features/tasks/constants/transitions'
-import { getSubtaskDeployGate } from '@/features/tasks/utils/task-selectors'
 import { useCurrentUser } from '@/features/users/hooks/use-current-user'
 import { Checkbox } from '@/shared/components/ui/checkbox'
 import { Field, FieldLabel } from '@/shared/components/ui/field'
@@ -23,9 +22,7 @@ import { useConfirm } from '@/shared/hooks/use-confirm'
 
 type SubtaskProgressCardProps = {
   subtask: Subtask
-  /** 이행 게이트 판정에 부모 상태가 필요하다 (시나리오 17) */
-  task: Task
-  /** 전이는 담당자·리드만 가능 (스펙 §5.3) */
+  /** 지금 단계의 전이 주체인지 — canActOnSubtaskStep으로 판정해 내려준다 */
   canTransition: boolean
 }
 
@@ -33,7 +30,7 @@ type SubtaskProgressCardProps = {
  * 상태에 관한 전부 — 지금 어디까지 왔는지(레일)와 다음 단계로 미는 액션을 한 카드에 둔다.
  * 하위작업은 흐름을 벗어나는 경로가 없어 제목 줄의 액션 하나가 전부다.
  */
-export function SubtaskProgressCard({ subtask, task, canTransition }: SubtaskProgressCardProps) {
+export function SubtaskProgressCard({ subtask, canTransition }: SubtaskProgressCardProps) {
   const [evidenceOpen, setEvidenceOpen] = useState(false)
   const [dbaChecked, setDbaChecked] = useState(false)
   const [dbaRequest, setDbaRequest] = useState('')
@@ -44,8 +41,6 @@ export function SubtaskProgressCard({ subtask, task, canTransition }: SubtaskPro
   const flow = getSubtaskFlow(subtask)
   // DBA 검증중은 결재가 떨어지면 자동으로 넘어가고, 완료는 더 갈 곳이 없다
   const label = SUBTASK_ADVANCE_LABEL[subtask.status]
-  // 이행은 부모 인수 확인이 끝나야 가능하다 (시나리오 17)
-  const deployGate = getSubtaskDeployGate(task, subtask)
   const hint = EVIDENCE_HINT[subtask.status]
 
   const isDevelopmentStep = subtask.status === 'DEVELOPMENT'
@@ -89,9 +84,8 @@ export function SubtaskProgressCard({ subtask, task, canTransition }: SubtaskPro
           canTransition && (
             <ActionButton
               label={label}
-              reason={deployGate.reason}
               pending={transitionSubtask.isPending}
-              variant="default"
+              variant="outline-primary"
               onClick={handleForward}
             />
           )

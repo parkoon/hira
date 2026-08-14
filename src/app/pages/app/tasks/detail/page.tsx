@@ -12,12 +12,7 @@ import { SubtaskFormModal } from '@/features/tasks/components/subtask-form-modal
 import { TaskDescription } from '@/features/tasks/components/task-description'
 import { TaskDetailHeader } from '@/features/tasks/components/task-detail-header'
 import { TaskFormModal } from '@/features/tasks/components/task-form/task-form-modal'
-import {
-  canConfirmAcceptance,
-  canEditTask,
-  canViewTask,
-  selectTaskByTaskNo,
-} from '@/features/tasks/utils/task-selectors'
+import { canEditTask, canViewTask, selectTaskByTaskNo } from '@/features/tasks/utils/task-selectors'
 import { getUsersQueryOptions } from '@/features/users/api/get-users'
 import { useCurrentUser } from '@/features/users/hooks/use-current-user'
 import { selectAssignableUsers } from '@/features/users/utils/user-selectors'
@@ -26,7 +21,6 @@ import { Page } from '@/shared/components/ui/layout/page'
 import { paths } from '@/shared/config/paths'
 
 import { SubtaskList } from './_components/subtask-list'
-import { TaskAcceptanceCard } from './_components/task-acceptance-card'
 import { TaskActionsMenu } from './_components/task-actions-menu'
 import { TaskActivity } from './_components/task-activity'
 import { TaskAttachments } from './_components/task-attachments'
@@ -96,11 +90,6 @@ function TaskDetailPage() {
               task.status === 'IN_PROGRESS' ? null : '작업중 상태에서만 하위작업을 만들 수 있어요'
             }
             onCreate={() => setSubtaskCreateOpen(true)}
-          />
-          {/* 정정 권한은 기록 권한과 같다 — 등록자가 남긴 증적을 등록자가 못 고치면 안 된다 */}
-          <TaskAcceptanceCard
-            task={task}
-            canEdit={canConfirmAcceptance(task, user)}
           />
           <TaskActivity task={task} />
         </div>
