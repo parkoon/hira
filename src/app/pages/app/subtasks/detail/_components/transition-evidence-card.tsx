@@ -51,7 +51,7 @@ export function TransitionEvidenceCard({ subtask, canEdit }: TransitionEvidenceC
             return (
               <li
                 key={status}
-                className="flex gap-2.5"
+                className="group/step flex gap-2.5"
               >
                 <div className="flex w-6 shrink-0 flex-col items-center">
                   {/* 증적이 있다는 건 그 단계를 끝냈다는 뜻이라 스테퍼의 완료 색을 쓴다 */}
@@ -75,10 +75,13 @@ export function TransitionEvidenceCard({ subtask, canEdit }: TransitionEvidenceC
                     </p>
 
                     {canEdit && (
+                      // 단계마다 하나씩 붙어 목록이 번잡해진다 — 짚은 항목에서만 드러낸다.
+                      // 자리는 늘 차지해 호버할 때 제목이 밀리지 않고, 키보드로도 닿는다
                       <Button
                         variant="ghost"
                         size="icon-sm"
                         aria-label={`${stepLabel(status)} 증적 정정`}
+                        className="opacity-0 transition-opacity group-hover/step:opacity-100 focus-visible:opacity-100"
                         onClick={() => setEditTarget(status)}
                       >
                         <PencilIcon />
