@@ -36,7 +36,12 @@ export const getTaskTreeService = async (query: TaskTreeQuery): Promise<TaskTree
   return data as unknown as TaskTreeResult
 }
 
-export const getTaskTreeQueryKeyPrefix = () => ['/tasks/tree'] as const
+/**
+ * 첫 요소를 '/tasks'로 두는 게 중요하다 — 작업·하위작업을 바꾸는 뮤테이션이 모두
+ * ['/tasks'] 하나로 무효화하는데, react-query는 원소 단위 prefix 매칭이라
+ * ['/tasks/tree']로 두면 형제 키가 되어 이 목록만 갱신되지 않고 남는다.
+ */
+export const getTaskTreeQueryKeyPrefix = () => ['/tasks', 'tree'] as const
 
 export const getTaskTreeQueryKey = (query: TaskTreeQuery) =>
   [...getTaskTreeQueryKeyPrefix(), query] as const
