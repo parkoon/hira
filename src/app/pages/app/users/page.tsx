@@ -81,15 +81,16 @@ function UserManagementPage() {
     <Page
       className="overflow-y-hidden"
       noContentPadding
-      action={
+    >
+      {/* 필터가 늘면 왼쪽만 가로로 흐르고 구성원 추가 버튼은 오른쪽에 붙어 있는다 */}
+      <div className="mb-3 flex items-center justify-between gap-2 px-2 pt-3">
+        <div className="min-w-0 flex-1 overflow-x-auto">
+          <UserFilters />
+        </div>
         <Button onClick={() => setAssignOpen(true)}>
           <UserPlusIcon />
           구성원 추가
         </Button>
-      }
-    >
-      <div className="mb-3 px-2">
-        <UserFilters />
       </div>
 
       <UsersTable

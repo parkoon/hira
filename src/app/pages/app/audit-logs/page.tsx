@@ -29,7 +29,13 @@ function AuditLogPage() {
   return (
     <Page
       className="overflow-y-hidden"
-      action={
+      noContentPadding
+    >
+      {/* 필터가 늘면 왼쪽만 가로로 흐르고 내보내기 버튼은 오른쪽에 붙어 있는다 */}
+      <div className="mb-3 flex items-center justify-between gap-2 px-2 pt-3">
+        <div className="min-w-0 flex-1 overflow-x-auto">
+          <AuditLogFilters actors={actors} />
+        </div>
         <Button
           variant="outline"
           onClick={() => exportAuditLogsCsv(logs)}
@@ -37,11 +43,6 @@ function AuditLogPage() {
           <DownloadIcon />
           CSV 내보내기
         </Button>
-      }
-      noContentPadding
-    >
-      <div className="mb-3 px-2">
-        <AuditLogFilters actors={actors} />
       </div>
       <AuditLogsTable logs={logs} />
     </Page>

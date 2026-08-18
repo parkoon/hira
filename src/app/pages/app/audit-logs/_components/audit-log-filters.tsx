@@ -37,6 +37,9 @@ export function AuditLogFilters({ actors }: { actors: string[] }) {
       search={filters.taskNo}
       onSearchChange={(taskNo) => void setFilters({ taskNo })}
       searchPlaceholder="작업번호 검색"
+      // 줄바꿈 대신 가로 스크롤 — 필터가 늘어도 표 높이를 갉아먹지 않는다.
+      // 자식까지 shrink를 막아야 눌리지 않고 실제로 넘쳐서 스크롤이 생긴다.
+      className="flex-nowrap [&>*]:shrink-0"
     />
   )
 }
