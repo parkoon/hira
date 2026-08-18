@@ -28,6 +28,10 @@ export const paths = {
           `/app/tasks/${taskNo}/subtasks/${subtaskNo}`,
       },
     },
+    taskTree: {
+      path: 'task-tree',
+      getHref: () => '/app/task-tree',
+    },
     myTasks: {
       path: 'my-tasks',
       getHref: () => '/app/my-tasks',

@@ -77,7 +77,7 @@ export type Approval = {
 export type Priority = 'URGENT' | 'HIGH' | 'NORMAL' | 'LOW'
 
 export type TaskActor = {
-  /** profiles.id — 본인 판정·담당자 필터는 이름이 아니라 id로 한다 (동명이인 안전) */
+  /** profiles.id — 본인 판정·작업자 필터는 이름이 아니라 id로 한다 (동명이인 안전) */
   id: string
   name: string
   dept: string
@@ -185,4 +185,51 @@ export type Task = {
   /** 요청 승인 전 받아야 하는 결재 (시나리오 3). 결재선 연동 전까지는 임시 버튼으로 채운다 */
   approvals: Approval[]
   history: StatusHistoryEntry[]
+}
+
+/**
+ * 계층 조회(`search_task_tree`)가 돌려주는 행. 상·하위가 같은 필드 구성을 공유한다.
+ * 목록이 그리는 것만 담는다 — 증적·이력·결재는 상세가 쓰는 것이라 여기 없다.
+ */
+type TaskTreeNode = {
+  /** 그리드 row ID. 작업번호와 하위작업번호는 겹치지 않아 상·하위를 통틀어 유일하다 */
+  id: string
+  key: string
+  title: string
+  /** profiles.id — 작업은 등록자, 하위작업은 작업자를 가리킨다 */
+  assigneeId: string | null
+  assigneeName: string | null
+  createdAt: string
+  updatedAt: string
+  /**
+   * 이 행 자체가 검색·필터에 걸렸는지. 매칭성 필터가 하나도 없으면 전 행 true다.
+   * false인 상위는 하위가 걸려 문맥으로 딸려온 행이고,
+   * false인 하위는 매칭된 형제 덕에 그룹째 실려온 행이다.
+   */
+  matched: boolean
+}
+
+export type TaskTreeChild = TaskTreeNode & {
+  parentId: string
+  status: SubtaskStatus
+}
+
+export type TaskTreeParent = TaskTreeNode & {
+  status: TaskStatus
+  /** `children.length`와 같다 — 상위 행이 배열을 세지 않게 서버가 실어 보낸다 */
+  childCount: number
+  children: TaskTreeChild[]
+}
+
+export type TaskTreePageMeta = {
+  number: number
+  size: number
+  /** 필터를 만족하는 **상위 작업** 총 건수 — 화면에 그려지는 행 수가 아니다 */
+  totalParents: number
+  totalPages: number
+}
+
+export type TaskTreeResult = {
+  content: TaskTreeParent[]
+  page: TaskTreePageMeta
 }

@@ -43,6 +43,10 @@ export const createAppRouter = () =>
               lazy: () => import('./pages/app/tasks/page'),
             },
             {
+              path: paths.app.taskTree.path,
+              lazy: () => import('./pages/app/task-tree/page'),
+            },
+            {
               path: paths.app.tasks.detail.path,
               lazy: () => import('./pages/app/tasks/detail/page'),
             },

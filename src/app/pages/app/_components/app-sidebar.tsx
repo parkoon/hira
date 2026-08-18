@@ -2,6 +2,7 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import {
   ClipboardListIcon,
   InboxIcon,
+  ListTreeIcon,
   ScrollTextIcon,
   SquareCheckIcon,
   UsersIcon,
@@ -62,6 +63,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       label: '작업 목록',
       icon: <ClipboardListIcon className="size-4" />,
       url: paths.app.tasks.root.getHref(),
+    },
+    {
+      label: '계층 조회',
+      icon: <ListTreeIcon className="size-4" />,
+      url: paths.app.taskTree.getHref(),
     },
     {
       label: '내 하위작업',

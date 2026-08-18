@@ -4,6 +4,8 @@ const createEnv = () => {
   const EnvSchema = z.object({
     SUPABASE_URL: z.url(),
     SUPABASE_ANON_KEY: z.string().min(1),
+    /** ag-grid Enterprise 라이선스 키. 없으면 평가판으로 뜬다 — 기능은 같고 워터마크만 붙는다 */
+    AG_GRID_LICENSE_KEY: z.string().optional(),
   })
 
   const envVars = Object.entries(import.meta.env).reduce<Record<string, string>>(

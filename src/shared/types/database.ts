@@ -328,6 +328,7 @@ export type Database = {
         Row: {
           assignee_id: string | null
           completed_at: string | null
+          created_at: string
           dba_verification_request: string | null
           description: string
           due_date: string | null
@@ -336,10 +337,12 @@ export type Database = {
           subtask_no: string
           title: string
           type: Database['public']['Enums']['subtask_type']
+          updated_at: string
         }
         Insert: {
           assignee_id?: string | null
           completed_at?: string | null
+          created_at?: string
           dba_verification_request?: string | null
           description?: string
           due_date?: string | null
@@ -348,10 +351,12 @@ export type Database = {
           subtask_no: string
           title: string
           type: Database['public']['Enums']['subtask_type']
+          updated_at?: string
         }
         Update: {
           assignee_id?: string | null
           completed_at?: string | null
+          created_at?: string
           dba_verification_request?: string | null
           description?: string
           due_date?: string | null
@@ -360,6 +365,7 @@ export type Database = {
           subtask_no?: string
           title?: string
           type?: Database['public']['Enums']['subtask_type']
+          updated_at?: string
         }
         Relationships: [
           {
@@ -393,6 +399,7 @@ export type Database = {
           submitted_at: string | null
           task_no: string
           title: string
+          updated_at: string
         }
         Insert: {
           consultant_id?: string | null
@@ -408,6 +415,7 @@ export type Database = {
           submitted_at?: string | null
           task_no: string
           title: string
+          updated_at?: string
         }
         Update: {
           consultant_id?: string | null
@@ -423,6 +431,7 @@ export type Database = {
           submitted_at?: string | null
           task_no?: string
           title?: string
+          updated_at?: string
         }
         Relationships: [
           {
@@ -446,7 +455,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      search_task_tree: {
+        Args: {
+          p_assignee_id?: string
+          p_page?: number
+          p_q?: string
+          p_size?: number
+          p_sort?: string
+          p_status?: string[]
+        }
+        Returns: Json
+      }
     }
     Enums: {
       approval_kind: 'COMPLIANCE' | 'CONSUMER_PROTECTION' | 'DBA'

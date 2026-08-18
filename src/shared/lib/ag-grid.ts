@@ -1,7 +1,20 @@
 import { AG_GRID_LOCALE_KR } from '@ag-grid-community/locale'
 import { AllCommunityModule, type ColDef, themeQuartz } from 'ag-grid-community'
+import { LicenseManager, RowGroupingModule, TreeDataModule } from 'ag-grid-enterprise'
 
-export const AG_GRID_MODULES = [AllCommunityModule]
+import { env } from '@/shared/config/env'
+
+// 키가 없으면 평가판으로 뜬다 — 기능은 그대로고 워터마크와 콘솔 경고만 붙는다.
+if (env.AG_GRID_LICENSE_KEY) {
+  LicenseManager.setLicenseKey(env.AG_GRID_LICENSE_KEY)
+}
+
+// 전체 번들(AllEnterpriseModule) 대신 쓰는 모듈만 골라 등록한다.
+//  * RowGrouping — 평평한 목록을 컬럼 값으로 묶는 뷰 옵션 (내 하위작업)
+//  * TreeData — 부모가 자기 값을 가진 계층을 그대로 그린다 (계층 조회).
+//    둘은 쓰임이 다르다. 부모가 실체인 화면에 RowGrouping을 쓰면 부모가 합성 그룹 행이 되어
+//    data가 비고, 하위 0건 부모는 아예 사라진다.
+export const AG_GRID_MODULES = [AllCommunityModule, RowGroupingModule, TreeDataModule]
 
 /**
  * 공식 한국어 로케일 + 페이지네이션 문구 보정.
