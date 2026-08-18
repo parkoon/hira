@@ -3,6 +3,7 @@ import { useQueryStates } from 'nuqs'
 import { useEffect, useMemo } from 'react'
 
 import { getTaskTreeQueryOptions } from '@/features/tasks/api/get-task-tree'
+import { TaskCreateModal } from '@/features/tasks/components/task-form/task-create-modal'
 import { getUsersQueryOptions } from '@/features/users/api/get-users'
 import { Page } from '@/shared/components/ui/layout/page'
 import { useDebounceValue } from '@/shared/hooks/use-debounce'
@@ -54,8 +55,12 @@ function TaskListPage() {
       className="overflow-y-hidden"
       noContentPadding
     >
-      <div className="mb-3 px-2 pt-3">
-        <TaskListFilters assignees={usersQuery.data ?? []} />
+      {/* 필터가 늘면 왼쪽만 가로로 흐르고 작업 요청 버튼은 오른쪽에 붙어 있는다 */}
+      <div className="mb-3 flex items-center justify-between gap-2 px-2 pt-3">
+        <div className="min-w-0 flex-1 overflow-x-auto">
+          <TaskListFilters assignees={usersQuery.data ?? []} />
+        </div>
+        <TaskCreateModal />
       </div>
 
       <TasksTable

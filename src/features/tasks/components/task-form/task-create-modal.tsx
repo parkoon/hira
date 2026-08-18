@@ -12,13 +12,13 @@ import { paths } from '@/shared/config/paths'
 
 import { TaskFormModal } from './task-form-modal'
 
-/** 헤더의 '새 작업' — 등록은 요청대기중까지만 만든다. 승인 요청은 상세에서 한다 (시나리오 1·2) */
+/** 작업 목록의 '작업 요청' — 등록은 요청대기중까지만 만든다. 승인 요청은 상세에서 한다 (시나리오 1·2) */
 export function TaskCreateModal() {
   const [open, setOpen] = useState(false)
   const navigate = useNavigate()
   const { user } = useCurrentUser()
   const createTask = useCreateTaskMutation()
-  // 헤더는 항상 떠 있으므로 여기서 받아두면 모달을 열 때 기다릴 일이 없다
+  // 목록이 뜰 때 미리 받아두면 모달을 열 때 기다릴 일이 없다
   const usersQuery = useSuspenseQuery(getUsersQueryOptions())
 
   return (
