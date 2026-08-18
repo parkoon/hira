@@ -52,14 +52,14 @@ export function TasksTable({
   onResetFilters,
 }: TasksTableProps) {
   /**
-   * 계층을 담당하는 그룹 컬럼.
-   * Nested Records 방식은 기본 표시값이 row ID라, 키·제목 조합을 innerRenderer로 직접 그린다.
+   * 계층을 담당하는 그룹 컬럼 — 들여쓰기와 펼침 아이콘이 여기 붙으므로 작업번호를 여기 둔다.
+   * Nested Records 방식은 기본 표시값이 row ID라 innerRenderer로 직접 그린다.
    */
   const autoGroupColumnDef = useMemo<ColDef<TaskTreeNode>>(
     () => ({
-      headerName: '작업',
-      flex: 1,
-      minWidth: 320,
+      headerName: '작업번호',
+      // 들여쓰기 한 단 + 펼침 아이콘 + 파생 표시까지 앞에 붙으므로 번호만 놓을 때보다 넉넉해야 한다
+      width: 240,
       cellRendererParams: {
         // 하위 건수는 '하위' 컬럼이 이미 보여준다 — 그룹 셀의 (1) 표기는 끈다
         suppressCount: true,
@@ -88,8 +88,6 @@ export function TasksTable({
               >
                 {data.key}
               </TaskLink>
-              <span className={cn('truncate', isParent && 'font-medium')}>{data.title}</span>
-              {isParent && !data.matched && <Lozenge tone="info">하위 매칭</Lozenge>}
             </span>
           )
         },
@@ -100,6 +98,24 @@ export function TasksTable({
 
   const columnDefs = useMemo<ColDef<TaskTreeNode>[]>(
     () => [
+      {
+        headerName: '제목',
+        flex: 1,
+        minWidth: 220,
+        cellRenderer: ({ data }: ICellRendererParams<TaskTreeNode>) => {
+          if (!data) return null
+
+          const isParent = isParentNode(data)
+
+          return (
+            <span className="flex items-center gap-1.5">
+              <span className={cn('truncate', isParent && 'font-medium')}>{data.title}</span>
+              {/* 이 행이 왜 결과에 들었는지는 제목 옆에서 읽혀야 한다 */}
+              {isParent && !data.matched && <Lozenge tone="info">하위 매칭</Lozenge>}
+            </span>
+          )
+        },
+      },
       {
         headerName: '상태',
         width: 140,
