@@ -67,6 +67,8 @@ export function TasksTable({
           if (!data) return null
 
           const isParent = isParentNode(data)
+          // 끝난 건은 훑어 내릴 때 걸러 읽히게 죽인다. 링크는 그대로 살아 있다
+          const isDone = data.status === 'DONE'
 
           return (
             <span className="flex items-center gap-1.5">
@@ -80,6 +82,9 @@ export function TasksTable({
                     ? paths.app.tasks.detail.getHref(data.key)
                     : paths.app.tasks.subtask.getHref(data.parentId, data.key)
                 }
+                className={cn(
+                  isDone && 'text-muted-foreground dark:text-muted-foreground line-through'
+                )}
               >
                 {data.key}
               </TaskLink>
