@@ -34,7 +34,7 @@ export default defineConfig({
         // ag-grid는 덩치가 커(gzip 약 180KB) 그리드를 쓰는 페이지 청크를 비대하게 만든다.
         // 별도 vendor 청크로 분리해 그리드를 쓰는 여러 페이지가 공유·캐싱하게 한다.
         codeSplitting: {
-          groups: [{ name: 'ag-grid', test: /[\\/]node_modules[\\/]ag-grid-/ }],
+          groups: [{ name: 'ag-grid', test: /[\\/]node_modules[\\/](ag-grid-|ag-stack)/ }],
         },
       },
     },

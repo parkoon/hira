@@ -33,11 +33,14 @@ importers:
         specifier: ^3.29.2
         version: 3.30.0
       ag-grid-community:
-        specifier: ^35.3.1
-        version: 35.3.1
+        specifier: ^36.1.0
+        version: 36.1.0
+      ag-grid-enterprise:
+        specifier: ^36.1.0
+        version: 36.1.0
       ag-grid-react:
-        specifier: ^35.3.1
-        version: 35.3.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        specifier: ^36.1.0
+        version: 36.1.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -1945,17 +1948,35 @@ packages:
     engines: {node: '>=0.4.0'}
     hasBin: true
 
-  ag-charts-types@13.3.1:
-    resolution: {integrity: sha512-m37eUe4g//swvGh8PWMlYQH3gknjSsPeW4sQwBhM3/auGAHmN0wvxEWlrdAn98pBPg4HoKbtOy+yf7gPCYsnvQ==}
+  ag-charts-community@14.1.0:
+    resolution: {integrity: sha512-J5S2Gag/nEJy7WzX/esAguqkuNHBYB3nly4vItMM/DggnnOYCopjLBEtkXXZZt1If1IQstnU4sKaUTmteAoj1Q==}
 
-  ag-grid-community@35.3.1:
-    resolution: {integrity: sha512-Wmkd/xYTCbAApcZZO74nBggZCnd/oX753NY3MJ4zYARVpfBHRWWhIBJ2sFTFKbDWwHZOWsx3YT9+kkyeuyLKlw==}
+  ag-charts-core@14.1.0:
+    resolution: {integrity: sha512-lkjDoudYOiUncHQ0FaDv8CaQ+TsOK16vUZnkJNPIaC92opRP95pryDbWQ6VDWzCLCqsJbAGPx2xlsTor+WgA2A==}
 
-  ag-grid-react@35.3.1:
-    resolution: {integrity: sha512-M3ljCQyGL+qzoyPN0BYrn4eAlgZr6Ailcjd8+a7OcneSiVsMNSJb/gTkIMUwmYivkPLIA8EEJ4hTxxKSaya6mQ==}
+  ag-charts-enterprise@14.1.0:
+    resolution: {integrity: sha512-1bLN22vv07tdJH/UrmSrIWSJu0fkpr//jfrcwaeAatXSwUspcjLzHmcQNNoeQ0TX6xTFaoZ558mJ96P3pmRhWw==}
+
+  ag-charts-locale@14.1.0:
+    resolution: {integrity: sha512-5UFnL7JoOj491LtqZmlCdbxDvXqE12qz664CZFBK4Tzlh8n48pN9yWfVqhlmkJWEC/wugG3Yf6/i3WGxL5qljw==}
+
+  ag-charts-types@14.1.0:
+    resolution: {integrity: sha512-mmzkng88c0l+Z9PvCMowMilhVeNgDU/iMuMemcOQD4BG/qO4vbkxWvyQO0iqju8Dx7YOY81PNzC/RmElQNiVkA==}
+
+  ag-grid-community@36.1.0:
+    resolution: {integrity: sha512-WnvSQ4csRs8gv/b1B0lPHykQXvUJVgi2u5mpY0Aa6dv3pvhDVVqCT8dwUyOeCog4JNPptaXGrOrZ8qP2XoJzVA==}
+
+  ag-grid-enterprise@36.1.0:
+    resolution: {integrity: sha512-bZmctvyMYNp089VAWlnuHH+C0xf1rUlon02uyUMglDjIZ6kiEH9ihWnkQPeiwaHlfrNWpAJSO7cXZBgkgBfUCQ==}
+
+  ag-grid-react@36.1.0:
+    resolution: {integrity: sha512-FNsmrOmr+taZY11sCA+6Ow0mKs2JqnmrjBrMjkKC2rVTXPARtks+tv+Ne4ZkLGGtvIMDlBFCDbSzFXVP0CdwXQ==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+
+  ag-stack@36.1.0:
+    resolution: {integrity: sha512-Kmkf5iRZmyduNx2KtW450j6GbCdJ4ejacSpb1AWl0yrdquRmScLRc1SlLolx6lyCbTBSJGo4tRraKbBzre+GlQ==}
 
   ajv-formats@2.1.1:
     resolution: {integrity: sha512-Wx0Kx52hxE7C18hkMEggYlEifqWZtYaRgouJor+WMdPnQyEK13vgEWyVNup7SoeeoLMsr4kf5h6dOW11I15MUA==}
@@ -6122,18 +6143,50 @@ snapshots:
 
   acorn@8.18.0: {}
 
-  ag-charts-types@13.3.1: {}
-
-  ag-grid-community@35.3.1:
+  ag-charts-community@14.1.0:
     dependencies:
-      ag-charts-types: 13.3.1
+      ag-charts-core: 14.1.0
+      ag-charts-locale: 14.1.0
+      ag-charts-types: 14.1.0
+    optional: true
 
-  ag-grid-react@35.3.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
+  ag-charts-core@14.1.0:
     dependencies:
-      ag-grid-community: 35.3.1
+      ag-charts-types: 14.1.0
+    optional: true
+
+  ag-charts-enterprise@14.1.0:
+    dependencies:
+      ag-charts-community: 14.1.0
+      ag-charts-core: 14.1.0
+    optional: true
+
+  ag-charts-locale@14.1.0:
+    optional: true
+
+  ag-charts-types@14.1.0: {}
+
+  ag-grid-community@36.1.0:
+    dependencies:
+      ag-charts-types: 14.1.0
+      ag-stack: 36.1.0
+
+  ag-grid-enterprise@36.1.0:
+    dependencies:
+      ag-grid-community: 36.1.0
+      ag-stack: 36.1.0
+    optionalDependencies:
+      ag-charts-community: 14.1.0
+      ag-charts-enterprise: 14.1.0
+
+  ag-grid-react@36.1.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
+    dependencies:
+      ag-grid-community: 36.1.0
       prop-types: 15.8.1
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
+
+  ag-stack@36.1.0: {}
 
   ajv-formats@2.1.1(ajv@8.20.0):
     optionalDependencies:
