@@ -9,12 +9,15 @@ import { MY_TASK_DEFAULT_SORT } from '../_constants'
 export const myTaskFilterParsers = {
   q: parseAsString.withDefault(''),
   status: parseAsArrayOf(parseAsString).withDefault([]),
+  /** 동명이인이 있어도 안전하도록 이름이 아니라 profiles.id를 담는다 */
+  assignee: parseAsArrayOf(parseAsString).withDefault([]),
   sort: parseAsString.withDefault(MY_TASK_DEFAULT_SORT),
 }
 
 type MyTaskFilters = {
   q: string
   status: string[]
+  assignee: string[]
   sort: string
 }
 
@@ -59,6 +62,9 @@ export function applyMyTaskFilters(subtasks: Subtask[], filters: MyTaskFilters):
 
   const filtered = subtasks.filter((subtask) => {
     if (statuses.length > 0 && !statuses.includes(subtask.status)) {
+      return false
+    }
+    if (filters.assignee.length > 0 && !filters.assignee.includes(subtask.assignee.id)) {
       return false
     }
     if (query && !`${subtask.subtaskNo} ${subtask.title}`.toLowerCase().includes(query)) {
