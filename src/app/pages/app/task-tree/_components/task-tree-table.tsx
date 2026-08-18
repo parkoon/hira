@@ -1,6 +1,5 @@
 import type { ColDef, GetRowIdParams, ICellRendererParams, RowClassParams } from 'ag-grid-community'
 import { AgGridProvider, AgGridReact } from 'ag-grid-react'
-import { format, parseISO } from 'date-fns'
 import { CornerDownRightIcon, SearchXIcon, TriangleAlertIcon } from 'lucide-react'
 import { useCallback, useMemo } from 'react'
 
@@ -122,24 +121,11 @@ export function TaskTreeTable({
         },
       },
       {
-        headerName: '하위',
-        width: 70,
-        cellRenderer: ({ data }: ICellRendererParams<TaskTreeNode>) => {
-          // 하위 행에는 셀 자체가 없고, 하위 0건인 상위는 빈 칸으로 둔다
-          if (!data || !isParentNode(data) || data.childCount === 0) return null
-          return <span>{data.childCount}</span>
-        },
-      },
-      {
-        headerName: '생성일',
-        width: 110,
-        valueGetter: ({ data }) => data?.createdAt ?? null,
-      },
-      {
-        headerName: '수정일',
-        width: 140,
-        valueGetter: ({ data }) =>
-          data ? format(parseISO(data.updatedAt), 'yyyy-MM-dd HH:mm') : null,
+        field: 'dueDate',
+        headerName: '목표일',
+        width: 120,
+        // 하위작업은 목표일이 없을 수 있다
+        cellRenderer: ({ value }: { value: string | null }) => value ?? EMPTY_CELL,
       },
     ],
     []

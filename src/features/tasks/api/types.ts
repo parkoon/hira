@@ -212,10 +212,13 @@ type TaskTreeNode = {
 export type TaskTreeChild = TaskTreeNode & {
   parentId: string
   status: SubtaskStatus
+  /** 하위작업은 목표일을 비워둘 수 있다 */
+  dueDate: string | null
 }
 
 export type TaskTreeParent = TaskTreeNode & {
   status: TaskStatus
+  dueDate: string
   /** `children.length`와 같다 — 상위 행이 배열을 세지 않게 서버가 실어 보낸다 */
   childCount: number
   children: TaskTreeChild[]
