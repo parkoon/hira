@@ -207,6 +207,8 @@ export function TaskTreeTable({
           defaultColDef={defaultColDef}
           localeText={AG_GRID_LOCALE}
           rowClassRules={rowClassRules}
+          // 읽기 전용 목록이라 셀을 짚어 할 일이 없다 — 클릭한 칸에 초점 테두리가 남지 않게 한다
+          suppressCellFocus
           getRowId={getRowId}
           // 페이지를 넘기면 맨 위부터 읽는다 — 스크롤이 남아 있으면 중간에 떨어진다
           onRowDataUpdated={({ api }) => api.ensureIndexVisible(0, 'top')}
