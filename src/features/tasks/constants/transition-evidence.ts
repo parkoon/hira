@@ -21,7 +21,7 @@ export const EVIDENCE_HINT: Partial<Record<SubtaskStatus, string>> = {
 
 /**
  * 증적은 링크·첨부파일·메모 중 최소 한 가지가 있어야 한다.
- * 무엇으로 남길지는 단계가 아니라 담당자가 고른다.
+ * 무엇으로 남길지는 단계가 아니라 작업자가 고른다.
  */
 export function hasEvidenceContent(evidence: EvidenceContent) {
   return (

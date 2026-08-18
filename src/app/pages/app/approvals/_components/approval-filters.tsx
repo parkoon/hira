@@ -7,7 +7,7 @@ import { toEnumOptions } from '@/shared/utils/enum'
 
 import { approvalFilterParsers } from '../_utils/approval-filters'
 
-/** 요청자 옵션은 필터 적용 전 목록에서 뽑아야 선택 후에도 목록이 줄지 않는다. */
+/** 담당자 옵션은 필터 적용 전 목록에서 뽑아야 선택 후에도 목록이 줄지 않는다. */
 export function ApprovalFilters({ requesters }: { requesters: string[] }) {
   const [filters, setFilters] = useQueryStates(approvalFilterParsers)
 
@@ -16,7 +16,7 @@ export function ApprovalFilters({ requesters }: { requesters: string[] }) {
       { key: 'priority', label: '우선순위', options: toEnumOptions(PRIORITY_META) },
       {
         key: 'requester',
-        label: '요청자',
+        label: '담당자',
         options: requesters.map((name) => ({ value: name, label: name })),
       },
     ],

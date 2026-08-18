@@ -13,7 +13,7 @@ export type ApproveSubtaskBody = {
   actorName: string
 }
 
-/** DBA 결재 — 떨어지면 담당자 조작 없이 제3자검증중으로 넘어간다 (시나리오 9) */
+/** DBA 결재 — 떨어지면 작업자 조작 없이 제3자검증중으로 넘어간다 (시나리오 9) */
 export const approveSubtaskService = async ({ subtaskNo, kind, actorName }: ApproveSubtaskBody) => {
   const { data: current, error: readError } = await supabase
     .from('subtasks')
@@ -47,7 +47,7 @@ export const approveSubtaskService = async ({ subtaskNo, kind, actorName }: Appr
       actorName,
       fromStatus: current.status,
       toStatus: advances ? 'THIRD_PARTY' : current.status,
-      // 전이 자체는 담당자 조작 없이 일어나므로 자동으로 기록한다 (시나리오 9)
+      // 전이 자체는 작업자 조작 없이 일어나므로 자동으로 기록한다 (시나리오 9)
       via: advances ? 'API' : 'MANUAL',
       reason: `${APPROVAL_KIND_META[kind].label} 결재 승인`,
     }

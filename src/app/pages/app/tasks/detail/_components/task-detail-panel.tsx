@@ -50,7 +50,7 @@ export function TaskDetailPanel({ task }: { task: Task }) {
       )}
 
       <PanelCard title="세부 사항">
-        <PanelCardField label="요청자">
+        <PanelCardField label="담당자">
           <span className="flex items-center gap-1.5">
             <NameAvatar name={task.requester.name} />
             {task.requester.name} · {task.requester.dept}

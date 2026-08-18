@@ -49,7 +49,7 @@ export const updateSubtaskService = async ({
     changes.push('설명 변경')
   }
   if (patch.assignee !== undefined && patch.assignee.id !== current.assignee_id) {
-    changes.push(`담당자 ${current.assignee?.name ?? '없음'} → ${patch.assignee.name}`)
+    changes.push(`작업자 ${current.assignee?.name ?? '없음'} → ${patch.assignee.name}`)
   }
   if (patch.dueDate !== undefined && patch.dueDate !== current.due_date) {
     changes.push(`목표일 ${current.due_date ?? '없음'} → ${patch.dueDate ?? '없음'}`)

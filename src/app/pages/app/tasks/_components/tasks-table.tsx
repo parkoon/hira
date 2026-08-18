@@ -54,7 +54,7 @@ export function TasksTable({ tasks }: { tasks: Task[] }) {
         cellRenderer: ({ data }: { data: Task }) => <PriorityLabel priority={data.priority} />,
       },
       {
-        headerName: '요청자',
+        headerName: '담당자',
         width: 130,
         valueGetter: ({ data }) => data?.requester.name,
         cellRenderer: ({ data }: { data: Task }) => (

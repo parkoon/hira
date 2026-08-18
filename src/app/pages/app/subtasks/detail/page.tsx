@@ -33,14 +33,14 @@ function SubtaskDetailPage() {
   const [editOpen, setEditOpen] = useState(false)
 
   const tasksQuery = useSuspenseQuery(getTasksQueryOptions())
-  // 수정 모달이 열릴 때 화면이 서스펜드되지 않도록 담당자 후보를 미리 받아 둔다
+  // 수정 모달이 열릴 때 화면이 서스펜드되지 않도록 작업자 후보를 미리 받아 둔다
   const usersQuery = useSuspenseQuery(getUsersQueryOptions())
   const updateSubtask = useUpdateSubtaskMutation()
 
   const subtask = selectSubtaskBySubtaskNo(tasksQuery.data, subtaskNo)
   const task = subtask ? selectTaskByTaskNo(tasksQuery.data, subtask.parentTaskNo) : undefined
 
-  // 요청자는 본인이 등록한 작업의 하위작업만 볼 수 있다 (스펙 §3.3) — URL 직접 접근에도 적용
+  // 담당자는 본인이 등록한 작업의 하위작업만 볼 수 있다 (스펙 §3.3) — URL 직접 접근에도 적용
   const visible = task !== undefined && canViewTask(task, user)
 
   if (!subtask || !task || !visible) {
@@ -53,7 +53,7 @@ function SubtaskDetailPage() {
     )
   }
 
-  // 담당자 본인 또는 리드 이상만 전이한다 (스펙 §5.2) — 인수 테스트중만 등록자 본인이다
+  // 작업자 본인 또는 리드 이상만 전이한다 (스펙 §5.2) — 인수 테스트중만 등록자 본인이다
   const canTransition = canActOnSubtaskStep(task, subtask, user, subtask.status)
   // 하위작업 수정·배정·삭제는 작업자 이상이 수행한다 (스펙 §5.1)
   const canManageSubtask = hasRole('WORKER')

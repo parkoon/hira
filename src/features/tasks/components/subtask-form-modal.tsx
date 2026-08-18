@@ -24,7 +24,7 @@ const subtaskFormSchema = z.object({
   type: z.enum(['DEPLOY', 'NON_DEPLOY'], { message: '유형을 선택해 주세요' }),
   title: z.string().trim().min(1, '제목을 입력해 주세요'),
   description: z.string().trim(),
-  assigneeId: z.string().min(1, '담당자를 선택해 주세요'),
+  assigneeId: z.string().min(1, '작업자를 선택해 주세요'),
   dueDate: z.string(),
 })
 
@@ -35,7 +35,7 @@ type SubtaskFormModalProps = {
   onOpenChange: (open: boolean) => void
   title: string
   submitLabel: string
-  /** 담당자 후보 — 페이지가 조회해서 넘긴다 (모달을 열 때 화면이 서스펜드되지 않게) */
+  /** 작업자 후보 — 페이지가 조회해서 넘긴다 (모달을 열 때 화면이 서스펜드되지 않게) */
   assignableUsers: TaskActor[]
   /** 수정처럼 기존 값에서 시작할 때 */
   defaultValues?: Partial<SubtaskDraft>
@@ -61,7 +61,7 @@ export function SubtaskFormModal({
   onSubmit,
 }: SubtaskFormModalProps) {
   const currentAssignee = defaultValues?.assignee
-  // 배정 후 역할이 내려간 담당자도 목록에 남겨야 선택값이 비어 보이지 않는다
+  // 배정 후 역할이 내려간 작업자도 목록에 남겨야 선택값이 비어 보이지 않는다
   const assigneeOptions =
     currentAssignee && !assignableUsers.some((user) => user.id === currentAssignee.id)
       ? [currentAssignee, ...assignableUsers]
@@ -170,7 +170,7 @@ export function SubtaskFormModal({
           </Field>
 
           <Field>
-            <FieldLabel htmlFor="subtask-assignee">담당자</FieldLabel>
+            <FieldLabel htmlFor="subtask-assignee">작업자</FieldLabel>
             <Controller
               control={form.control}
               name="assigneeId"

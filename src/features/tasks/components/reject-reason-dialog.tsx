@@ -24,7 +24,7 @@ export function RejectReasonDialog({ task, onOpenChange, onConfirm }: RejectReas
       open={task !== null}
       onOpenChange={handleOpenChange}
       title={`${task?.taskNo ?? ''} 반려`}
-      description="반려 사유는 요청자에게 그대로 전달되며 감사 로그에 기록됩니다."
+      description="반려 사유는 담당자에게 그대로 전달되며 감사 로그에 기록됩니다."
       // 필드가 하나뿐이라 기본 고정 높이 대신 내용 높이를 따르게 한다
       className="h-auto max-h-[calc(100dvh-2rem)] sm:max-w-lg"
       expandable={false}

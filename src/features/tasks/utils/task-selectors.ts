@@ -10,7 +10,7 @@ import type { User } from '@/features/users/api/types'
 import { ROLE_LEVEL } from '@/features/users/constants/metadata'
 
 /**
- * 작업 열람 권한 — 요청자는 본인이 등록한 건만 볼 수 있다 (스펙 §3.3).
+ * 작업 열람 권한 — 담당자는 본인이 등록한 건만 볼 수 있다 (스펙 §3.3).
  * 목록과 상세(직접 URL 접근)가 같은 규칙을 쓴다.
  */
 export function canViewTask(task: Task, user: User): boolean {
@@ -42,7 +42,7 @@ export function selectSubtaskBySubtaskNo(tasks: Task[], subtaskNo: string): Subt
   return tasks.flatMap((task) => task.subtasks).find((subtask) => subtask.subtaskNo === subtaskNo)
 }
 
-/** 내 하위작업 — 본인이 담당자인 하위작업. 동명이인이 있어도 안전하게 id로 식별한다 */
+/** 내 하위작업 — 본인이 작업자인 하위작업. 동명이인이 있어도 안전하게 id로 식별한다 */
 export function selectSubtasksByAssignee(tasks: Task[], assigneeId: string): Subtask[] {
   return tasks
     .flatMap((task) => task.subtasks)
@@ -70,7 +70,7 @@ export function getSubtaskDeletionState(subtask: Subtask) {
 }
 
 /**
- * 하위작업 내용(제목·설명·담당자·목표일) 수정 가능 여부.
+ * 하위작업 내용(제목·설명·작업자·목표일) 수정 가능 여부.
  * 완료된 건은 기록이 확정된 것으로 본다. 권한은 화면이 따로 판정한다 (삭제와 같은 방식).
  */
 export function getSubtaskEditState(subtask: Subtask) {
@@ -177,7 +177,7 @@ export function getTaskEditState(task: Task) {
 
 /**
  * 하위작업 단계별 수행 주체 — 전이와 그 단계 증적 정정이 같은 규칙을 쓴다.
- * 기본은 담당자·리드(스펙 §5.3)지만, 인수 테스트중만 부모 작업의 등록자 본인이다 —
+ * 기본은 작업자·리드(스펙 §5.3)지만, 인수 테스트중만 부모 작업의 등록자 본인이다 —
  * 요청한 사람이 요청한 대로인지 확인하는 단계라 리드도 대행할 수 없다.
  */
 export function canActOnSubtaskStep(

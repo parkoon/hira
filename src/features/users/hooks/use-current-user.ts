@@ -18,7 +18,7 @@ export function useCurrentUser() {
 
   if (user === null) throw new Error('인증 가드 안에서만 쓸 수 있습니다')
 
-  /** 역할 계층(요청자 ⊂ 작업자 ⊂ 리드 ⊂ 관리자) 기준 권한 확인 — 스펙 §3.1 */
+  /** 역할 계층(담당자 ⊂ 작업자 ⊂ 리드 ⊂ 관리자) 기준 권한 확인 — 스펙 §3.1 */
   const hasRole = (minRole: UserRole) => ROLE_LEVEL[user.role] >= ROLE_LEVEL[minRole]
 
   return { user, hasRole }

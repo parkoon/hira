@@ -104,7 +104,7 @@ describe('selectVisibleTasks', () => {
     expect(visible.map((task) => task.taskNo)).toEqual(['WR-2026-0001', 'WR-2026-0002'])
   })
 
-  it('요청자는 본인이 등록한 건만 본다', () => {
+  it('담당자는 본인이 등록한 건만 본다', () => {
     const requester = makeUser({ id: 'user-kim', name: '김현주', role: 'REQUESTER' })
     const visible = selectVisibleTasks([mine, others], requester)
 
@@ -194,7 +194,7 @@ describe('canActOnSubtaskStep', () => {
   const assignee = makeUser()
   const lead = makeUser({ id: 'user-yoon', name: '윤서진', role: 'LEAD' })
 
-  it('일반 단계는 담당자 본인과 리드만 수행한다', () => {
+  it('일반 단계는 작업자 본인과 리드만 수행한다', () => {
     const subtask = makeSubtask({ status: 'DEVELOPMENT' })
 
     expect(canActOnSubtaskStep(makeTask(), subtask, assignee, 'DEVELOPMENT')).toBe(true)
@@ -210,7 +210,7 @@ describe('canActOnSubtaskStep', () => {
     ).toBe(false)
   })
 
-  it('인수 테스트중은 등록자 본인만 수행하고, 리드·담당자도 대행할 수 없다', () => {
+  it('인수 테스트중은 등록자 본인만 수행하고, 리드·작업자도 대행할 수 없다', () => {
     const subtask = makeSubtask({ status: 'ACCEPTANCE' })
 
     expect(canActOnSubtaskStep(makeTask(), subtask, requester, 'ACCEPTANCE')).toBe(true)

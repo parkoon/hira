@@ -143,7 +143,7 @@ export function AssignRoleDialog({ open, onOpenChange, users, onAssign }: Assign
       open={open}
       onOpenChange={handleOpenChange}
       title="구성원 추가"
-      description="조직도에서 구성원을 고르고 역할을 지정합니다. 요청자 역할은 사내 계정 최초 로그인 시 자동 부여되어 따로 등록할 필요가 없습니다."
+      description="조직도에서 구성원을 고르고 역할을 지정합니다. 담당자 역할은 사내 계정 최초 로그인 시 자동 부여되어 따로 등록할 필요가 없습니다."
       className="h-auto max-h-[calc(100dvh-2rem)] sm:max-w-lg"
       expandable={false}
       secondaryAction={{ label: '취소', onClick: () => handleOpenChange(false) }}

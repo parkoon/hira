@@ -42,7 +42,7 @@ function TaskDetailPage() {
 
   const task = selectTaskByTaskNo(tasksQuery.data, taskNo)
 
-  // 요청자는 본인이 등록한 건만 볼 수 있다 (스펙 §3.3) — 목록과 같은 규칙을 URL 직접 접근에도 적용한다
+  // 담당자는 본인이 등록한 건만 볼 수 있다 (스펙 §3.3) — 목록과 같은 규칙을 URL 직접 접근에도 적용한다
   const visible = task !== undefined && canViewTask(task, user)
 
   if (!task || !visible) {

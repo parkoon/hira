@@ -54,7 +54,7 @@ export function SubtaskDetailPanel({ subtask, canTransition }: SubtaskDetailPane
       />
 
       <PanelCard title="세부 사항">
-        <PanelCardField label="담당자">
+        <PanelCardField label="작업자">
           <span className="flex items-center gap-1.5">
             <NameAvatar name={subtask.assignee.name} />
             {subtask.assignee.name}

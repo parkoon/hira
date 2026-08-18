@@ -67,7 +67,7 @@ function UserManagementPage() {
     [setRoleOf]
   )
 
-  // 요청자는 최초 로그인 시 자동 부여되는 기본 역할이라 명부에 올리지 않는다 (스펙 §3.2)
+  // 담당자는 최초 로그인 시 자동 부여되는 기본 역할이라 명부에 올리지 않는다 (스펙 §3.2)
   const filteredUsers = useMemo(
     () =>
       applyUserFilters(
