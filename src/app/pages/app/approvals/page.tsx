@@ -68,9 +68,6 @@ function ApprovalInboxPage() {
       noContentPadding
     >
       <div className="mb-3 px-2 pt-2">
-        <p className="text-muted-foreground mb-2 text-xs">
-          개인정보 취급 건은 강조 표시됩니다. 본인이 등록한 작업은 직접 승인·반려할 수 없습니다.
-        </p>
         <ApprovalFilters requesters={requesters} />
       </div>
 
