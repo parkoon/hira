@@ -15,14 +15,17 @@ export const TASK_LIST_DEFAULT_SORT = 'createdAt,desc'
 export const TASK_LIST_SORT_META = {
   'createdAt,desc': { label: '등록일 ↓', order: 10 },
   'createdAt,asc': { label: '등록일 ↑', order: 20 },
-  'updatedAt,desc': { label: '수정일 ↓', order: 30 },
-  'updatedAt,asc': { label: '수정일 ↑', order: 40 },
-  'key,desc': { label: '작업번호 ↓', order: 50 },
-  'key,asc': { label: '작업번호 ↑', order: 60 },
-  'title,asc': { label: '제목 ↑', order: 70 },
-  'title,desc': { label: '제목 ↓', order: 80 },
-  'status,asc': { label: '상태 코드 ↑', order: 90 },
-  'status,desc': { label: '상태 코드 ↓', order: 100 },
+  // 목록이 보여주는 유일한 날짜라 등록일 바로 다음에 둔다 — 목표일 없는 하위작업은 늘 뒤로 간다
+  'dueDate,asc': { label: '목표일 ↑', order: 30 },
+  'dueDate,desc': { label: '목표일 ↓', order: 40 },
+  'updatedAt,desc': { label: '수정일 ↓', order: 50 },
+  'updatedAt,asc': { label: '수정일 ↑', order: 60 },
+  'key,desc': { label: '작업번호 ↓', order: 70 },
+  'key,asc': { label: '작업번호 ↑', order: 80 },
+  'title,asc': { label: '제목 ↑', order: 90 },
+  'title,desc': { label: '제목 ↓', order: 100 },
+  'status,asc': { label: '상태 코드 ↑', order: 110 },
+  'status,desc': { label: '상태 코드 ↓', order: 120 },
 } satisfies Record<string, EnumMetadata>
 
 /**
