@@ -42,13 +42,6 @@ export function selectSubtaskBySubtaskNo(tasks: Task[], subtaskNo: string): Subt
   return tasks.flatMap((task) => task.subtasks).find((subtask) => subtask.subtaskNo === subtaskNo)
 }
 
-/** 내 하위작업 — 본인이 작업자인 하위작업. 동명이인이 있어도 안전하게 id로 식별한다 */
-export function selectSubtasksByAssignee(tasks: Task[], assigneeId: string): Subtask[] {
-  return tasks
-    .flatMap((task) => task.subtasks)
-    .filter((subtask) => subtask.assignee.id === assigneeId)
-}
-
 export function getSubtaskProgress(task: Task) {
   const total = task.subtasks.length
   const done = task.subtasks.filter((subtask) => subtask.status === 'DONE').length

@@ -43,10 +43,6 @@ export const createAppRouter = () =>
               lazy: () => import('./pages/app/tasks/page'),
             },
             {
-              path: paths.app.taskTree.path,
-              lazy: () => import('./pages/app/task-tree/page'),
-            },
-            {
               path: paths.app.tasks.detail.path,
               lazy: () => import('./pages/app/tasks/detail/page'),
             },
@@ -55,15 +51,6 @@ export const createAppRouter = () =>
               lazy: () => import('./pages/app/subtasks/detail/page'),
             },
             // 아래 화면들은 역할이 모자라면 열리지 않는다 — 사이드바 노출 조건과 같은 기준
-            {
-              element: <RequireRole minRole="WORKER" />,
-              children: [
-                {
-                  path: paths.app.myTasks.path,
-                  lazy: () => import('./pages/app/my-tasks/page'),
-                },
-              ],
-            },
             {
               element: <RequireRole minRole="LEAD" />,
               children: [

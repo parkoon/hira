@@ -1,20 +1,10 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
-import {
-  ClipboardListIcon,
-  InboxIcon,
-  ListTreeIcon,
-  ScrollTextIcon,
-  SquareCheckIcon,
-  UsersIcon,
-} from 'lucide-react'
+import { ClipboardListIcon, InboxIcon, ScrollTextIcon, UsersIcon } from 'lucide-react'
 import * as React from 'react'
 import { Link, useLocation } from 'react-router'
 
 import { getTasksQueryOptions } from '@/features/tasks/api/get-tasks'
-import {
-  selectPendingApprovalTasks,
-  selectSubtasksByAssignee,
-} from '@/features/tasks/utils/task-selectors'
+import { selectPendingApprovalTasks } from '@/features/tasks/utils/task-selectors'
 import type { UserRole } from '@/features/users/api/types'
 import { ROLE_LEVEL } from '@/features/users/constants/metadata'
 import { useCurrentUser } from '@/features/users/hooks/use-current-user'
@@ -63,18 +53,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       label: '작업 목록',
       icon: <ClipboardListIcon className="size-4" />,
       url: paths.app.tasks.root.getHref(),
-    },
-    {
-      label: '계층 조회',
-      icon: <ListTreeIcon className="size-4" />,
-      url: paths.app.taskTree.getHref(),
-    },
-    {
-      label: '내 하위작업',
-      icon: <SquareCheckIcon className="size-4" />,
-      url: paths.app.myTasks.getHref(),
-      count: selectSubtasksByAssignee(tasks, user.id).length,
-      minRole: 'WORKER',
     },
     {
       label: '승인 대기함',

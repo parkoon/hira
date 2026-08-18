@@ -5,7 +5,7 @@ import { Button } from '@/shared/components/ui/button'
 
 import { getPageWindow } from '../_utils/page-window'
 
-type TaskTreePagerProps = {
+type TaskListPagerProps = {
   page: TaskTreePageMeta | undefined
   /** 전환 중에는 연타를 막는다 — 이전 페이지가 그려진 채로 버튼만 살아 있으면 헷갈린다 */
   disabled: boolean
@@ -16,7 +16,7 @@ type TaskTreePagerProps = {
  * 그리드 바깥의 페이저. 페이징 단위가 상위 작업이라 화면의 행 수와 건수가 다르므로,
  * 카운트에 '상위 작업'이라는 단위를 반드시 붙인다 — 그 차이를 설명해 주는 유일한 장치다.
  */
-export function TaskTreePager({ page, disabled, onPageChange }: TaskTreePagerProps) {
+export function TaskListPager({ page, disabled, onPageChange }: TaskListPagerProps) {
   if (!page) return null
 
   const pageNumbers = getPageWindow(page.number, page.totalPages)
