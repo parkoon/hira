@@ -34,6 +34,10 @@ type TransitionEvidenceDialogProps = {
   /** 정정 시 기존 값을 채워 연다. 값이 바뀌면 호출 측에서 `key`로 리마운트한다 */
   initialValues?: EvidenceContent
   onOpenChange: (open: boolean) => void
+  /**
+   * 확인 후 닫는 것은 호출 측 몫이다 — 저장이 실패했는데 닫히면
+   * 입력한 링크·메모를 되찾을 길이 없다 (`task-form-modal`과 같은 규칙)
+   */
   onConfirm: (evidence: EvidenceContent) => void
 }
 
@@ -101,14 +105,12 @@ export function TransitionEvidenceDialog({
       primaryAction={{
         label: confirmLabel,
         disabled: confirmDisabled || !hasEvidenceContent(evidence),
-        onClick: () => {
+        onClick: () =>
           // 빈 링크 칸은 저장하지 않는다
           onConfirm({
             ...evidence,
             links: evidence.links.filter((link) => link.url.trim().length > 0),
-          })
-          onOpenChange(false)
-        },
+          }),
       }}
     >
       <div className="space-y-4">

@@ -49,6 +49,13 @@ export function SubtaskProgressCard({ subtask, canTransition }: SubtaskProgressC
     ? getPostDevelopmentStatus(dbaChecked ? dbaRequest : null)
     : getNextSubtaskStatus(subtask)
 
+  const closeEvidenceDialog = () => {
+    setEvidenceOpen(false)
+    // 팝업은 언마운트로 리셋되지만 DBA 입력은 밖에 있어 직접 비운다
+    setDbaChecked(false)
+    setDbaRequest('')
+  }
+
   const handleForward = () => {
     if (hint) {
       setEvidenceOpen(true)
@@ -109,14 +116,7 @@ export function SubtaskProgressCard({ subtask, canTransition }: SubtaskProgressC
             (isDevelopmentStep && dbaChecked && dbaRequest.trim().length === 0) ||
             transitionSubtask.isPending
           }
-          onOpenChange={(next) => {
-            setEvidenceOpen(next)
-            // 팝업은 언마운트로 리셋되지만 DBA 입력은 밖에 있어 직접 비운다
-            if (!next) {
-              setDbaChecked(false)
-              setDbaRequest('')
-            }
-          }}
+          onOpenChange={(next) => !next && closeEvidenceDialog()}
           onConfirm={(evidence) => {
             if (!nextStatus) return
             transitionSubtask.mutate(
@@ -130,8 +130,11 @@ export function SubtaskProgressCard({ subtask, canTransition }: SubtaskProgressC
                 }),
               },
               {
-                onSuccess: () =>
-                  toast.success(`${SUBTASK_STATUS_META[nextStatus].label}(으)로 전이했습니다.`),
+                // 실패하면 팝업을 열어 둔다 — 입력한 증적으로 바로 재시도할 수 있어야 한다
+                onSuccess: () => {
+                  closeEvidenceDialog()
+                  toast.success(`${SUBTASK_STATUS_META[nextStatus].label}(으)로 전이했습니다.`)
+                },
               }
             )
           }}

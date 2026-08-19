@@ -114,6 +114,7 @@ export function TransitionEvidenceCard({ task, subtask }: TransitionEvidenceCard
           title={`${stepLabel(editTarget)} 증적 정정`}
           hint="이전 값은 지우지 않고 정정 이력으로 남습니다."
           confirmLabel="정정"
+          confirmDisabled={recordEvidence.isPending}
           initialValues={getStepEvidence(subtask, editTarget).latest ?? undefined}
           onOpenChange={(open) => !open && setEditTarget(null)}
           onConfirm={(evidence) => {
@@ -124,7 +125,13 @@ export function TransitionEvidenceCard({ task, subtask }: TransitionEvidenceCard
                 evidence,
                 actorName: user.name,
               },
-              { onSuccess: () => toast.success(`${stepLabel(editTarget)} 증적을 정정했습니다.`) }
+              {
+                // 실패하면 팝업을 열어 둔다 — 입력한 증적으로 바로 재시도할 수 있어야 한다
+                onSuccess: () => {
+                  setEditTarget(null)
+                  toast.success(`${stepLabel(editTarget)} 증적을 정정했습니다.`)
+                },
+              }
             )
           }}
         />
