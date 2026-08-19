@@ -56,17 +56,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const tasksQuery = useSuspenseQuery(getTasksQueryOptions())
   const tasks = tasksQuery.data
 
+  // 작업 목록이 메인(랜딩)이라 맨 위, 그 아래 뱃지 달린 인박스 둘(내 할 일·승인 대기함)을
+  // 붙여 두고, 역할 범위가 좁아지는 순(전 역할 → 리드 → 관리자)으로 내려간다
   const navItems: SidebarItem[] = [
+    {
+      label: '작업 목록',
+      icon: <ClipboardListIcon className="size-4" />,
+      url: paths.app.tasks.root.getHref(),
+    },
     {
       label: '내 할 일',
       icon: <ListTodoIcon className="size-4" />,
       url: paths.app.myWork.getHref(),
       count: selectMyTurnItems(tasks, user).length,
-    },
-    {
-      label: '작업 목록',
-      icon: <ClipboardListIcon className="size-4" />,
-      url: paths.app.tasks.root.getHref(),
     },
     {
       label: '승인 대기함',
