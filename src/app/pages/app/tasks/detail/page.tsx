@@ -3,15 +3,11 @@ import { useState } from 'react'
 import { useParams } from 'react-router'
 import { toast } from 'sonner'
 
-import { useAttachFilesMutation } from '@/features/tasks/api/attach-files'
 import { useCreateSubtaskMutation } from '@/features/tasks/api/create-subtask'
-import { useDeleteAttachmentsMutation } from '@/features/tasks/api/delete-attachments'
 import { getTasksQueryOptions } from '@/features/tasks/api/get-tasks'
-import { useUpdateTaskMutation } from '@/features/tasks/api/update-task'
 import { SubtaskFormModal } from '@/features/tasks/components/subtask-form-modal'
 import { TaskDescription } from '@/features/tasks/components/task-description'
 import { TaskDetailHeader } from '@/features/tasks/components/task-detail-header'
-import { TaskFormModal } from '@/features/tasks/components/task-form/task-form-modal'
 import { canEditTask, canViewTask, selectTaskByTaskNo } from '@/features/tasks/utils/task-selectors'
 import { getUsersQueryOptions } from '@/features/users/api/get-users'
 import { useCurrentUser } from '@/features/users/hooks/use-current-user'
@@ -25,6 +21,7 @@ import { TaskActionsMenu } from './_components/task-actions-menu'
 import { TaskActivity } from './_components/task-activity'
 import { TaskAttachments } from './_components/task-attachments'
 import { TaskDetailPanel } from './_components/task-detail-panel'
+import { TaskEditModal } from './_components/task-edit-modal'
 
 /** 화면 6 — 작업 상세 (Jira 신규 이슈 뷰 배치) */
 function TaskDetailPage() {
@@ -36,9 +33,6 @@ function TaskDetailPage() {
   const tasksQuery = useSuspenseQuery(getTasksQueryOptions())
   const usersQuery = useSuspenseQuery(getUsersQueryOptions())
   const createSubtask = useCreateSubtaskMutation()
-  const updateTask = useUpdateTaskMutation()
-  const attachFiles = useAttachFilesMutation()
-  const deleteAttachments = useDeleteAttachmentsMutation()
 
   const task = selectTaskByTaskNo(tasksQuery.data, taskNo)
 
@@ -104,80 +98,11 @@ function TaskDetailPage() {
         </div>
       </div>
 
-      {/* 열 때마다 마운트해 현재 값으로 폼을 채운다 */}
-      {editOpen && (
-        <TaskFormModal
-          open
-          onOpenChange={setEditOpen}
-          title={`${task.taskNo} 수정`}
-          submitLabel="저장"
-          consultableUsers={selectAssignableUsers(usersQuery.data)}
-          // 첨부 가능 조건이 수정 가능 조건과 같아 한 폼에 둔다 — 규칙이 갈라질 자리를 없앤다
-          withAttachments
-          existingAttachments={task.attachments}
-          defaultValues={{
-            title: task.title,
-            description: task.description,
-            priority: task.priority,
-            dueDate: task.dueDate,
-            consultantId: task.consultant?.id ?? '',
-            handlesPersonalData: task.handlesPersonalData ? 'YES' : 'NO',
-            consumerProtectionTarget: task.consumerProtectionTarget ? 'YES' : 'NO',
-            darkPatternChecked: task.darkPatternChecked,
-          }}
-          pending={updateTask.isPending}
-          onSubmit={(values) =>
-            updateTask.mutate(
-              {
-                taskNo: task.taskNo,
-                draft: {
-                  title: values.title,
-                  description: values.description,
-                  priority: values.priority,
-                  dueDate: values.dueDate,
-                  consultantId: values.consultantId,
-                  handlesPersonalData: values.handlesPersonalData === 'YES',
-                  consumerProtectionTarget: values.consumerProtectionTarget === 'YES',
-                  darkPatternChecked: values.darkPatternChecked,
-                },
-                actorName: user.name,
-              },
-              {
-                onSuccess: (changed) => {
-                  setEditOpen(false)
-                  // 첨부는 이력을 따로 남기는 별개 동작이라 내용 수정과 나눠 부른다
-                  const removed = task.attachments.filter((attachment) =>
-                    values.removedAttachmentIds.includes(attachment.id)
-                  )
-                  if (removed.length > 0) {
-                    deleteAttachments.mutate(
-                      { taskNo: task.taskNo, attachments: removed, actorName: user.name },
-                      {
-                        onSuccess: () => toast.success(`첨부 ${removed.length}개를 뗐습니다.`),
-                      }
-                    )
-                  }
-                  if (values.attachments.length > 0) {
-                    attachFiles.mutate(
-                      {
-                        taskNo: task.taskNo,
-                        files: values.attachments,
-                        actorName: user.name,
-                      },
-                      {
-                        onSuccess: () =>
-                          toast.success(`${values.attachments.length}개 파일을 첨부했습니다.`),
-                      }
-                    )
-                  }
-                  // 값이 그대로면 아무것도 기록되지 않으므로 수정했다고 알리지 않는다
-                  if (changed) toast.success(`${task.taskNo} 작업을 수정했습니다.`)
-                },
-              }
-            )
-          }
-        />
-      )}
+      <TaskEditModal
+        task={task}
+        open={editOpen}
+        onOpenChange={setEditOpen}
+      />
 
       <SubtaskFormModal
         open={subtaskCreateOpen}
