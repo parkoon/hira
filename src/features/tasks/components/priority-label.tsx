@@ -18,11 +18,16 @@ const PRIORITY_ICON_CLASS: Record<Priority, string> = {
   LOW: 'text-blue-600 dark:text-blue-400',
 }
 
-export function PriorityLabel({ priority }: { priority: Priority }) {
+/** 아이콘만 — Jira 목록처럼 좁은 칼럼에서 툴팁과 함께 쓴다 */
+export function PriorityIcon({ priority, className }: { priority: Priority; className?: string }) {
   const Icon = PRIORITY_ICON[priority]
+  return <Icon className={cn('size-3.5', PRIORITY_ICON_CLASS[priority], className)} />
+}
+
+export function PriorityLabel({ priority }: { priority: Priority }) {
   return (
     <span className="inline-flex items-center gap-1">
-      <Icon className={cn('size-3.5', PRIORITY_ICON_CLASS[priority])} />
+      <PriorityIcon priority={priority} />
       {PRIORITY_META[priority].label}
     </span>
   )

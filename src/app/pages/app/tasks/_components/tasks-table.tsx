@@ -1,17 +1,22 @@
 import type { ColDef, GetRowIdParams, ICellRendererParams, RowClassParams } from 'ag-grid-community'
 import { AgGridProvider, AgGridReact } from 'ag-grid-react'
+import { format } from 'date-fns'
 import { CornerDownRightIcon, SearchXIcon, TriangleAlertIcon } from 'lucide-react'
 import { useCallback, useMemo } from 'react'
 
 import type { TaskTreeChild, TaskTreeParent } from '@/features/tasks/api/types'
+import { PriorityIcon } from '@/features/tasks/components/priority-label'
 import { SubtaskStatusLozenge } from '@/features/tasks/components/subtask-status-lozenge'
 import { TaskLink } from '@/features/tasks/components/task-link'
 import { TaskStatusLozenge } from '@/features/tasks/components/task-status-lozenge'
+import { PRIORITY_META } from '@/features/tasks/constants/metadata'
 import { Button } from '@/shared/components/ui/button'
 import { Empty } from '@/shared/components/ui/empty'
 import { Lozenge } from '@/shared/components/ui/lozenge'
 import { NameAvatar } from '@/shared/components/ui/name-avatar'
+import { Progress } from '@/shared/components/ui/progress'
 import { Spinner } from '@/shared/components/ui/spinner'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/components/ui/tooltip'
 import { paths } from '@/shared/config/paths'
 import {
   AG_GRID_DEFAULT_COL_DEF,
@@ -51,6 +56,9 @@ export function TasksTable({
   onRetry,
   onResetFilters,
 }: TasksTableProps) {
+  // 자정을 넘겨 켜 둔 화면까지 챙기지 않는다 — 다음 조회 때 다시 계산된다
+  const today = format(new Date(), 'yyyy-MM-dd')
+
   /**
    * 계층을 담당하는 그룹 컬럼 — 들여쓰기와 펼침 아이콘이 여기 붙으므로 작업번호를 여기 둔다.
    * Nested Records 방식은 기본 표시값이 row ID라 innerRenderer로 직접 그린다.
@@ -61,7 +69,7 @@ export function TasksTable({
       // 들여쓰기 한 단 + 펼침 아이콘 + 파생 표시까지 앞에 붙으므로 번호만 놓을 때보다 넉넉해야 한다
       width: 240,
       cellRendererParams: {
-        // 하위 건수는 '하위' 컬럼이 이미 보여준다 — 그룹 셀의 (1) 표기는 끈다
+        // 하위 건수는 '하위작업' 칼럼이 진행률과 함께 보여준다 — 그룹 셀의 (1) 표기는 끈다
         suppressCount: true,
         innerRenderer: ({ data }: ICellRendererParams<TaskTreeNode>) => {
           if (!data) return null
@@ -142,14 +150,60 @@ export function TasksTable({
         },
       },
       {
+        headerName: '하위작업',
+        width: 120,
+        cellRenderer: ({ data }: ICellRendererParams<TaskTreeNode>) => {
+          // 서버가 이 페이지 상위의 자식을 전부 실어 보내므로 완료 수를 그 자리에서 센다
+          if (!data || !isParentNode(data) || data.childCount === 0) return null
+          const done = data.children.filter((child) => child.status === 'DONE').length
+          return (
+            <span className="flex h-full items-center gap-1.5">
+              <Progress
+                value={(done / data.childCount) * 100}
+                className="h-1.5 w-12"
+              />
+              <span className="text-muted-foreground text-[11px]">
+                {done}/{data.childCount}
+              </span>
+            </span>
+          )
+        },
+      },
+      {
         field: 'dueDate',
         headerName: '목표일',
         width: 120,
-        // 하위작업은 목표일이 없을 수 있다
-        cellRenderer: ({ value }: { value: string | null }) => value ?? EMPTY_CELL,
+        cellRenderer: ({ data }: ICellRendererParams<TaskTreeNode>) => {
+          // 하위작업은 목표일이 없을 수 있다
+          if (!data?.dueDate) return EMPTY_CELL
+          // 끝난 건의 지난 날짜는 문제가 아니다 — 진행 중인데 지났을 때만 소리를 낸다
+          const overdue = data.status !== 'DONE' && data.dueDate < today
+          return (
+            <span className={cn(overdue && 'text-destructive font-medium')}>{data.dueDate}</span>
+          )
+        },
+      },
+      {
+        headerName: '우선순위',
+        width: 96,
+        cellRenderer: ({ data }: ICellRendererParams<TaskTreeNode>) => {
+          // 우선순위는 부모의 속성이라 하위작업 행에는 없다
+          if (!data || !isParentNode(data)) return EMPTY_CELL
+          return (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                {/* Jira 목록처럼 아이콘만 — 이름은 툴팁이 알려준다 */}
+                <span className="flex h-full items-center">
+                  <PriorityIcon priority={data.priority} />
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>{PRIORITY_META[data.priority].label}</TooltipContent>
+            </Tooltip>
+          )
+        },
       },
     ],
-    []
+    [today]
   )
 
   const defaultColDef = useMemo<ColDef>(() => ({ ...AG_GRID_DEFAULT_COL_DEF, sortable: false }), [])

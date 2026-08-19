@@ -18,6 +18,9 @@ export const TASK_LIST_SORT_META = {
   // 목록이 보여주는 유일한 날짜라 등록일 바로 다음에 둔다 — 목표일 없는 하위작업은 늘 뒤로 간다
   'dueDate,asc': { label: '목표일 ↑', order: 30 },
   'dueDate,desc': { label: '목표일 ↓', order: 40 },
+  // enum 순서가 URGENT부터라 asc가 곧 높은순이다 — 화살표로 적으면 반대로 읽혀 말로 푼다
+  'priority,asc': { label: '우선순위 높은순', order: 42 },
+  'priority,desc': { label: '우선순위 낮은순', order: 44 },
   'updatedAt,desc': { label: '수정일 ↓', order: 50 },
   'updatedAt,asc': { label: '수정일 ↑', order: 60 },
   'key,desc': { label: '작업번호 ↓', order: 70 },

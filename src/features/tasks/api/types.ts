@@ -233,6 +233,8 @@ export type TaskTreeChild = TaskTreeNode & {
 
 export type TaskTreeParent = TaskTreeNode & {
   status: TaskStatus
+  /** 우선순위는 부모의 속성 — 하위작업 행에는 없다 */
+  priority: Priority
   dueDate: string
   /** `children.length`와 같다 — 상위 행이 배열을 세지 않게 서버가 실어 보낸다 */
   childCount: number
