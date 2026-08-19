@@ -1,12 +1,5 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
-import {
-  ChartColumnIcon,
-  ClipboardListIcon,
-  InboxIcon,
-  ListTodoIcon,
-  ScrollTextIcon,
-  UsersIcon,
-} from 'lucide-react'
+import { ClipboardListIcon, InboxIcon, ListTodoIcon, ScrollTextIcon, UsersIcon } from 'lucide-react'
 import * as React from 'react'
 import { Link, useLocation } from 'react-router'
 
@@ -75,12 +68,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       icon: <InboxIcon className="size-4" />,
       url: paths.app.approvals.getHref(),
       count: selectPendingApprovalTasks(tasks).length,
-      minRole: 'LEAD',
-    },
-    {
-      label: '리포트',
-      icon: <ChartColumnIcon className="size-4" />,
-      url: paths.app.reports.getHref(),
       minRole: 'LEAD',
     },
     {
