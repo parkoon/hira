@@ -20,6 +20,7 @@ import { SubtaskList } from './_components/subtask-list'
 import { TaskActionsMenu } from './_components/task-actions-menu'
 import { TaskActivity } from './_components/task-activity'
 import { TaskAttachments } from './_components/task-attachments'
+import { TaskCloneModal } from './_components/task-clone-modal'
 import { TaskDetailPanel } from './_components/task-detail-panel'
 import { TaskEditModal } from './_components/task-edit-modal'
 
@@ -29,6 +30,7 @@ function TaskDetailPage() {
   const { user, hasRole } = useCurrentUser()
   const [subtaskCreateOpen, setSubtaskCreateOpen] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
+  const [cloneOpen, setCloneOpen] = useState(false)
 
   const tasksQuery = useSuspenseQuery(getTasksQueryOptions())
   const usersQuery = useSuspenseQuery(getUsersQueryOptions())
@@ -67,6 +69,7 @@ function TaskDetailPage() {
                 task={task}
                 canEdit={canEditTask(task, user)}
                 onEdit={() => setEditOpen(true)}
+                onClone={() => setCloneOpen(true)}
               />
             }
           />
@@ -102,6 +105,12 @@ function TaskDetailPage() {
         task={task}
         open={editOpen}
         onOpenChange={setEditOpen}
+      />
+
+      <TaskCloneModal
+        task={task}
+        open={cloneOpen}
+        onOpenChange={setCloneOpen}
       />
 
       <SubtaskFormModal
