@@ -7,6 +7,7 @@ import { isKnownEnumValue } from '@/shared/utils/enum'
 import {
   TASK_LIST_DEFAULT_SIZE,
   TASK_LIST_DEFAULT_SORT,
+  TASK_LIST_DUE_META,
   TASK_LIST_MAX_SIZE,
   TASK_LIST_SORT_META,
 } from '../_constants'
@@ -19,6 +20,7 @@ export const taskListFilterParsers = {
   status: parseAsArrayOf(parseAsString).withDefault([]),
   assignee: parseAsString.withDefault(''),
   sort: parseAsString.withDefault(TASK_LIST_DEFAULT_SORT),
+  due: parseAsString.withDefault(''),
 }
 
 type RawTaskListParams = {
@@ -28,6 +30,7 @@ type RawTaskListParams = {
   status: string[]
   assignee: string
   sort: string
+  due: string
 }
 
 /**
@@ -50,5 +53,6 @@ export function normalizeTaskListParams(raw: RawTaskListParams): TaskTreeQuery {
     status,
     assigneeId: raw.assignee.length > 0 ? raw.assignee : null,
     sort: isKnownEnumValue(TASK_LIST_SORT_META, raw.sort) ? raw.sort : TASK_LIST_DEFAULT_SORT,
+    due: isKnownEnumValue(TASK_LIST_DUE_META, raw.due) ? raw.due : null,
   }
 }

@@ -32,6 +32,15 @@ export const TASK_LIST_SORT_META = {
 } satisfies Record<string, EnumMetadata>
 
 /**
+ * 목표일 퀵 필터 — 지연은 진행 중인데 목표일이 지난 행, 임박은 7일 안에 닥치는 행.
+ * 퀵 필터 버튼과 필터 칩이 같은 목록을 본다 — 어느 쪽으로 걸어도 같은 URL 상태다.
+ */
+export const TASK_LIST_DUE_META = {
+  overdue: { label: '지연', order: 10 },
+  soon: { label: '임박(7일)', order: 20 },
+} satisfies Record<string, EnumMetadata>
+
+/**
  * 상태 필터 옵션 — 작업 상태와 하위작업 상태를 한 목록에 담는다.
  * 두 계층이 서로 다른 enum을 쓰지만 필터는 각 행을 자기 상태와만 맞춰보므로,
  * 하위 상태를 고르면 부모는 컨텍스트로만 딸려온다.

@@ -14,6 +14,7 @@ const makeRaw = (overrides: Partial<Parameters<typeof normalizeTaskListParams>[0
   status: [] as string[],
   assignee: '',
   sort: TASK_LIST_DEFAULT_SORT,
+  due: '',
   ...overrides,
 })
 
@@ -51,6 +52,13 @@ describe('normalizeTaskListParams', () => {
     expect(normalizeTaskListParams(makeRaw({ sort: 'title,asc' })).sort).toBe('title,asc')
     expect(normalizeTaskListParams(makeRaw({ sort: 'dueDate,asc' })).sort).toBe('dueDate,asc')
     expect(normalizeTaskListParams(makeRaw({ sort: 'dueDate,desc' })).sort).toBe('dueDate,desc')
+  })
+
+  it('목표일 퀵 필터는 아는 값만 통과시키고 나머지는 미적용으로 본다', () => {
+    expect(normalizeTaskListParams(makeRaw({ due: 'overdue' })).due).toBe('overdue')
+    expect(normalizeTaskListParams(makeRaw({ due: 'soon' })).due).toBe('soon')
+    expect(normalizeTaskListParams(makeRaw({ due: 'tomorrow' })).due).toBeNull()
+    expect(normalizeTaskListParams(makeRaw()).due).toBeNull()
   })
 
   it('담당자가 비어 있으면 조건을 걸지 않는다', () => {

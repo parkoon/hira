@@ -510,6 +510,7 @@ export type Database = {
       search_task_tree: {
         Args: {
           p_assignee_id?: string
+          p_due?: string
           p_page?: number
           p_q?: string
           p_size?: number

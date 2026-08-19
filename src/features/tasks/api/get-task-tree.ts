@@ -17,6 +17,8 @@ export type TaskTreeQuery = {
   assigneeId: string | null
   /** `필드,방향` — 상위 간 정렬과 그룹 내 정렬에 같은 기준이 적용된다 */
   sort: string
+  /** 목표일 퀵 필터 — 지연(overdue) 또는 7일 내 임박(soon). 행 단위 매칭 조건이다 */
+  due: 'overdue' | 'soon' | null
 }
 
 export const getTaskTreeService = async (query: TaskTreeQuery): Promise<TaskTreeResult> => {
@@ -28,6 +30,7 @@ export const getTaskTreeService = async (query: TaskTreeQuery): Promise<TaskTree
     // 생성 타입이 uuid를 optional string으로 잡아 null 대신 미전달로 기본값에 맡긴다
     p_assignee_id: query.assigneeId ?? undefined,
     p_sort: query.sort,
+    p_due: query.due ?? undefined,
   })
 
   if (error) throw error

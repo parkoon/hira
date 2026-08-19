@@ -48,7 +48,14 @@ function TaskListPage() {
   }, [pageMeta, params.page, taskTreeQuery.isPlaceholderData, setParams])
 
   const resetFilters = () =>
-    void setParams({ q: '', status: [], assignee: '', sort: TASK_LIST_DEFAULT_SORT, page: 1 })
+    void setParams({
+      q: '',
+      status: [],
+      assignee: '',
+      due: '',
+      sort: TASK_LIST_DEFAULT_SORT,
+      page: 1,
+    })
 
   return (
     <Page
