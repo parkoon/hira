@@ -70,7 +70,7 @@ export function ApprovalsTable({
           </span>
         ),
       },
-      { field: 'dueDate', headerName: '완료요청일', width: 120 },
+      { field: 'dueDate', headerName: '목표일', width: 120 },
       {
         field: 'priority',
         headerName: '우선순위',

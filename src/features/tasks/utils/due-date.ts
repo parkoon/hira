@@ -3,7 +3,7 @@ import { differenceInCalendarDays, parseISO } from 'date-fns'
 import type { EnumTone } from '@/shared/utils/enum'
 
 /**
- * 완료요청일까지 남은 일수를 Jira D-day 표기로 변환한다.
+ * 목표일까지 남은 일수를 Jira D-day 표기로 변환한다.
  * 임박(7일 이내)·초과 여부를 tone으로 함께 돌려준다.
  */
 export function getDueDateStatus(dueDate: string) {

@@ -42,7 +42,7 @@ export function CompleteTaskDialog({
         <p>
           하위작업 <strong>{total}건 모두 완료</strong>되었습니다.
           <br />
-          완료요청일 {task.dueDate} 대비{' '}
+          목표일 {task.dueDate} 대비{' '}
           {remainingDays > 0 ? (
             <span className="font-semibold text-emerald-700 dark:text-emerald-400">
               {remainingDays}일 조기 완료

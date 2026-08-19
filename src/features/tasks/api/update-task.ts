@@ -47,7 +47,7 @@ export const updateTaskService = async ({
     )
   }
   if (draft.dueDate !== current.due_date) {
-    changes.push(`완료요청일 ${current.due_date} → ${draft.dueDate}`)
+    changes.push(`목표일 ${current.due_date} → ${draft.dueDate}`)
   }
   if (draft.consultantId !== current.consultant_id) {
     // 이력은 사람이 읽는다 — id만 남기면 누구로 바뀌었는지 알 수 없어 이름을 찾아온다.

@@ -69,7 +69,7 @@ export function TaskDetailPanel({ task }: { task: Task }) {
           )}
         </PanelCardField>
 
-        <PanelCardField label="완료요청일">
+        <PanelCardField label="목표일">
           <span className="flex items-center gap-1.5">
             {task.dueDate}
             {task.status !== 'DONE' && <Lozenge tone={due.tone}>{due.label}</Lozenge>}

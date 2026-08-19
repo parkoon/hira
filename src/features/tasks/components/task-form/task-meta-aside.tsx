@@ -30,7 +30,7 @@ export function TaskMetaAside({ consultableUsers }: { consultableUsers: TaskActo
     <div className="space-y-4">
       <Field>
         <FieldLabel htmlFor="task-due-date">
-          완료요청일 <RequiredMark />
+          목표일 <RequiredMark />
         </FieldLabel>
         <Controller
           control={control}

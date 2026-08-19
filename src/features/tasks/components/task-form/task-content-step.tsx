@@ -15,7 +15,7 @@ type TaskContentStepProps = {
   existingAttachments?: Attachment[]
 }
 
-/** 화면 3 — 작업 등록 Step 1 (작업 내용). 완료요청일·우선순위 등 메타 필드는 모달 aside에 있다 */
+/** 화면 3 — 작업 등록 Step 1 (작업 내용). 목표일·우선순위 등 메타 필드는 모달 aside에 있다 */
 export function TaskContentStep({ withAttachments, existingAttachments }: TaskContentStepProps) {
   const {
     control,

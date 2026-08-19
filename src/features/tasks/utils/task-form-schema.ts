@@ -7,7 +7,7 @@ export const taskFormSchema = z.object({
   title: z.string().trim().min(1, '요청제목을 입력해 주세요'),
   dueDate: z
     .string()
-    .min(1, '완료요청일을 선택해 주세요')
+    .min(1, '목표일을 선택해 주세요')
     // 오늘 이전 날짜는 선택할 수 없다 (스펙 §4.1)
     .refine(
       (value) => value >= format(new Date(), 'yyyy-MM-dd'),
