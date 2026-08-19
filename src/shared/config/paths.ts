@@ -36,6 +36,10 @@ export const paths = {
       path: 'approvals',
       getHref: () => '/app/approvals',
     },
+    reports: {
+      path: 'reports',
+      getHref: () => '/app/reports',
+    },
     users: {
       path: 'users',
       getHref: () => '/app/users',

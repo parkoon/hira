@@ -62,6 +62,10 @@ export const createAppRouter = () =>
                   path: paths.app.approvals.path,
                   lazy: () => import('./pages/app/approvals/page'),
                 },
+                {
+                  path: paths.app.reports.path,
+                  lazy: () => import('./pages/app/reports/page'),
+                },
               ],
             },
             {
