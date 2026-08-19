@@ -36,6 +36,8 @@ export function useSignInMutation() {
   return useMutation({
     mutationKey: getSignInMutationKey(),
     mutationFn: signInService,
+    // 실패는 로그인 폼이 인라인으로 보여준다 — 전역 토스트까지 뜨면 같은 실패가 두 번 알린다
+    meta: { suppressGlobalError: true },
     // 로그인한 사람이 바뀌면 캐시를 비운다 — invalidate만 하면 refetch가 끝날 때까지
     // 이전 사용자의 데이터(메뉴·권한 가드)가 잠깐 렌더된다. sign-out과 같은 방식
     onSuccess: () => queryClient.clear(),
