@@ -340,8 +340,26 @@ describe('getSubtaskEditState', () => {
 })
 
 describe('getSubtaskDeletionState', () => {
-  it('작업대기중이고 이력이 없어야 삭제할 수 있다', () => {
+  it('작업대기중이고 전이 이력이 없어야 삭제할 수 있다', () => {
     expect(getSubtaskDeletionState(makeSubtask()).enabled).toBe(true)
+  })
+
+  it('내용 수정 이력(from == to)은 삭제를 막지 않는다', () => {
+    const edited = makeSubtask({
+      history: [
+        {
+          id: 1,
+          occurredAt: '2026-08-01 10:00',
+          actorName: '임도윤',
+          fromStatus: 'TODO',
+          toStatus: 'TODO',
+          via: 'MANUAL',
+          reason: '제목 수정',
+        },
+      ],
+    })
+
+    expect(getSubtaskDeletionState(edited).enabled).toBe(true)
   })
 
   it('전이한 하위작업은 삭제할 수 없다', () => {

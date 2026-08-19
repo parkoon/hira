@@ -56,7 +56,8 @@ export function getSubtaskDeletionState(subtask: Subtask) {
   if (subtask.status !== 'TODO') {
     return { enabled: false, reason: '작업대기중 상태에서만 삭제할 수 있어요' }
   }
-  if (subtask.history.length > 0) {
+  // 내용 수정도 이력을 남기지만(from == to) 그것은 전이가 아니다 — 수정만 한 건은 지울 수 있다
+  if (subtask.history.some((entry) => entry.fromStatus !== entry.toStatus)) {
     return { enabled: false, reason: '상태 전이 이력이 있어 삭제할 수 없어요' }
   }
   return { enabled: true, reason: null }
