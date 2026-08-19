@@ -1,5 +1,4 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
-import { DownloadIcon } from 'lucide-react'
 import { useQueryStates } from 'nuqs'
 import { useMemo } from 'react'
 
@@ -40,7 +39,6 @@ function AuditLogPage() {
           variant="outline"
           onClick={() => exportAuditLogsCsv(logs)}
         >
-          <DownloadIcon />
           CSV 내보내기
         </Button>
       </div>

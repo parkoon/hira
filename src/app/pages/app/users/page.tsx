@@ -1,5 +1,4 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
-import { UserPlusIcon } from 'lucide-react'
 import { useQueryStates } from 'nuqs'
 import { useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'
@@ -87,10 +86,7 @@ function UserManagementPage() {
         <div className="min-w-0 flex-1 overflow-x-auto">
           <UserFilters />
         </div>
-        <Button onClick={() => setAssignOpen(true)}>
-          <UserPlusIcon />
-          구성원 추가
-        </Button>
+        <Button onClick={() => setAssignOpen(true)}>구성원 추가</Button>
       </div>
 
       <UsersTable
