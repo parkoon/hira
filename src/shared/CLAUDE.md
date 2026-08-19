@@ -62,11 +62,10 @@ navigate('/app/posts')
 
 단일 도메인 전용 훅은 `features/{domain}/hooks/`에 둔다.
 
-| 훅               | 역할                         |
-| ---------------- | ---------------------------- |
-| `use-confirm`    | confirm 다이얼로그 상태 관리 |
-| `use-debounce`   | 값 디바운싱                  |
-| `use-disclosure` | open/close boolean 상태 관리 |
+| 훅             | 역할                         |
+| -------------- | ---------------------------- |
+| `use-confirm`  | confirm 다이얼로그 상태 관리 |
+| `use-debounce` | 값 디바운싱                  |
 
 ---
 
@@ -78,6 +77,7 @@ navigate('/app/posts')
 - `supabase.ts` — 단일 `supabase` 클라이언트 인스턴스. 직접 생성하지 않는다.
 - `supabase-error.ts` — Supabase 에러 판별 + 한국어 문구 매핑 (`isSupabaseError`, `getSupabaseErrorMessage`).
 - `audit-log.ts` — 감사 로그 기록 헬퍼 (`recordAuditLog`).
+- `notifications.ts` — 인앱 알림 기록 헬퍼 (`pushNotification`). 조회·표시는 `features/notifications/`가 맡는다.
 - `react-query.ts` — `QueryClient` 설정 + 전역 에러 핸들링.
   - query 에러 → `ErrorBoundary`
   - mutation 에러 → `MutationCache` 전역 핸들러
