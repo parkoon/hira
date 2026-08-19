@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 
 import { getUsersQueryOptions } from '@/features/users/api/get-users'
 import type { User, UserRole } from '@/features/users/api/types'
+import type { UserRoleAssignment } from '@/features/users/api/update-user-roles'
 import { useUpdateUserRolesMutation } from '@/features/users/api/update-user-roles'
 import { USER_ROLE_META } from '@/features/users/constants/metadata'
 import { useCurrentUser } from '@/features/users/hooks/use-current-user'
@@ -27,43 +28,40 @@ function UserManagementPage() {
   const users = usersQuery.data
 
   /** 역할 변경 이력을 남기며 지정한 사용자들의 역할을 갈아끼운다 (스펙 §3.2) */
-  const setRoleOf = useCallback(
-    (userIds: string[], nextRole: UserRole, onSuccess: () => void) => {
-      updateUserRoles.mutate(
-        { userIds, role: nextRole, changedBy: currentUser.name },
-        { onSuccess }
-      )
+  const applyAssignments = useCallback(
+    (assignments: UserRoleAssignment[], onSuccess: () => void) => {
+      updateUserRoles.mutate({ assignments, changedBy: currentUser.name }, { onSuccess })
     },
     [updateUserRoles, currentUser.name]
   )
 
   const handleAssign = useCallback(
-    (userIds: string[], role: UserRole) => {
-      setRoleOf(userIds, role, () =>
-        toast.success(`${userIds.length}명에게 ${USER_ROLE_META[role].label} 역할을 부여했습니다.`)
+    (assignments: UserRoleAssignment[]) => {
+      applyAssignments(assignments, () =>
+        toast.success(`${assignments.length}명에게 역할을 부여했습니다.`)
       )
     },
-    [setRoleOf]
+    [applyAssignments]
   )
 
   const handleRoleChange = useCallback(
     (target: User, nextRole: UserRole) => {
-      setRoleOf([target.id], nextRole, () =>
+      applyAssignments([{ userId: target.id, role: nextRole }], () =>
         toast.success(
           `${target.name}의 역할을 ${USER_ROLE_META[target.role].label} → ${USER_ROLE_META[nextRole].label}(으)로 변경했습니다.`
         )
       )
     },
-    [setRoleOf]
+    [applyAssignments]
   )
 
   const handleRevoke = useCallback(
     (target: User) => {
-      setRoleOf([target.id], 'REQUESTER', () =>
+      applyAssignments([{ userId: target.id, role: 'REQUESTER' }], () =>
         toast.success(`${target.name}의 ${USER_ROLE_META[target.role].label} 역할을 회수했습니다.`)
       )
     },
-    [setRoleOf]
+    [applyAssignments]
   )
 
   // 담당자는 최초 로그인 시 자동 부여되는 기본 역할이라 명부에 올리지 않는다 (스펙 §3.2)
