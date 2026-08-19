@@ -92,6 +92,8 @@ export type AttachmentDraft = {
 /** 저장된 첨부. id로 지목해 뗄 수 있다 (같은 이름이 여러 번 붙을 수 있다) */
 export type Attachment = AttachmentDraft & {
   id: number
+  /** storage의 본문 위치. 본문 보관 전에 붙은 데모 첨부는 null이라 내려받을 수 없다 */
+  storagePath: string | null
 }
 
 export type ReferenceLink = {

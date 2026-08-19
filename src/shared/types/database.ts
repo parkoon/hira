@@ -56,6 +56,7 @@ export type Database = {
           file_name: string
           id: number
           size: number
+          storage_path: string | null
           task_no: string | null
         }
         Insert: {
@@ -63,6 +64,7 @@ export type Database = {
           file_name: string
           id?: never
           size?: number
+          storage_path?: string | null
           task_no?: string | null
         }
         Update: {
@@ -70,6 +72,7 @@ export type Database = {
           file_name?: string
           id?: never
           size?: number
+          storage_path?: string | null
           task_no?: string | null
         }
         Relationships: [

@@ -14,7 +14,9 @@ export type DeleteAttachmentsBody = {
 }
 
 /**
- * 작업에서 첨부를 뗀다. 파일 본문은 애초에 보관하지 않으므로(`attach-files.ts`) 행만 지운다.
+ * 작업에서 첨부를 뗀다. 행을 먼저 지우고 storage 본문은 뒤따라 지운다 —
+ * 행이 없으면 화면·감사에서 사라진 것이고, 본문 삭제가 실패해도 되돌릴 행이 없어
+ * 실패로 알리지 않고 고아 정리 대상으로만 남긴다.
  * 지운 뒤에는 되돌릴 수 없어 무엇을 뗐는지 감사 로그에 남긴다.
  */
 export const deleteAttachmentsService = async ({
@@ -34,6 +36,14 @@ export const deleteAttachmentsService = async ({
     // 다른 작업의 첨부를 지우는 요청은 id가 맞아도 통과시키지 않는다
     .eq('task_no', taskNo)
   if (error) throw error
+
+  const storagePaths = attachments
+    .map((attachment) => attachment.storagePath)
+    .filter((path): path is string => path !== null)
+  if (storagePaths.length > 0) {
+    const { error: storageError } = await supabase.storage.from('attachments').remove(storagePaths)
+    if (storageError) console.error('첨부 본문을 지우지 못했습니다', storageError)
+  }
 
   await recordAuditLog({
     actorName,

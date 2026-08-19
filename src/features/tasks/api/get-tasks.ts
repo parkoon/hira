@@ -83,7 +83,12 @@ const toLinks = (rows: Tables['reference_links']['Row'][]): ReferenceLink[] =>
 const toAttachments = (rows: Tables['attachments']['Row'][]): Attachment[] =>
   [...rows]
     .sort((a, b) => a.id - b.id)
-    .map((row) => ({ id: row.id, fileName: row.file_name, size: row.size }))
+    .map((row) => ({
+      id: row.id,
+      fileName: row.file_name,
+      size: row.size,
+      storagePath: row.storage_path,
+    }))
 
 const toApprovals = (rows: Tables['approvals']['Row'][]) =>
   [...rows]
