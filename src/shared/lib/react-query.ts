@@ -1,5 +1,5 @@
-import type { DefaultOptions, MutationKey, UseMutationOptions } from '@tanstack/react-query'
-import { MutationCache, QueryCache, QueryClient, useIsMutating } from '@tanstack/react-query'
+import type { DefaultOptions } from '@tanstack/react-query'
+import { MutationCache, QueryCache, QueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
 declare module '@tanstack/react-query' {
@@ -100,26 +100,3 @@ export function createQueryClient() {
     mutationCache,
   })
 }
-
-export const useMutationLoading = (key: MutationKey) => {
-  return useIsMutating({ mutationKey: key }) > 0
-}
-
-// ============================================
-// Type Helpers
-// ============================================
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type ApiFnReturnType<FnType extends (...args: any) => Promise<any>> = Awaited<
-  ReturnType<FnType>
->
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type QueryConfig<T extends (...args: any[]) => any> = Omit<
-  ReturnType<T>,
-  'queryKey' | 'queryFn'
->
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type MutationConfig<MutationFnType extends (...args: any) => Promise<any>> =
-  UseMutationOptions<ApiFnReturnType<MutationFnType>, Error, Parameters<MutationFnType>[0]>

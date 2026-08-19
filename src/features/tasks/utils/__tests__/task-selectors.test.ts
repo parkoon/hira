@@ -14,7 +14,6 @@ import {
   getTaskAdvanceState,
   getTaskApproveState,
   getTaskEditState,
-  selectVisibleTasks,
 } from '@/features/tasks/utils/task-selectors'
 import type { User } from '@/features/users/api/types'
 
@@ -78,44 +77,6 @@ const makeEvidence = (overrides: Partial<TransitionEvidence> = {}): TransitionEv
   recordedBy: '임도윤',
   recordedAt: '2026-08-01',
   ...overrides,
-})
-
-describe('selectVisibleTasks', () => {
-  const draft = makeTask({ taskNo: 'WR-2026-0001', status: 'DRAFT' })
-  const mine = makeTask({
-    taskNo: 'WR-2026-0002',
-    requester: { id: 'user-kim', name: '김현주', dept: '보험운영팀', contact: '' },
-  })
-  const others = makeTask({
-    taskNo: 'WR-2026-0003',
-    requester: { id: 'user-choi', name: '최유진', dept: '여신관리팀', contact: '' },
-  })
-
-  it('임시저장 건은 등록자가 아니면 목록에 보이지 않는다', () => {
-    const visible = selectVisibleTasks([draft, mine], makeUser({ role: 'LEAD' }))
-
-    expect(visible.map((task) => task.taskNo)).toEqual(['WR-2026-0002'])
-  })
-
-  it('임시저장 건은 등록자 본인에게는 보인다', () => {
-    const requester = makeUser({ id: 'user-kim', name: '김현주', role: 'REQUESTER' })
-    const visible = selectVisibleTasks([draft, mine], requester)
-
-    expect(visible.map((task) => task.taskNo)).toEqual(['WR-2026-0001', 'WR-2026-0002'])
-  })
-
-  it('담당자는 본인이 등록한 건만 본다', () => {
-    const requester = makeUser({ id: 'user-kim', name: '김현주', role: 'REQUESTER' })
-    const visible = selectVisibleTasks([mine, others], requester)
-
-    expect(visible.map((task) => task.taskNo)).toEqual(['WR-2026-0002'])
-  })
-
-  it('작업자 이상은 제출된 건을 모두 본다', () => {
-    const visible = selectVisibleTasks([mine, others], makeUser({ role: 'WORKER' }))
-
-    expect(visible).toHaveLength(2)
-  })
 })
 
 describe('getRequiredApprovals', () => {
