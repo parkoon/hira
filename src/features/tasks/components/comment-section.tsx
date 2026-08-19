@@ -1,3 +1,4 @@
+import { useSuspenseQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
 import { useCreateCommentMutation } from '@/features/tasks/api/create-comment'
@@ -5,10 +6,13 @@ import { useDeleteCommentMutation } from '@/features/tasks/api/delete-comment'
 import type { Comment } from '@/features/tasks/api/types'
 import { useUpdateCommentMutation } from '@/features/tasks/api/update-comment'
 import type { ActivityOwner } from '@/features/tasks/api/writers'
+import { CommentBody } from '@/features/tasks/components/comment-body'
+import { RichTextEditor } from '@/features/tasks/components/rich-text-editor'
+import { getUsersQueryOptions } from '@/features/users/api/get-users'
 import { useCurrentUser } from '@/features/users/hooks/use-current-user'
+import { selectAssignableUsers } from '@/features/users/utils/user-selectors'
 import { Button } from '@/shared/components/ui/button'
 import { NameAvatar } from '@/shared/components/ui/name-avatar'
-import { Textarea } from '@/shared/components/ui/textarea'
 import { useConfirm } from '@/shared/hooks/use-confirm'
 
 type CommentSectionProps = {
@@ -18,12 +22,18 @@ type CommentSectionProps = {
 
 /**
  * 댓글 입력과 목록 (Jira 이슈 뷰의 Comments).
- * 입력은 목록 위에 둔다 — 접혀 있다가 짚으면 펼쳐지고, 목록은 최신이 위다.
+ * 입력은 목록 위에 둔다 — 접혀 있다가 짚으면 리치 텍스트 에디터로 펼쳐지고, 목록은 최신이 위다.
+ * @로 구성원을 언급하고, Ctrl/⌘+Enter로 저장한다.
  * 성공 토스트는 띄우지 않는다 — 댓글이 목록에 나타나는 것이 곧 피드백이다.
  */
 export function CommentSection({ owner, comments }: CommentSectionProps) {
   const { user } = useCurrentUser()
   const confirm = useConfirm()
+  // 상세 페이지가 이미 받아 둔 쿼리라 여기서 다시 서스펜드되지 않는다.
+  // 멘션 후보는 전 작업을 열람할 수 있는 작업자 이상으로 좁힌다 — 담당자를 남의
+  // 레코드로 불러봐야 열 수 없는 문이다
+  const usersQuery = useSuspenseQuery(getUsersQueryOptions())
+  const mentionCandidates = selectAssignableUsers(usersQuery.data)
   const createComment = useCreateCommentMutation()
   const updateComment = useUpdateCommentMutation()
   const deleteComment = useDeleteCommentMutation()
@@ -34,8 +44,10 @@ export function CommentSection({ owner, comments }: CommentSectionProps) {
   const [editDraft, setEditDraft] = useState('')
 
   const handleCreate = () => {
+    // Ctrl+Enter로도 들어온다 — 버튼 비활성과 같은 조건으로 막는다
+    if (draft.length === 0 || createComment.isPending) return
     createComment.mutate(
-      { owner, body: draft.trim(), authorId: user.id, authorName: user.name },
+      { owner, body: draft, authorId: user.id, authorName: user.name },
       {
         onSuccess: () => {
           setDraft('')
@@ -46,8 +58,9 @@ export function CommentSection({ owner, comments }: CommentSectionProps) {
   }
 
   const handleUpdate = (id: number) => {
+    if (editDraft.length === 0 || updateComment.isPending) return
     updateComment.mutate(
-      { id, body: editDraft.trim(), authorId: user.id },
+      { id, body: editDraft, authorId: user.id },
       { onSuccess: () => setEditingId(null) }
     )
   }
@@ -69,17 +82,16 @@ export function CommentSection({ owner, comments }: CommentSectionProps) {
         <NameAvatar name={user.name} />
         {composing ? (
           <div className="min-w-0 flex-1 space-y-2">
-            <Textarea
-              autoFocus
-              rows={3}
+            <RichTextEditor
               value={draft}
-              placeholder="댓글 달기…"
-              onChange={(event) => setDraft(event.target.value)}
+              onChange={setDraft}
+              mentionCandidates={mentionCandidates}
+              onSubmit={handleCreate}
             />
-            <div className="flex gap-1.5">
+            <div className="flex items-center gap-1.5">
               <Button
                 size="sm"
-                disabled={draft.trim().length === 0 || createComment.isPending}
+                disabled={draft.length === 0 || createComment.isPending}
                 onClick={handleCreate}
               >
                 저장
@@ -94,6 +106,9 @@ export function CommentSection({ owner, comments }: CommentSectionProps) {
               >
                 취소
               </Button>
+              <span className="text-muted-foreground ml-1 text-[11px]">
+                @로 언급 · Ctrl+Enter로 저장
+              </span>
             </div>
           </div>
         ) : (
@@ -130,16 +145,16 @@ export function CommentSection({ owner, comments }: CommentSectionProps) {
 
                 {editing ? (
                   <div className="space-y-2 pt-1">
-                    <Textarea
-                      autoFocus
-                      rows={3}
+                    <RichTextEditor
                       value={editDraft}
-                      onChange={(event) => setEditDraft(event.target.value)}
+                      onChange={setEditDraft}
+                      mentionCandidates={mentionCandidates}
+                      onSubmit={() => handleUpdate(comment.id)}
                     />
                     <div className="flex gap-1.5">
                       <Button
                         size="sm"
-                        disabled={editDraft.trim().length === 0 || updateComment.isPending}
+                        disabled={editDraft.length === 0 || updateComment.isPending}
                         onClick={() => handleUpdate(comment.id)}
                       >
                         저장
@@ -155,7 +170,7 @@ export function CommentSection({ owner, comments }: CommentSectionProps) {
                   </div>
                 ) : (
                   <>
-                    <p className="text-[13px] break-words whitespace-pre-wrap">{comment.body}</p>
+                    <CommentBody html={comment.body} />
                     {/* Jira처럼 본인 댓글에만 낮은 톤의 텍스트 링크를 붙인다 */}
                     {mine && (
                       <div className="text-muted-foreground flex items-center gap-1.5 text-[11px]">
