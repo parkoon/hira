@@ -35,7 +35,7 @@ export function CommentSection({ owner, comments }: CommentSectionProps) {
 
   const handleCreate = () => {
     createComment.mutate(
-      { owner, body: draft.trim(), authorId: user.id },
+      { owner, body: draft.trim(), authorId: user.id, authorName: user.name },
       {
         onSuccess: () => {
           setDraft('')

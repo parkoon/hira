@@ -225,6 +225,61 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          actor_name: string
+          created_at: string
+          id: number
+          message: string
+          read_at: string | null
+          recipient_id: string
+          subtask_no: string | null
+          task_no: string | null
+        }
+        Insert: {
+          actor_name: string
+          created_at?: string
+          id?: never
+          message: string
+          read_at?: string | null
+          recipient_id: string
+          subtask_no?: string | null
+          task_no?: string | null
+        }
+        Update: {
+          actor_name?: string
+          created_at?: string
+          id?: never
+          message?: string
+          read_at?: string | null
+          recipient_id?: string
+          subtask_no?: string | null
+          task_no?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'notifications_recipient_id_fkey'
+            columns: ['recipient_id']
+            isOneToOne: false
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'notifications_subtask_no_fkey'
+            columns: ['subtask_no']
+            isOneToOne: false
+            referencedRelation: 'subtasks'
+            referencedColumns: ['subtask_no']
+          },
+          {
+            foreignKeyName: 'notifications_task_no_fkey'
+            columns: ['task_no']
+            isOneToOne: false
+            referencedRelation: 'tasks'
+            referencedColumns: ['task_no']
+          },
+        ]
+      }
       profiles: {
         Row: {
           contact: string

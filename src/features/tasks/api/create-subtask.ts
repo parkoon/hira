@@ -4,6 +4,7 @@ import { getTasksQueryKeyPrefix } from '@/features/tasks/api/get-tasks'
 import type { SubtaskDraft } from '@/features/tasks/api/types'
 import { insertHistory } from '@/features/tasks/api/writers'
 import { recordAuditLog } from '@/shared/lib/audit-log'
+import { pushNotification } from '@/shared/lib/notifications'
 import { supabase } from '@/shared/lib/supabase'
 
 export type CreateSubtaskBody = {
@@ -71,6 +72,15 @@ export const createSubtaskService = async ({
     targetLabel: subtaskNo,
     targetTaskNo: parentTaskNo,
     detail: `${draft.title} · 담당 ${draft.assignee.name}`,
+  })
+
+  // 배정받은 작업자에게 알린다 — 본인이 만들어 본인이 맡는 경우는 헬퍼가 거른다
+  await pushNotification({
+    recipientId: draft.assignee.id,
+    actorName,
+    message: `${subtaskNo} 하위작업을 배정했습니다`,
+    taskNo: parentTaskNo,
+    subtaskNo,
   })
 }
 

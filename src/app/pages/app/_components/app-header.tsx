@@ -1,3 +1,4 @@
+import { NotificationBell } from '@/features/notifications/components/notification-bell'
 import { NavUserButton } from '@/features/users/components/nav-user-button'
 import { EnvBadge } from '@/shared/components/env-badge'
 import { ThemeButton } from '@/shared/components/theme-button'
@@ -11,6 +12,7 @@ export function AppHeader() {
       <EnvBadge />
       <div className="ml-auto flex items-center gap-2">
         <ThemeButton />
+        <NotificationBell />
         <NavUserButton />
       </div>
     </header>

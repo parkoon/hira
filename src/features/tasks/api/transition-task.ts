@@ -6,6 +6,7 @@ import { insertHistory } from '@/features/tasks/api/writers'
 import { TASK_STATUS_META } from '@/features/tasks/constants/metadata'
 import { AppError } from '@/shared/lib/app-error'
 import { type AuditEventType, recordAuditLog } from '@/shared/lib/audit-log'
+import { pushNotification } from '@/shared/lib/notifications'
 import { supabase } from '@/shared/lib/supabase'
 
 /**
@@ -17,6 +18,16 @@ const AUDIT_EVENT_BY_STATUS: Partial<Record<TaskStatus, AuditEventType>> = {
   IN_PROGRESS: 'TASK_APPROVE',
   REJECTED: 'TASK_REJECT',
   DONE: 'TASK_COMPLETE',
+}
+
+/**
+ * 등록자에게 알리는 전이 — 남이 내 작업을 움직인 결과다.
+ * 제출·회수는 등록자 본인의 조작이라 알릴 사람이 없다.
+ */
+const NOTIFY_MESSAGE_BY_STATUS: Partial<Record<TaskStatus, string>> = {
+  IN_PROGRESS: '작업을 승인했습니다',
+  REJECTED: '작업을 반려했습니다',
+  DONE: '작업을 최종 완료했습니다',
 }
 
 export type TransitionTaskBody = {
@@ -36,7 +47,7 @@ export const transitionTaskService = async ({
 }: TransitionTaskBody) => {
   const { data: current, error: readError } = await supabase
     .from('tasks')
-    .select('status')
+    .select('status, requester_id')
     .eq('task_no', taskNo)
     .single()
   if (readError) throw readError
@@ -76,6 +87,16 @@ export const transitionTaskService = async ({
       targetLabel: taskNo,
       targetTaskNo: taskNo,
       detail: `${TASK_STATUS_META[current.status].label} → ${TASK_STATUS_META[toStatus].label}`,
+    })
+  }
+
+  const notifyMessage = NOTIFY_MESSAGE_BY_STATUS[toStatus]
+  if (notifyMessage) {
+    await pushNotification({
+      recipientId: current.requester_id,
+      actorName,
+      message: `${taskNo} ${notifyMessage}`,
+      taskNo,
     })
   }
 }

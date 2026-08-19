@@ -5,6 +5,7 @@ import type { TaskActor } from '@/features/tasks/api/types'
 import { insertHistory } from '@/features/tasks/api/writers'
 import { AppError } from '@/shared/lib/app-error'
 import { recordAuditLog } from '@/shared/lib/audit-log'
+import { pushNotification } from '@/shared/lib/notifications'
 import { supabase } from '@/shared/lib/supabase'
 
 /**
@@ -91,6 +92,17 @@ export const updateSubtaskService = async ({
     targetTaskNo: current.parent_task_no,
     detail: summary,
   })
+
+  // 배정이 바뀌었을 때만 — 새 작업자는 자기에게 온 일을 알아야 한다
+  if (patch.assignee !== undefined && patch.assignee.id !== current.assignee_id) {
+    await pushNotification({
+      recipientId: patch.assignee.id,
+      actorName,
+      message: `${subtaskNo} 하위작업을 배정했습니다`,
+      taskNo: current.parent_task_no,
+      subtaskNo,
+    })
+  }
 
   return true
 }

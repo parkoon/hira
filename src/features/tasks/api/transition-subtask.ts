@@ -7,6 +7,7 @@ import { insertEvidence, insertHistory } from '@/features/tasks/api/writers'
 import { SUBTASK_STATUS_META } from '@/features/tasks/constants/metadata'
 import { AppError } from '@/shared/lib/app-error'
 import { recordAuditLog } from '@/shared/lib/audit-log'
+import { type NotificationInput, pushNotification } from '@/shared/lib/notifications'
 import { supabase } from '@/shared/lib/supabase'
 
 export type TransitionSubtaskBody = {
@@ -32,7 +33,10 @@ export const transitionSubtaskService = async ({
 }: TransitionSubtaskBody) => {
   const { data: current, error: readError } = await supabase
     .from('subtasks')
-    .select('status, parent_task_no, completed_at, dba_verification_request')
+    .select(
+      `status, parent_task_no, completed_at, dba_verification_request, assignee_id,
+       parent:tasks!subtasks_parent_task_no_fkey(requester_id)`
+    )
     .eq('subtask_no', subtaskNo)
     .single()
   if (readError) throw readError
@@ -92,6 +96,34 @@ export const transitionSubtaskService = async ({
       via === 'API' ? '자동' : '수동'
     })`,
   })
+
+  // 남이 움직인 결과를 당사자에게 알린다 — 본인 조작은 헬퍼가 거른다
+  const requesterId = current.parent?.requester_id ?? ''
+  const entries: NotificationInput[] = []
+  if (toStatus === 'ACCEPTANCE') {
+    // 인수 테스트중은 등록자만 전이할 수 있다 — 본인 차례가 온 것을 알린다
+    entries.push({
+      recipientId: requesterId,
+      actorName,
+      message: `${subtaskNo} 하위작업을 인수 테스트중으로 전이했습니다 — 인수 확인 차례입니다`,
+      taskNo: current.parent_task_no,
+      subtaskNo,
+    })
+  }
+  if (
+    current.assignee_id !== null &&
+    // 등록자가 곧 작업자인 하위작업에 같은 전이 알림을 두 번 보내지 않는다
+    !(toStatus === 'ACCEPTANCE' && current.assignee_id === requesterId)
+  ) {
+    entries.push({
+      recipientId: current.assignee_id,
+      actorName,
+      message: `${subtaskNo} 하위작업을 ${SUBTASK_STATUS_META[toStatus].label}(으)로 전이했습니다`,
+      taskNo: current.parent_task_no,
+      subtaskNo,
+    })
+  }
+  await pushNotification(entries)
 }
 
 export const getTransitionSubtaskMutationKey = () => ['/subtasks', 'transition'] as const

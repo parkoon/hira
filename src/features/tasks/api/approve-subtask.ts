@@ -5,6 +5,7 @@ import type { ApprovalKind } from '@/features/tasks/api/types'
 import { insertApproval, insertHistory } from '@/features/tasks/api/writers'
 import { APPROVAL_KIND_META, SUBTASK_STATUS_META } from '@/features/tasks/constants/metadata'
 import { recordAuditLog } from '@/shared/lib/audit-log'
+import { pushNotification } from '@/shared/lib/notifications'
 import { supabase } from '@/shared/lib/supabase'
 
 export type ApproveSubtaskBody = {
@@ -17,7 +18,7 @@ export type ApproveSubtaskBody = {
 export const approveSubtaskService = async ({ subtaskNo, kind, actorName }: ApproveSubtaskBody) => {
   const { data: current, error: readError } = await supabase
     .from('subtasks')
-    .select('status, parent_task_no')
+    .select('status, parent_task_no, assignee_id')
     .eq('subtask_no', subtaskNo)
     .single()
   if (readError) throw readError
@@ -62,6 +63,17 @@ export const approveSubtaskService = async ({ subtaskNo, kind, actorName }: Appr
       targetTaskNo: current.parent_task_no,
       detail: `${SUBTASK_STATUS_META.DBA_VERIFICATION.label} → ${SUBTASK_STATUS_META.THIRD_PARTY.label} (자동)`,
     })
+
+    // 결재를 기다리며 멈춰 있던 작업자에게 흐름이 다시 움직인 것을 알린다
+    if (current.assignee_id !== null) {
+      await pushNotification({
+        recipientId: current.assignee_id,
+        actorName,
+        message: `${subtaskNo}의 DBA 결재를 승인했습니다 — 제3자 검증중으로 넘어갑니다`,
+        taskNo: current.parent_task_no,
+        subtaskNo,
+      })
+    }
   }
 }
 
