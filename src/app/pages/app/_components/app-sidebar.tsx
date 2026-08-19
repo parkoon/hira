@@ -1,9 +1,10 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
-import { ClipboardListIcon, InboxIcon, ScrollTextIcon, UsersIcon } from 'lucide-react'
+import { ClipboardListIcon, InboxIcon, ListTodoIcon, ScrollTextIcon, UsersIcon } from 'lucide-react'
 import * as React from 'react'
 import { Link, useLocation } from 'react-router'
 
 import { getTasksQueryOptions } from '@/features/tasks/api/get-tasks'
+import { selectMyTurnItems } from '@/features/tasks/utils/my-turn'
 import { selectPendingApprovalTasks } from '@/features/tasks/utils/task-selectors'
 import type { UserRole } from '@/features/users/api/types'
 import { ROLE_LEVEL } from '@/features/users/constants/metadata'
@@ -49,6 +50,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const tasks = tasksQuery.data
 
   const navItems: SidebarItem[] = [
+    {
+      label: '내 할 일',
+      icon: <ListTodoIcon className="size-4" />,
+      url: paths.app.myWork.getHref(),
+      count: selectMyTurnItems(tasks, user).length,
+    },
     {
       label: '작업 목록',
       icon: <ClipboardListIcon className="size-4" />,

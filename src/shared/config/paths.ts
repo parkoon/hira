@@ -13,6 +13,10 @@ export const paths = {
       path: '/app',
       getHref: () => '/app',
     },
+    myWork: {
+      path: 'my-work',
+      getHref: () => '/app/my-work',
+    },
     tasks: {
       root: {
         path: 'tasks',

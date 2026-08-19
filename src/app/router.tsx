@@ -39,6 +39,10 @@ export const createAppRouter = () =>
               ),
             },
             {
+              path: paths.app.myWork.path,
+              lazy: () => import('./pages/app/my-work/page'),
+            },
+            {
               path: paths.app.tasks.root.path,
               lazy: () => import('./pages/app/tasks/page'),
             },
