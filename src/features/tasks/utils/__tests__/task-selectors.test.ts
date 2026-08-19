@@ -44,6 +44,7 @@ const makeSubtask = (overrides: Partial<Subtask> = {}): Subtask => ({
   approvals: [],
   evidences: [],
   history: [],
+  comments: [],
   branch: null,
   ...overrides,
 })
@@ -66,6 +67,7 @@ const makeTask = (overrides: Partial<Task> = {}): Task => ({
   subtasks: [],
   approvals: [],
   history: [],
+  comments: [],
   ...overrides,
 })
 

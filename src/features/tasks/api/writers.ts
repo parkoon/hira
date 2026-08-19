@@ -1,10 +1,11 @@
 import type { EvidenceContent, StatusHistoryEntry, SubtaskStatus } from '@/features/tasks/api/types'
 import { supabase } from '@/shared/lib/supabase'
 
-/** 이력은 작업(부모)에도 하위작업(자식)에도 붙는다. 증적은 하위작업에만 남는다 */
+/** 이력·댓글은 작업(부모)에도 하위작업(자식)에도 붙는다. 증적은 하위작업에만 남는다 */
 export type ActivityOwner = { taskNo: string } | { subtaskNo: string }
 
-const ownerColumns = (owner: ActivityOwner) => ({
+/** 소유자 판별 컬럼 쌍 — 이력·결재·댓글 insert가 같은 모양을 쓴다 */
+export const ownerColumns = (owner: ActivityOwner) => ({
   task_no: 'taskNo' in owner ? owner.taskNo : null,
   subtask_no: 'subtaskNo' in owner ? owner.subtaskNo : null,
 })

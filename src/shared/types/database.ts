@@ -122,6 +122,58 @@ export type Database = {
         }
         Relationships: []
       }
+      comments: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          id: number
+          subtask_no: string | null
+          task_no: string | null
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          id?: never
+          subtask_no?: string | null
+          task_no?: string | null
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: never
+          subtask_no?: string | null
+          task_no?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'comments_author_id_fkey'
+            columns: ['author_id']
+            isOneToOne: false
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'comments_subtask_no_fkey'
+            columns: ['subtask_no']
+            isOneToOne: false
+            referencedRelation: 'subtasks'
+            referencedColumns: ['subtask_no']
+          },
+          {
+            foreignKeyName: 'comments_task_no_fkey'
+            columns: ['task_no']
+            isOneToOne: false
+            referencedRelation: 'tasks'
+            referencedColumns: ['task_no']
+          },
+        ]
+      }
       evidences: {
         Row: {
           id: number

@@ -108,6 +108,19 @@ export type StatusHistoryEntry = {
   reason: string | null
 }
 
+/**
+ * 댓글 — 시스템 이력과 별개인 사람의 대화 (Jira 이슈 뷰의 Comments).
+ * 본인 댓글만 수정·삭제할 수 있어 작성자를 이름이 아니라 id로 판정한다.
+ */
+export type Comment = {
+  id: number
+  author: Pick<TaskActor, 'id' | 'name'>
+  body: string
+  createdAt: string
+  /** 작성 후 고쳐진 적 있으면 true — 화면이 (수정됨)을 붙인다 */
+  edited: boolean
+}
+
 /** 하위작업에서 만든 Gitea 브랜치 — 하위작업과 1:1이다 (개발 패널이 링크로 보여준다) */
 export type SubtaskBranch = {
   repoFullName: string
@@ -136,6 +149,7 @@ export type Subtask = {
   /** 단계 완료 시 남긴 증적 (시나리오 각주 3) */
   evidences: TransitionEvidence[]
   history: StatusHistoryEntry[]
+  comments: Comment[]
   branch: SubtaskBranch | null
 }
 
@@ -185,6 +199,7 @@ export type Task = {
   /** 요청 승인 전 받아야 하는 결재 (시나리오 3). 결재선 연동 전까지는 임시 버튼으로 채운다 */
   approvals: Approval[]
   history: StatusHistoryEntry[]
+  comments: Comment[]
 }
 
 /**

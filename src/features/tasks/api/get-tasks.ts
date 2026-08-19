@@ -3,6 +3,7 @@ import { format } from 'date-fns'
 
 import type {
   Attachment,
+  Comment,
   EvidenceContent,
   ReferenceLink,
   StatusHistoryEntry,
@@ -26,12 +27,14 @@ const TASK_TREE_SELECT = `
   attachments(*),
   approvals(*),
   status_history(*),
+  comments(*, author:profiles!comments_author_id_fkey(id, name)),
   subtasks(
     *,
     assignee:profiles!subtasks_assignee_id_fkey(id, name, dept),
     approvals(*),
     evidences(*, reference_links(*), attachments(*)),
     status_history(*),
+    comments(*, author:profiles!comments_author_id_fkey(id, name)),
     subtask_branches(*)
   )
 `
@@ -50,11 +53,16 @@ type EvidenceRow = Tables['evidences']['Row'] & {
   attachments: Tables['attachments']['Row'][]
 }
 
+type CommentRow = Tables['comments']['Row'] & {
+  author: Pick<Tables['profiles']['Row'], 'id' | 'name'> | null
+}
+
 type SubtaskRow = Tables['subtasks']['Row'] & {
   assignee: Pick<Tables['profiles']['Row'], 'id' | 'name' | 'dept'> | null
   approvals: Tables['approvals']['Row'][]
   evidences: EvidenceRow[]
   status_history: Tables['status_history']['Row'][]
+  comments: CommentRow[]
   // unique 제약 때문에 PostgREST가 1:1 관계로 인식해 배열이 아닌 단일 객체(또는 null)를 준다
   subtask_branches: Tables['subtask_branches']['Row'] | null
 }
@@ -65,6 +73,7 @@ type TaskRow = Tables['tasks']['Row'] & {
   attachments: Tables['attachments']['Row'][]
   approvals: Tables['approvals']['Row'][]
   status_history: Tables['status_history']['Row'][]
+  comments: CommentRow[]
   subtasks: SubtaskRow[]
 }
 
@@ -83,6 +92,19 @@ const toApprovals = (rows: Tables['approvals']['Row'][]) =>
       kind: row.kind,
       approvedBy: row.approved_by,
       approvedAt: toDateTime(row.approved_at),
+    }))
+
+/** 이력과 같은 규칙 — 최신 댓글을 위에 놓고, 순서는 시계가 아니라 id가 정한다 */
+const toComments = (rows: CommentRow[]): Comment[] =>
+  [...rows]
+    .sort((a, b) => b.id - a.id)
+    .map((row) => ({
+      id: row.id,
+      author: { id: row.author?.id ?? '', name: row.author?.name ?? '' },
+      body: row.body,
+      createdAt: toDateTime(row.created_at),
+      // 트리거가 수정 시에만 updated_at을 밀어 두 값이 같으면 손대지 않은 댓글이다
+      edited: row.updated_at !== row.created_at,
     }))
 
 /** 화면은 최신 항목을 위에 놓는다 — id가 단조 증가라 시계와 무관하게 기록 순서를 보존한다 */
@@ -135,6 +157,7 @@ function toSubtask(row: SubtaskRow): Subtask {
       recordedAt: toDate(evidence.recorded_at),
     })),
     history: toHistory(row.status_history),
+    comments: toComments(row.comments),
     branch: branchRow
       ? {
           repoFullName: branchRow.repo_full_name,
@@ -172,6 +195,7 @@ function toTask(row: TaskRow): Task {
       .map(toSubtask),
     approvals: toApprovals(row.approvals),
     history: toHistory(row.status_history),
+    comments: toComments(row.comments),
   }
 }
 
